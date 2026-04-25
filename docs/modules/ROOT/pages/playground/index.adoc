@@ -1,0 +1,54 @@
+= Playground
+:toc:
+:toclevels: 1
+:page-toclevels: 1
+
+This is a playground page for experimenting with AsciiDoc features and content layouts.
+
+== Section One
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+== Section Two
+
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+=== Subsection
+
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+== Code Example
+
+[source,xml]
+----
+<configuration>
+    <property name="example">value</property>
+</configuration>
+----
+
+== Table Example
+
+[cols="1,2,1"]
+|===
+| Column A | Column B | Column C
+
+| Row 1A   | Row 1B   | Row 1C
+| Row 2A   | Row 2B   | Row 2C
+|===
+
+== Diagram Example
+
+[mermaid]
+....
+flowchart TD
+    A[Start] --> B{Is it working?}
+    B -- Yes --> C[Great!]
+    B -- No --> D[Check the Kroki extension]
+    D --> B
+....
+
+== Notes
+
+NOTE: This page is a placeholder and will be replaced with real content.
+
+TIP: You can use this page to test how components render in the site.
