@@ -1,1 +1,40 @@
-= Welcome to Evolveum Docs!
+= Evolveum Docs
+:page-toclevels: 0
+
+== Site Section
+
+* link:/book/[MidPoint Book]
+* link:/iam/[Identity and Access Management Introduction]
+* link:/midpoint/[MidPoint]
+** link:/midpoint/reference/[Configuration reference]
+** link:/midpoint/studio/[MidPoint Studio]
+** link:/midpoint/projects/midPilot/[MidPilot]
+** link:/midpoint/devel/[MidPoint developer zone]
+** link:/midpoint/tools/[MidPoint-related tools]
+** link:/midpoint/exercises/[MidPoint Exercises]
+** link:/midpoint/methodology/first-steps/[First steps with midPoint]
+* link:/community/[Community and participation]
+* link:/connectors/[Identity Connectors]
+* link:/talks/[Evolveum Talks]
+* link:/library/[Evolveum Library]
+* link:/faq/[Frequently Asked Questions]
+
+NOTE: The links above point to sections that have not yet been migrated to Antora. They will be broken until the corresponding pages are added.
+
+== Recent Projects
+
+link:/midpoint/projects/midPilot/[MidPilot] — an AI Assistant for Rapid Application Onboarding.
+
+This project has received funding from the European Union through the Recovery and Resilience Plan of the Slovak Republic.
+
+image:funded-by-the-eu-next-generation-logo.webp[Funded by the EU – NextGenerationEU, 200] image:recovery-and-resilience-plan-logo.webp[Recovery and Resilience Plan, 200]
+
+== Other Information Sources
+
+* https://support.evolveum.com/[MidPoint Issue Tracking (OpenProject)]
+* https://lists.evolveum.com/[MidPoint Mailing Lists]
+
+== Copyright
+
+Content of this site is licensed under CC BY-NC-ND, which allows quite a broad use of the documentation.
+Please see our link:/copyright/[copyright and licensing guidelines] for a detailed explanation.
