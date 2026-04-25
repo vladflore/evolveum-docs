@@ -1,0 +1,5 @@
+name: evolveum-docs
+title: Evolveum Docs
+version: ~
+nav:
+- modules/ROOT/nav.adoc
