@@ -1,1 +1,3 @@
 * xref:index.adoc[Home]
+* xref:midpoint/index.adoc[MidPoint]
+** xref:midpoint/quickstart/index.adoc[Quick Start Guide]

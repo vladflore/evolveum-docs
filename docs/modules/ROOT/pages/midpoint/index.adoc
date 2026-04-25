@@ -1,0 +1,50 @@
+= MidPoint
+:page-display-order: 200
+:page-upkeep-status: red
+:description: Technology documentation of midPoint, open source identity management and governance platform.
+
+[.text-left]
+image::midpoint/midpoint-logo.png[MidPoint,320,80]
+
+MidPoint is an *identity management and governance platform*.
+It is a comprehensive, feature-rich system, developed and maintained by a *professional team* of full-time engineers.
+MidPoint is *open source* software, available under the terms of Apache License and European Union Public License.
+
+NOTE: Links below (except Quick Start) point to sections not yet migrated to Antora and will be broken until the corresponding pages are added.
+
+[cols="1,1", frame=none, grid=none]
+|===
+a|
+=== Users and Engineers
+
+* xref:midpoint/quickstart/index.adoc[Quick Start]
+* link:/book/[MidPoint Book]
+* link:/midpoint/demo/[Live Demo]
+* link:/midpoint/roadmap/[Roadmap]
+* link:/midpoint/release/[Releases]
+* link:/midpoint/reference/[Configuration Reference]
+* link:/support/[Support]
+
+a|
+=== Developers and Architects
+
+* link:/midpoint/devel/[Developer Zone]
+* link:/midpoint/architecture/[MidPoint Architecture]
+* https://github.com/Evolveum/midpoint/[Source Code]
+* link:/midpoint/versioning/[Versioning]
+* link:/midpoint/devel/prism/[Prism] and link:/midpoint/devel/axiom/[Axiom]
+
+a|
+=== Tools
+
+* link:/midpoint/tools/studio/[MidPoint Studio]
+* link:/midpoint/tools/schrodinger/[Schrödinger Testing Framework]
+* link:/midpoint/tools/[Other tools ...]
+
+a|
+=== Subprojects
+
+* link:/midpoint/projects/midprivacy/[MidPrivacy Initiative]
+* link:/midpoint/projects/midscale/[MidScale]
+* link:/midpoint/projects/[Other projects ...]
+|===
