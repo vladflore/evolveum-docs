@@ -1,0 +1,15 @@
+= MidPoint Architectural Concepts
+:page-nav-title: Concepts
+
+Following pages describe fundamental concepts used in midPoint:
+
+  * xref:abstract-role.adoc[Abstract Role]
+  * xref:common-interface-concepts.adoc[Common Interface Concepts]
+  * xref:consistency-model.adoc[Consistency Model]
+  * xref:inducement-assignment-entitlement.adoc[Assignment × inducement × entitlement]
+  * xref:lightweight-identifier.adoc[Lightweight Identifier]
+  * xref:operation-result.adoc[Operation Result]
+  * xref:orphaned-account.adoc[Orphaned account]
+  * xref:relaxed-referential-integrity.adoc[Relaxed Referential Integrity]
+  * xref:shadow/index.adoc[Shadow]
+  * xref:task.adoc[Task]

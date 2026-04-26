@@ -29,7 +29,7 @@ a|
 === Developers and Architects
 
 * link:/midpoint/devel/[Developer Zone]
-* link:/midpoint/architecture/[MidPoint Architecture]
+* xref:midpoint/architecture/index.adoc[MidPoint Architecture]
 * https://github.com/Evolveum/midpoint/[Source Code]
 * link:/midpoint/versioning/[Versioning]
 * link:/midpoint/devel/prism/[Prism] and link:/midpoint/devel/axiom/[Axiom]
