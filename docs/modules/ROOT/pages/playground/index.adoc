@@ -38,14 +38,14 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
 
 == Diagram Example
 
-[mermaid]
-....
+[source,mermaid]
+----
 flowchart TD
     A[Start] --> B{Is it working?}
     B -- Yes --> C[Great!]
     B -- No --> D[Check the Kroki extension]
     D --> B
-....
+----
 
 == Notes
 
