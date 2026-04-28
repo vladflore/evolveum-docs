@@ -52,3 +52,31 @@ flowchart TD
 NOTE: This page is a placeholder and will be replaced with real content.
 
 TIP: You can use this page to test how components render in the site.
+
+== Static Redirects
+
+* xref:playground/a/index.adoc[Go to A Index]
+
+Original link: link:http://127.0.0.1:8080/evolveum-docs/playground/a/index.html[Go to A Index]
+
+== Broken Links
+
+* xref:playground/c/index.adoc[Go to C Index which does not exist]
+
+[source,bash]
+----
+[01:28:20.433] ERROR (asciidoctor):
+target of xref not found: playground/c/index.adoc
+file: /Users/vladflore/dev/sandbox/work/freelance/evolveum/migration/evolveum-docs/docs/modules/ROOT/pages/playground/index.adoc
+source: /Users/vladflore/dev/sandbox/work/freelance/evolveum/migration/evolveum-docs (branch: links <worktree> | start path: docs)
+----
+
+image::nonexistent.png[Nonexistent Image]
+
+[source,bash]
+----
+[01:47:24.991] ERROR (asciidoctor):
+target of image not found: nonexistent.png
+file: /Users/vladflore/dev/sandbox/work/freelance/evolveum/migration/evolveum-docs/docs/modules/ROOT/pages/playground/index.adoc
+source: /Users/vladflore/dev/sandbox/work/freelance/evolveum/migration/evolveum-docs (branch: links <worktree> | start path: docs)
+----
