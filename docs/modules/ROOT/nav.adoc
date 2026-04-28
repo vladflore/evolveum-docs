@@ -9,4 +9,9 @@
 **** xref:midpoint/architecture/concepts/shadow/index.adoc[Shadow]
 ***** xref:midpoint/architecture/concepts/shadow/dead-shadow.adoc[Dead Shadow]
 **** xref:midpoint/architecture/concepts/task.adoc[Tasks and activities]
+** xref:evolveum-midpoint::index.adoc[MidPoint reference]
+*** Roles & Policies
+**** Policies
+***** xref:evolveum-midpoint::roles-policies/policies/certification/index.adoc[Access Certification]
+
 * xref:playground/index.adoc[Playground]
