@@ -7,7 +7,7 @@
 :page-wiki-metadata-modify-date: 2016-02-20T15:41:50.298+01:00
 :page-upkeep-status: green
 :page-toc: top
-:page-description: Discover the conceptual foundation of tasks, how they relate to activities, what they are used for, and how you can increase your productivity with tasks
+:description: Discover the conceptual foundation of tasks, how they relate to activities, what they are used for, and how you can increase your productivity with tasks
 
 MidPoint performs virtually every operation through a task.
 Whether it is an atomic change, such as renaming a user in the graphical user interface, or a complex job like synchronizing or reconciling resource objects, all work is carried out by tasks.

@@ -1,7 +1,7 @@
 = Dead shadow
 :page-upkeep-status: green
 :page-toc: top
-:page-description: Dead shadows in midPoint track deleted resources, aiding diagnostics and consistency. Learn how they help ensure data integrity in identity management.
+:description: Dead shadows in midPoint track deleted resources, aiding diagnostics and consistency. Learn how they help ensure data integrity in identity management.
 
 Discover what are dead shadows in midPoint, why they exist, what you can use them for, and how they help data integrity and diagnostics.
 

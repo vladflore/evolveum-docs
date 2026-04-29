@@ -1,7 +1,6 @@
 = Shadow
 :page-upkeep-status: green
 :page-toc: top
-:page-description:
 
 Discover what shadows in midPoint are,
 why they are important for seamless resource account provisioning and synchronization,
