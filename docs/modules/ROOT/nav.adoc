@@ -9,13 +9,13 @@
 **** xref:midpoint/architecture/concepts/shadow/index.adoc[Shadow]
 ***** xref:midpoint/architecture/concepts/shadow/dead-shadow.adoc[Dead Shadow]
 **** xref:midpoint/architecture/concepts/task.adoc[Tasks and activities]
-** xref:midpoint::index.adoc[MidPoint reference]
+** xref:midpoint::reference/index.adoc[MidPoint reference]
 *** Roles & Policies
 **** Policies
-***** xref:midpoint::roles-policies/policies/certification/index.adoc[Access Certification]
+***** xref:midpoint::reference/roles-policies/policies/certification/index.adoc[Access Certification]
 *** Admin GUI
 **** Resource Wizard
 ***** Object type
-****** xref:midpoint::admin-gui/resource-wizard/object-type/credentials/index.adoc[Credentials]
+****** xref:midpoint::reference/admin-gui/resource-wizard/object-type/credentials/index.adoc[Credentials]
 
 * xref:playground/index.adoc[Playground]
