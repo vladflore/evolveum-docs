@@ -57,7 +57,7 @@ TIP: You can use this page to test how components render in the site.
 
 * xref:playground/a/index.adoc[Go to A Index]
 
-Original link: link:http://127.0.0.1:8080/evolveum-docs/playground/a/index.html[Go to A Index]
+Original link: link:http://127.0.0.1:8080/docs/playground/a/index.html[Go to A Index]
 
 == Broken Links
 

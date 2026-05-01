@@ -6,7 +6,7 @@
 * link:/book/[MidPoint Book]
 * link:/iam/[Identity and Access Management Introduction]
 * link:/midpoint/[MidPoint]
-** xref:evolveum-midpoint::index.adoc[Configuration reference]
+** xref:midpoint::index.adoc[Configuration reference]
 ** link:/midpoint/studio/[MidPoint Studio]
 ** link:/midpoint/projects/midPilot/[MidPilot]
 ** link:/midpoint/devel/[MidPoint developer zone]

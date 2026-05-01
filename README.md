@@ -1,1 +1,1 @@
-# evolveum-docs
+# docs
