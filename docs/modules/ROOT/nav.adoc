@@ -1,6 +1,9 @@
 // * xref:index.adoc[Home]
 * xref:midpoint/index.adoc[MidPoint]
 ** xref:midpoint/quickstart/index.adoc[Quick Start Guide]
+** Installation
+*** Containers
+**** xref:midpoint/install/containers/kubernetes.adoc[Vanilla Kubernetes]
 ** xref:midpoint/architecture/index.adoc[Architecture]
 *** xref:midpoint/architecture/concepts/index.adoc[Concepts]
 **** xref:midpoint/architecture/concepts/inducement-assignment-entitlement.adoc[Assignment × inducement × entitlement]
