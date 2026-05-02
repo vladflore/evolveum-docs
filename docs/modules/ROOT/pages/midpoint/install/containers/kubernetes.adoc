@@ -4,7 +4,7 @@
 :page-toc: top
 :toclevels: 4
 :page-keywords: [ 'install', 'kubernetes' ]
-:page-aliases: midpoint/install/kubernetes/about/, midpoint/install/kubernetes/advanced-examples/, midpoint/install/kubernetes/cluster/, midpoint/install/kubernetes/, midpoint/install/kubernetes/single-node/
+:page-moved-from: /midpoint/install/kubernetes/about/, /midpoint/install/kubernetes/advanced-examples/, /midpoint/install/kubernetes/cluster/, /midpoint/install/kubernetes/, /midpoint/install/kubernetes/single-node/
 
 This page describes how midPoint uses vanilla Kubernetes for a containerized installation.
 
