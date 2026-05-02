@@ -1,4 +1,3 @@
-= Evolveum Docs
 :page-toclevels: 0
 
 == Site Section
