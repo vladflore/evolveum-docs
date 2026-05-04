@@ -1,0 +1,267 @@
+= MidScale: Prism Design
+
+WARNING: This document is draft of preliminary notes for Prism Design meeting
+
+== Participants
+
+* Radovan Semancik
+* Katarina Bolemant
+* Pavol Mederly
+* Anton Tkacik
+* Igor Farinic
+* Kamil Jires
+* Richard Richter
+
+== Motivation and Requirements
+
+=== Motivation
+
+Prism is use by every component of midPoint and provides basic infrastructure for data representation and manipulation.
+The performance, scalability and features of Prism directly affects scalability of midPoint as a whole.
+
+=== Primary Problems
+
+We are trying to solve following problems:
+
+* *Thread safety* of prism code.
+We need the code to work correctly even with high volume of concurrent requests.
+E.g. systematically avoid race conditions.
+Allow objects to be safely cached, boosting performance.
+Potential problems:
+** JAXB code (complex properties).
+** DOM, inside partially-parsed XNodes.
+** GregorianCalendar, PolyString and similar primitive properties implemented by complex Java classes.
+** OperationResult?
+
+* *Performance*.
+Do not waste CPU or memory, avoid high complexity, e.g. we know we have some O(n^2^) code there.
+Prism is used everywhere, it is used often.
+Even small performance problems are likely to significantly amplify.
+Likely problems:
+** O(n^2^) code, e.g. checking for value existence before adding new value
+** schema clone & modify, e.g. application of security+obj.template+archetypes for GUI
+
+* *API stability*.
+Prism is used everywhere in midPoint, it is used in midPoint client, it is used by midPoint expressions and customizations.
+Every incompatible change in midPoint API is likely to cause cascading changes at many places.
+Lot of customers may be affected.
+*Note:* Solution to this problem is likely to appear as a side-effect during Prism improvement.
+
+=== Use cases
+
+* Prism provides schema for data, which is used for data (un)marshalling, data  processing and validation
+
+* Prism provides data marshalling / unmarshalling capabilities based on schema
+
+* Prism serves as primary in-memory data structures for representing processed   data
+
+* Prism provides basic primitives for data processing and trasnformation such as data modification, data equivalency
+
+* Prism as base for client and midPoint
+
+=== Assumptions
+
+* For foreseeable future Prism is in midPoint context (used in midPoint client, not used by any third-party software)
+* Axiom based schema - eventually, but we need to live with XSD for now
+
+// * Focus is to make it work in our private cloud. No effort shall be spend on the abstractions and preparation on the other clouds.
+
+//* system components: mP, LDAP, PSQL, other resource prefer DBTables (PSQL) not files (scalability).
+
+//* We will focus on docker and dockerization, not hybrids for now (VM/Windows).
+
+
+=== Ideal State
+
+== Requirements
+
+* Profiling - open question for now
+
+
+=== Testing Environment Requirements
+
+* 1-2 source systems
+** PostgreSQL
+* 10k-100k records
+* 4x targets systems
+** 2x OpenLDAP
+** 2x Database
+* Large extension schema (counts by Katarina)
+* Archetypes 3x
+* Assigments per user: 10-100 (average 40)
+- 20% expired
+- conditions in aassigments
+- 2 midPoint node: 16GB RAM
+- DB server: 16GB RAM
+
+=== Performance and scalability goals
+
+NOTE: Do we have some *performance* or *scalability* targets?
+Do we know how big a system do we want to support?
+How many users, how many requests per second, special usage patterns (bursts), anything else?
+
+//* Start with 1mio of records, target 10+ mio, in order of magnitude tens of millions
+
+//* The records are like cartesian product: 10 mio of users, each 10 accounts is like 100 million shadows
+
+//* Open question: number of other objects? Like roles, services, orgs? And also many assignments slow down problem
+
+
+
+== Ideas and Concepts
+
+[NOTE]
+====
+When thinking about the use cases, do not limit your thoughts to just that one specific use case.
+Think about generic mechanisms, broader principles.
+Focus on *concepts* and ideas, rather than algorithms.
+Design mechanism that can handle your use case, and thousands of similar use cases as well.
+Design *generic re-usable mechanisms*.
+
+Make sure the new mechanisms work well with existing mechanisms.
+We are looking for *synergies*.
+We want to combine mechanisms together into more flexible and more powerful solutions.
+====
+
+=== Thread Safety
+
+* Thread safety
+- Thread safety issues & immutability
+- Pure JAXB beans - immutable, replace Gregorian Calendar, ordered lists
+- XNodes with DOM (locking on DOM document)
+- OperationResult
+- ReadOnly flag in midPoint APIs, we want it do be true by default. But how to migrate?
+- Schema
+
+=== Performance
+
+* Big Items
+//** Container with lot of items -  Problem of many attributes for an object (100+).
+** Item with lot of values
+*** Duplication checks -HashSet??? - requires Immutability of nested values
+*** Delta application (see <<Prism Deltas>>)
+* Application of Authorization & Schema
+** Smart schema builders
+*** change label
+*** change flags
+- removal of items
+- Object caching
+
+* Parsing & Serialization
+
+=== Memory
+
+* Application of Authorization & Schema
+- Smart schema builders
+- change label
+- change flags
+- removal of items
+- Object caching
+* Parsing & Serialization
+
+== Planning
+
+. Performance measurements - Baselines
+. Performance measurements - Weaknesses
+. Thread safety analysis
+- Prism
+- Util
+- Repository
+- Repository Cache
+- Task
+. Planning based on performance measurements / thread safety analysis
+. Thread-safety Improvements
+. Performance Improvements
+
+== Implementation
+
+=== Testing & Reporting
+
+Selection & integration of of Unit Test benchmark solution which provides
+measurements & record collection.
+
+Responsible: Richard & Tony
+
+=== Proposals
+
+==== Metrics Runtime
+
+Consider to unify metrics collections at various places in MidPoint (if there
+are differences and it is possible).
+
+Consider introduction of "global" metrics collection mechanisms.
+
+==== Black-box tests
+
+Blackbox tests should be based on MIDPOINT 4.2 and developed on branch there in
+order to measure baselines. Tests then will be merged to master to measure
+actual new performance.
+
+Branch will be `perf-test`.
+
+TODO: feasibility
+
+== Performance and Scalability Considerations
+
+TODO
+
+== Testability Considerations
+
+NOTE: Make sure that the functionality can be tested.
+Think about the testing process.
+Can this be teste by the usual mechanisms that we have?
+Will we need some special environment or setup?
+
+=== Diagnostics and Visibility
+
+* Java profiling: for use on developer's machines
+
+* MidPoint tracing capabilities: for use in (clustered) testing environment
+
+== Security Considerations
+
+TODO
+
+== Open Questions
+
+We need to further discuss:
+
+* Prism complex properties, how the will be seen by Prism schema code, code generation approach.
+
+* Thread safety approach, design of mechanisms (immutability? freezing?, etc.)
+
+* Application of schema for GUI/REST (security, obj.template, etc.)
+
+* Item equivalence
+
+* Vision for Prism5/midPoint5, future of Axiom; to guide the design of Prism improvements
+
+== Existing Measurements & Problems
+
+== Prism Deltas
+
+* Item Delta application with `n` modified values to target with `m` original values has following operation counts (worst case, as of 4.2):
+** `n` copies of new value
+** `m*n + n*(n-1)/2` comparisons
+
+
+=== schema/TestDeltaPerfComparison
+
+Measured tests resulsts confirms linear time growth of applying single-item delta
+to multi-valued container.
+
+,===
+monitor,assigments, count,total(us),avg(us),min(us),max(us),note
+delta.clone,10,20000,123630,6,3,4295,Cloning of structure
+delta.clone,100,20000,438725,21,16,4557,Cloning of structure
+delta.clone,1000,20000,3490439,174,157,4480,Cloning of structure
+delta.clone,10000,20000,50605384,2530,2187,11569,Cloning of structure
+delta.MINUS.apply,10,10000,77894,7,6,157,Application of delta
+delta.MINUS.apply,100,10000,507189,50,42,3801,Application of delta
+delta.MINUS.apply,1000,10000,5625361,562,457,2676,Application of delta
+delta.MINUS.apply,10000,10000,59016484,5901,5275,17396,Application of delta
+delta.PLUS.apply,10,10000,225786,22,8,1850,Application of delta
+delta.PLUS.apply,100,10000,544184,54,43,225,Application of delta
+delta.PLUS.apply,1000,10000,5441953,544,454,4989,Application of delta
+delta.PLUS.apply,10000,10000,56833512,5683,5136,15418,Application of delta
+,===

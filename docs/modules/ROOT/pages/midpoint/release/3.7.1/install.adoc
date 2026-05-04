@@ -1,0 +1,26 @@
+---
+release-version: '3.7.1'
+---
+= Installing MidPoint 3.7.1 "Darwin" Update 1 From Binary Distribution
+:page-layout: release-install
+:release-version: 3.7.1
+:page-nav-title: Installation Instructions
+:page-wiki-name: Installing midPoint v3.7.1
+:page-wiki-id: 24676603
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2018-03-06T16:32:47.947+01:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2018-03-06T16:32:47.947+01:00
+:page-liquid:
+
+++++
+{% include release-install-prereq-j8.html %}
+++++
+
+[NOTE]
+.Java 8 only
+====
+MidPoint {release-version} is supported only on Java 8 platforms.
+MidPoint supported both Java 7 and Java 8 for several years.
+The support for Java 7 was deprecated in midPoint 3.4.1 and it was removed in midPoint 3.5.
+====

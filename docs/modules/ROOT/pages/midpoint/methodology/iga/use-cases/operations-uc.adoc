@@ -1,0 +1,37 @@
+= IGA Use Cases: Operations and Data Governance
+:page-nav-title: Operations use-cases
+:page-display-order: 200
+:page-toc: top
+:toclevels: 3
+:sectnums:
+:sectnumlevels: 3
+
+Following use-cases are defined in the area of operations and data governance.
+
+Operation teams are managing IGA data of individual users or objects and/or of bulk of objects. Most (if not all) the tasks should be performed using GUI.
+
+== Bulk operations
+
+[#_define_set_of_usersobjects_for_bulk_operation]
+=== Define set of users/objects for bulk operation
+
+Scenario::
+The IGA operator must perform an operation over list of users (or other objects) he obtained. There is no specific query for defining the users. The list is obtained externally - not from midPoint. E.g. in the form of csv file.
+
+Actors::
+Typically, this is performed by IGA operator or IGA administrator.
+
+Motivation::
+When managing bulk of objects, the operators are defining the search filters by query. Sometimes, the query is not good solution, as they need to perform operation on set of objects that does not have anything in common to build a well readable query.
++
+Defining query by naming all users is not practical and not well readable. Importing such list as scope definition for bulk task or bulk action would help the operator to solve the problem easily.
++
+Typical operation is when IGA administrator obtains list of 100 users that should obtain specific role, or get specific role removed. It should be easy for standard IGA administrator to perform such operation.
+
+User Story::
+The IGA operator or administrator upload the list of objects (in csv form to midPoint). Then he prepares the bulk task or bulk operation definition and references the uploaded file as source in the search filter. Then he performs the operation.
++
+The objects in csv should be defined by one of unique attributes - typically name. The OID should be allowed, but not expected to be used.
+It may be large (up to number of users in mp).
+
+NOTE: The implementation of reverse reports as processing objects specified in csv file is unintuitive. It would be great to provide the functionality of defining usersfor bulk tasks.

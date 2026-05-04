@@ -1,0 +1,728 @@
+= Examples of metadata processing
+
+Mappings used below are of "thinking aloud" kind. No schema does exist yet.
+
+== Example 1: Propagation of data sensitivity information
+
+Let's assume that `extension/impairmentCategory` is highly sensitive information. Then assignment of the org
+`Special Medical Services` (that is created based on the `impairmentCategory` having value greater than `B`)
+should be marked as highly sensitive as well.
+
+The picture below shows that other assignments (like of `Employees` org) have low sensitivity.
+
+image::example-assignment-sensitive.png["Assignment creation based on sensitive data"]
+
+// [source,xml]
+----
+<mapping>
+    <source>
+        <path>extension/impairmentCategory</path>
+    </source>
+    <expression>
+        <assignmentTargetSearch>
+            <targetType>OrgType</targetType>
+            <oid>29963fc9-f494-4911-af3c-9e73fd64617f</oid> <!-- Special Medical Services -->
+        </assignmentTargetSearch>
+    </expression>
+    <condition>
+        <script>
+            <code>
+                impairmentCategory >= 'B'
+            </code>
+        </script>
+    </condition>
+    <target>
+        <path>assignment</path>
+        <set> ... </set>
+    </target>
+</mapping>
+----
+
+We have no special needs for sensitivity metadata treatment, simply copying them from source to output:
+
+// [source,xml]
+----
+<metadataMapping>
+    <source>
+        <path>sensitivity</path>
+    </source>
+    <target>
+        <path>sensitivity</path>
+    </target>
+</metadataMapping>
+----
+
+(This could be the default mapping for any metadata. So we just should be able to declare that we want it to be
+applied to sensitivity metadata here. Or maybe to all metadata.)
+
+NOTE: The sensitivity information should be propagated also to corresponding `roleMembershipRef` value. This is
+something that cannot be expressed in the context of this mapping, though. See xref:../open-questions/[open questions].
+
+image::example-assignment-sensitive-2.png["Assignment creation based on sensitive data, with roleMembershipRef"]
+
+== Example 2: Another example of propagation of confidentiality information
+
+HR system supplies information on user primary role (engineer, researcher, support person, manager, and so on)
+and user organizational unit (or units) where he or she fulfills this role. Each role and organizational unit
+value has a confidentiality information attached, e.g. `unclassified`, `restricted`, `secret`, `topSecret`.
+For each combination of primary role and organizational unit midPoint creates an assignment to appropriate
+role with `orgRef` pointing to related org object. We want to compute the confidentiality information for
+such assignment as the highest of the confidentiality levels of source values.
+
+Jim's primary role value of `Researcher` has confidentiality of `restricted` but his `organizationalUnit` value of
+`Cryptoanalysis Department` is marked as `secret`. So the resulting assignment has confidentiality of `secret`.
+
+image::example-confidentiality-jim.png["Propagating confidentiality information for Jim"]
+
+Frank's primary role value of `Secretary` is also `restricted` but he serves two departments: Cryptoanalysis (`secret`)
+and Human Resources (`restricted`). So his first assignment is `secret` but the second one is `restricted` only.
+
+image::example-confidentiality-frank.png["Propagating confidentiality information for Frank"]
+
+The data mapping looks fairly complex, although in reality it is not:
+
+----
+<mapping>
+    <source>
+        <path>organization</path>
+    </source>
+    <source>
+        <path>organizationalUnit</path>
+    </source>
+    <expression>
+        <assignmentTargetSearch>
+            <targetType>RoleType</targetType>
+            <filter>
+                <text>name = $organization</text>
+            </filter>
+            <populate>
+                <populateItem>
+                    <expression>
+                        <referenceSearch>
+                            <targetType>OrgType</targetType>
+                            <filter>
+                                <text>name = $organizationalUnit</text>
+                            </filter>
+                        </referenceSearch>
+                    </expression>
+                    <target>
+                        <path>orgRef</path>
+                    </target>
+                </populateItem>
+            </populate>
+        </assignmentTargetSearch>
+    </expression>
+    <target>
+        <path>assignment</path>
+    </target>
+</mapping>
+----
+
+[NOTE]
+====
+Multiple levels of expressions are evaluated here:
+
+1. `assignmentTargetSearch` creating the output value/values, i.e. one or more assignments,
+2. `path` when constructing the filter to be used for searching for the role by its name (`$organization`),
+3. `referenceSearch` when looking for `orgRef` for the assignment,
+4. `path` when constructing the filter to be used for looking for `orgRef` for the assignment (`$organizationalUnit`).
+
+We want to set confidentiality on the assignment value itself, so the metadata mapping can be declared at the level
+of the data mapping.
+
+The situation would be different if we would like to set confidentiality for the `assignment/orgRef`
+value only. This case will not be supported in midPoint 4.2 by general configuration means. Custom scripts would need
+to be used.
+====
+
+Metadata mapping for the confidentiality looks like this. Note it is evaluated in the absolute mode, because it needs
+to find the highest confidentiality value among all the source values.
+
+----
+<metadataMapping>
+    <source>
+        <path>confidentiality</path>
+    </source>
+    <expression>
+        <script>
+            <relativityMode>absolute</relativityMode>
+            <code>
+                custom.getHigestConfidentiality(confidentiality)
+            </code>
+        </script>
+    </expression>
+    <target>
+        <path>confidentiality</path>
+    </target>
+</metadataMapping>
+----
+
+(Specification of evaluation mode for metadata is an open question. We assume that the absolute mode
+is the reasonable default here.)
+
+== Example 3: Using level of assurance to select one of values
+
+A member of academic community has a set of contact email addresses, each coming from different source
+(HR, eduGAIN, user entry) and therefore having different level of assurance (high, medium, low).
+We want to select the primary email address having the highest level of assurance. We also want to propagate
+LoA and source information from the original value in `extension/email` to the value which is put into `emailAddress`
+property.
+
+image::example-primary-email-selection.png["Selecting primary email address depending on the level of assurance"]
+
+// [source,xml]
+----
+<mapping>
+    <source>
+        <path>extension/email</path>
+    </source>
+    <expression>
+        <script>
+            <relativityMode>absolute</relativityMode>
+            <valueVariableMode>prism</valueVariableMode> <!-- provides values as prism values (including metadata) -->
+            <code>
+                // The following method selects a value with the highest level of assurance.
+                // If there are more such values, selects any of them - TODO.
+                custom.selectHighestLoa(email)
+            </code>
+        </script>
+    </expression>
+    <target>
+        <path>emailAddress</path>
+    </target>
+</mapping>
+----
+
+Again, no special needs in the metadata area:
+
+----
+<metadataMapping>
+    <source>
+        <path>loa</path>
+    </source>
+    <target>
+        <path>loa</path>
+    </target>
+</metadataMapping>
+----
+----
+<metadataMapping>
+    <source>
+        <path>source</path>
+    </source>
+    <target>
+        <path>source</path>
+    </target>
+</metadataMapping>
+----
+(A more compact notation would be great.)
+
+== Example 4: Using level of assurance to filter values
+
+This is a variation on the example above. Let us generate certificates for users. Each user has a primary
+email address but also a set of secondary addresses (aliases). We want the certificate to contain
+the primary address along with those aliases that have LoA of `high`. (Also, the condition is that
+emailAddress is provided and is of LoA `high` as well.)
+
+image::example-filtering-by-loa.png["Using level of assurance to filter values"]
+
+// [source,xml]
+----
+<mapping>
+    <source>
+        <path>emailAddress</path>
+    </source>
+    <source>
+        <path>extension/emailAlias</path>
+    </source>
+    <source>
+        <name>existingCertificate</name>
+        <path>extension/certificate</path>
+    </source>
+    <expression>
+        <script>
+            <relativityMode>absolute</relativityMode>
+            <valueVariableMode>prism</valueVariableMode> <!-- provides values as prism values (including metadata) -->
+            <code>
+                highLoaAliases = custom.filterByLoa(emailAlias, 'high')
+                custom.checkOrCreateCertificate(existingCertificate, emailAddress, highLoaAliases)
+            </code>
+        </script>
+    </expression>
+    <condition>
+        <script>
+            <code>
+                custom.getLoa(primaryAddress) == 'high' // implies that there is a value
+            </code>
+        </script>
+    </condition>
+    <target>
+        <path>extension/certificate</path>
+    </target>
+</mapping>
+----
+
+We don't need LoA information for the certificate. Let's assume we want to propagate other metadata
+(except for `created` that we want to generate from the current time).
+
+// [source,xml]
+----
+<metadataHandling>
+    <excludeMapping>
+        <target>
+            <path>loa</path>
+        </target>
+        <target>
+            <path>created</path>
+        </target>
+    </excludeMapping>
+    <!-- default processing i.e. copying the values -->
+</metadataHandling>
+----
+
+This shows how we can invoke custom code. Note that creation timestamp will be probably treated by the system
+(at selected places) by default.
+----
+<metadataMapping>
+    <expression>
+        <script>
+            <code>basic.currentDateTime()</code>
+        </script>
+    </expression>
+    <target>
+        <path>created</path>
+    </target>
+</metadataMapping>
+----
+
+== Example 5: Creating email aliases with metadata depending on metadata of their components
+
+User's email aliases (`extension/emailAlias`) are derived from user name(s) (`extension/name`) and mail domain(s)
+(`extension/domain`). Each name and domain has a source (e.g. HR, Facebook) and level of assurance. Created email
+aliases carry information about the source(s) of its constituent values, and its LoA is determined as the lower one
+of LoAs from the constituents.
+
+image::example-email-aliases.png["Creating email aliases with metadata"]
+
+// [source,xml]
+----
+<mapping>
+    <source>
+        <path>extension/name</path>
+    </source>
+    <source>
+        <path>extension/domain</path>
+    </source>
+    <expression>
+        <script>
+            <code>
+                // e.g. 'Bill R. Smith', 'example.org' -> 'Bill_R_Smith@example.org'
+                custom.createEmailAlias(name, domain)
+            </code>
+        </script>
+    </expression>
+    <target>
+        <path>extension/emailAlias</path>
+    </target>
+</mapping>
+----
+
+We need to combine `source` metadata values. But this is the default behavior, because (we assume) `source`
+is multivalued metadata property.
+
+// [source,xml]
+----
+<metadataMapping>
+    <source>
+        <path>source</path>
+    </source>
+    <target>
+        <path>source</path>
+    </target>
+</metadataMapping>
+----
+
+== Example 6: Detailed tracing of origin of values
+
+This is a slightly more complex scenario consisting of a couple of mappings (inbound, template, outbound):
+
+1. HR provides `givenName` and `familyName` of a user.
+They are processed by inbound mappings.
+
+2. The object template creates `fullName` from these components.
+
+3. An outbound mapping for LDAP resource puts the result into `cn` account attribute.
+
+----
+<attribute>
+    <ref>ri:firstName</ref>
+    <inbound>
+        <name>inbound-firstName mapping</name>
+        <expression>
+            <script>
+                <code>input.toUpperCase()</code>
+            </script>
+        </expression>
+        <target>
+            <path>givenName</path>
+        </target>
+    </inbound>
+</attribute>
+----
+----
+<attribute>
+    <ref>ri:lastName</ref>
+    <inbound>
+        <name>inbound-lastName mapping</name>
+        <expression>
+            <script>
+                <code>input.toUpperCase()</code>
+            </script>
+        </expression>
+        <target>
+            <path>familyName</path>
+        </target>
+    </inbound>
+</attribute>
+----
+
+----
+<mapping>
+    <name>fullName mapping</name>
+    <source>
+        <path>givenName</path>
+    </source>
+    <source>
+        <path>familyName</path>
+    </source>
+    <expression>
+        <script>
+            <code>
+                givenName + ' ' + familyName
+            </code>
+        </script>
+    </expression>
+    <target>
+        <path>fullName</path>
+    </target>
+</mapping>
+----
+
+----
+<attribute>
+    <ref>ri:cn</ref>
+    <outbound>
+        <name>outbound-cn mapping</name>
+        <source>
+            <path>fullName</path>
+        </source>
+        <expression>
+            <script>
+                <code>fullName.toLowerCase()</code>
+            </script>
+        </expression>
+    </outbound>
+</attribute>
+----
+
+image::example-origin-tracing.png["Detailed tracing of origin of values"]
+
+We need to manage transformation metadata container. The behavior is built into midPoint, so we
+only have to specify it needs to be applied.
+
+// [source,xml]
+----
+<metadataHandling>
+    <includeMapping>
+        <target>
+            <path>transformation</path>
+        </target>
+    </includeMapping>
+</metadataHandling>
+----
+
+If we want to define it explicitly, it would be something like this:
+----
+<metadataMapping>
+    <source>
+        <path>source</path>
+    </source>
+    <source>
+        <path>transformation</path>
+    </source>
+        <expression>
+            <script>
+                <code>metadata.createTransformedFrom(source, transformation)</code>
+            </script>
+        </expression>
+    <target>
+        <path>transformation</path>
+    </target>
+</metadataMapping>
+----
+
+We assume that each value has either `source` metadata item or `transformation` metadata item (never both).
+The resulting `transformation` value would refer to union of `source` and `transformation` values of the
+source data values. This is ensured by `metadata.createTransformedFrom` method. The mapping reference would
+be obtained from the evaluation context.
+
+An alternative would be to refer directly to source prism values. (This approach is usable if the transformational
+metadata is kept only in memory i.e. during computation.)
+
+
+== Example 7: Knowing lawful base for data processing
+
+Our users are employees on university (teachers, staff) or students.
+Local law mandates to have list of employees publicly available, but we have no right to publish list of students.
+For internal systems we need (and are allowed to) use students data.
+We want to know what the lawful base for data processing for all data we have including the data in target systems.
+
+We have HR resource and Students registry resource. We obtain `fullName` and `affiliation` from both of them.
+This is quite common setup for universities. FullName is guaranteed to be the same in both resources, but each resource handles own values for affiliation.
+A user can be both student and employee at the same time.
+Person database is target system, which is used to find a person on university.
+Each person has a flag which tells the Peron database if the name of the person should be publicly available or not.
+
+
+1. Inbound mappings have to establish lawful base for working with them as well as the scope of allowed processing.
+2. Outbound mappings have to respect the scope and lawful base.
+
+image::example-lawful-base.png["Lawful base"]
+
+Inbound mappings for HR resource.
+
+----
+<attribute>
+    <ref>ri:fullName</ref>
+    <inbound>
+            <strenght>strong</strenght>
+            <exclusiveStrong>true</exclusiveStrong>
+        <target>
+            <path>fullName</path>
+        </target>
+    </inbound>
+</attribute>
+
+<attribute>
+    <ref>ri:affiliation</ref>
+    <inbound>
+        <target>
+            <path>extension/affiliation</path>
+        </target>
+    </inbound>
+</attribute>
+----
+
+Corresponding metadata mapping for both attributes.
+
+----
+<metadataMapping>
+    <!-- no source -->
+    <expression>
+         <value>public</value>
+    </expression>
+    <target>
+        <path>gdprReleaseScope</path>
+    </target>
+
+    <expression>
+         <value>legal obligation</value>
+    </expression>
+    <target>
+        <path>gdprLawfulBase</path>
+    </target>
+</metadataMapping>
+----
+
+
+Inbound mappings for Students Registry resource.
+
+----
+<attribute>
+    <ref>ri:fullName</ref>
+    <inbound>
+            <strenght>normal</strenght>
+            <exclusiveStrong>true</exclusiveStrong>
+        <target>
+            <path>fullName</path>
+        </target>
+    </inbound>
+</attribute>
+
+<attribute>
+    <ref>ri:affiliation</ref>
+    <inbound>
+        <target>
+            <path>extension/affiliation</path>
+        </target>
+    </inbound>
+</attribute>
+----
+
+Corresponding metadata mapping for both attributes.
+
+----
+<metadataMapping>
+    <!-- no source -->
+    <expression>
+         <value>local</value>
+    </expression>
+    <target>
+        <path>gdprReleaseScope</path>
+    </target>
+
+    <expression>
+         <value>legitimate interest</value>
+    </expression>
+    <target>
+        <path>gdprLawfulBase</path>
+    </target>
+</metadataMapping>
+----
+
+
+
+
+Outbound mapping:
+
+----
+<attribute>
+    <ref>ri:fullName</ref>
+    <outbound>
+        <source>
+            <path>fullName</path>
+        </source>
+    </outbound>
+</attribute>
+
+<attribute>
+    <ref>ri:affiliation</ref>
+    <outbound>
+        <source>
+            <path>extension/affiliation</path>
+        </source>
+            <expression>
+                  <script>
+                        <valueVariableMode>prism</valueVariableMode> <!-- provides values as prism values (including metadata) -->
+                        <code>
+                              custom.filterByGdprReleaseScope(extension/affiliation, 'public')
+                        </code>
+                  </script>
+            </expression>
+    </outbound>
+</attribute>
+
+<attribute>
+    <ref>ri:fullNamePublic</ref>
+    <outbound>
+        <source>
+            <path>fullName</path>
+        </source>
+            <expression>
+                  <script>
+                        <valueVariableMode>prism</valueVariableMode> <!-- provides values as prism values (including metadata) -->
+                        <code>
+                           releaseScope = fullName.valueMetadata().getPropertyRealValue(new QName("gdprReleaseScope"), String.class);
+                           return "public".equals(releaseScope)
+                        </code>
+                  </script>
+            </expression>
+    </outbound>
+</attribute>
+----
+
+Corresponding metadata mapping for both attributes.
+
+----
+<metadataMapping>
+    <source>
+        <path>gdprReleaseScope</path>
+    </source>
+    <target>
+        <path>gdprReleaseScope</path>
+    </target>
+
+    <source>
+        <path>gdprLawfulBase</path>
+    </source>
+    <target>
+        <path>gdprLawfulBase</path>
+    </target>
+</metadataMapping>
+----
+
+
+
+
+
+
+
+== Example 8: Privacy preserving email provisioning
+
+Our company allows our customers to use services provided by third parties.
+But we want to protect privacy of our users at at same time.
+Therefore we are generating unique opaque email address for each user and we are operating a service which are forwarding emails from this generated addres to real email address of a user.
+Users can decide if the real email address or the opaque one will be provisioned to third party services.
+The opaque one is being released by default.
+Having this implemented, the third party services can send an email to users without knowing the real email address.
+Moreover, the users are empowered to share their real address if they want to.
+
+
+
+We obtain `givenName` and `familyName` from upstream resource.
+
+1. The person email address is stored in emailAddess attribute of a user
+2. emailAddess attribute metadata might contain consent to share the address with third party services
+3. The opaque email address on an user is generated in an object template and will be stored in extension/opaqueEmailAddres attribute
+4. Outbound mapping for third party resource will use emailAddess if it's metatada contain the consent to do so, otherwise extension/opaqueEmailAddres will be used.
+
+
+image::example-privacy-preserving-email.png["Privacy preserving email provisioning"]
+
+image::example-privacy-preserving-email2.png["Privacy preserving email provisioning 2"]
+
+Outbound mapping for a third party service:
+
+----
+<attribute>
+    <ref>ri:email</ref>
+    <outound>
+        <source>
+            <path>emailAddess</path>
+        </source>
+        <source>
+            <path>extension/opaqueEmailAddres</path>
+        </source>
+            <expression>
+               <script>
+                  <valueVariableMode>prism</valueVariableMode> <!-- provides values as prism values (including metadata) -->
+                  <code>
+                     if(custom.hasConsentToShareWithThirdParties(emailAddess)) {
+                        return emailAddess;
+                     }
+                     return extension/opaqueEmailAddres;
+                  </code>
+               </script>
+        </expression>
+    </outound>
+</attribute>
+----
+
+
+
+The `hasConsentToShareWithThirdParties` in the custom library method that something like this:
+
+----
+private static String SHARE_WITH_THIRD_PARTIES_CONSENT_OID = "884156eb-7917-4b3b-83b4-2c4389cf5f20";
+private static String SHARE_WITH_THIRD_PARTIES_CONSENT_VALUE = "consent:" + SHARE_WITH_THIRD_PARTIES_CONSENT_OID;
+
+public boolean hasConsentToShareWithThirdParties(PrismValue value) {
+    if (value != null) {
+        legal = value.valueMetadata().getPropertyRealValue(new QName("legal"), String.class);
+        return SHARE_WITH_THIRD_PARTIES_CONSENT_VALUE.equals(legal);
+    } else {
+        return false;
+    }
+}
+----
+

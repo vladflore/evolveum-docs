@@ -1,7 +1,7 @@
 = Assignment × inducement × entitlement
 :page-toc: top
-:keywords: inducement, entitlement, assignment
-:description: A quick primer to help you understand the differences between inducement, entitlement, and assignment, distinct but interconnected concepts in midPoint
+:page-keywords: inducement, entitlement, assignment
+:page-description: A quick primer to help you understand the differences between inducement, entitlement, and assignment, distinct but interconnected concepts in midPoint
 
 In midPoint, inducement, entitlement, and assignment are distinct but interconnected concepts within its role-based access control (RBAC) framework.
 This is a quick primer to help you understand the differences between these concepts as they can be easy to confuse.
@@ -20,11 +20,12 @@ First, let us briefly define the meaning and purpose of each of these concepts, 
     ** Direct assignment: A user is explicitly assigned a role, account, or organizational unit.
     ** Construction assignments: Define how a resource object (e.g., an LDAP account) should be created for the user.
 
-[source,mermaid]
-----
+++++
+{% mermaid %}
 flowchart LR
     A[User] --> |is assigned| B[Role] --> |leads to| C(Entitlement) --> |associated with| A
-----
+{% endmermaid %}
+++++
 
 === Inducement
 
@@ -37,8 +38,8 @@ flowchart LR
     ** Role hierarchy: Inducements in a role apply to users who inherit the role (directly or via hierarchy).
     ** Indirect application: Inducements are not applied directly to the user but to the role, which then affects the user.
 
-[source,mermaid]
-----
+++++
+{% mermaid %}
 flowchart LR
 %% Nodes
 User[<sup>User</sup><br>Alice]
@@ -52,7 +53,8 @@ User --> |is assigned| RoleA --o |induces| RoleB
 
 RoleA --> |leads to| EntlA --> |associated with| UserEnd
 RoleB --> |leads to| EntlB --> |associated with| UserEnd
-----
+{% endmermaid %}
+++++
 
 === Entitlement
 
@@ -67,11 +69,12 @@ RoleB --> |leads to| EntlB --> |associated with| UserEnd
     ** Entitlement associations: Roles or assignments can define entitlements (e.g., group memberships) that are synchronized to the resource.
     ** Schema handling: Entitlements are defined in the resource schema (e.g., LDAP group schema) and are provisioned based on the synchronization logic in midPoint.
 
-[source,mermaid]
-----
+++++
+{% mermaid %}
 flowchart LR
     A[User] --> |is assigned| B[Role] --> |leads to| C(Entitlement) --> |associated with| A
-----
+{% endmermaid %}
+++++
 
 == Key differences
 
@@ -92,8 +95,8 @@ flowchart LR
 . Entitlements are the result of inducements or assignments, representing actual access on the resource.
 
 .Relation diagram of assignments, inducements, and entitlements
-[source,mermaid]
-----
+++++
+{% mermaid %}
 flowchart TD
     %% Nodes
     User["User (focus)<br>Alice"]
@@ -126,7 +129,8 @@ flowchart TD
     class RoleMgr,RoleTL role;
     class Account acct;
     class EntMgr,EntTL ent;
-----
+{% endmermaid %}
+++++
 
 .How to read the diagram
 [NOTE]

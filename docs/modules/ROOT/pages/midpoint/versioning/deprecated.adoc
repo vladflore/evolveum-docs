@@ -1,0 +1,21 @@
+= Deprecated Functionality
+:page-display-order: 950
+:page-wiki-name: Deprecated Functionality
+:page-wiki-id: 36569418
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2019-09-10T18:02:50.573+02:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2019-09-10T18:03:21.214+02:00
+
+Functionality marked as "deprecated" will be usually supported during support lifetime of the release in which it was deprecated.
+Deprecated functionality may be removed in any subsequent release.
+This will be usually a next minor or major release.
+However, in serious cases support for deprecated functionality may be removed even in maintenance releases.
+Such cases include removal of support for insecure or obsolete platforms, especially platforms that no longer have public security updates.
+Functionality that is not covered by any midPoint subscription may also be removed in a maintenance release.
+
+== See Also
+
+* xref:feature-lifecycle/[]
+
+* xref:experimental.adoc[]

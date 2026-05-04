@@ -1,3 +1,8 @@
+---
+midpoint-feature: task-management
+doc-type: intro
+---
+
 = Tasks and activities
 :page-wiki-name: Task
 :page-wiki-id: 13074801
@@ -7,7 +12,7 @@
 :page-wiki-metadata-modify-date: 2016-02-20T15:41:50.298+01:00
 :page-upkeep-status: green
 :page-toc: top
-:description: Discover the conceptual foundation of tasks, how they relate to activities, what they are used for, and how you can increase your productivity with tasks
+:page-description: Discover the conceptual foundation of tasks, how they relate to activities, what they are used for, and how you can increase your productivity with tasks
 
 MidPoint performs virtually every operation through a task.
 Whether it is an atomic change, such as renaming a user in the graphical user interface, or a complex job like synchronizing or reconciling resource objects, all work is carried out by tasks.
@@ -58,7 +63,7 @@ Refer to xref:/midpoint/reference/tasks/activities/[] for details.
 
 | *Granularity*
 | Coarse‑grained; one task may encompass many activities
-| Fine‑grained; each activity is a single step (e.g., "import objects", "reconcile accounts", "run script")
+| Fine‑grained; each activity is a single step (e.g., “import objects”, “reconcile accounts”, “run script”)
 
 | *Scheduling*
 | Defined at the task level (cron expression, interval, manual start)
@@ -121,7 +126,7 @@ When an organization automates this work using tasks, IT professionals can devot
 | Reduces the downtime caused by network glitches and provides immediate visibility when something goes awry
 
 | *Reporting*
-| Enable the task's built‑in reporting to generate a daily summary (new accounts, deprovisioned accounts, conflicts resolved) and send it to the security team
+| Enable the task’s built‑in reporting to generate a daily summary (new accounts, deprovisioned accounts, conflicts resolved) and send it to the security team
 | Enables continuous auditing and compliance reporting with minimal effort
 
 | *Scalability*

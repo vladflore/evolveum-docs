@@ -1,0 +1,114 @@
+= Exercise tips
+
+Entitlements and gensync:
+groups automatically created for job codes
+roles automatically created for "team" LDAP groups
+
+== MEDIUM
+
+* Archetypes(employee,project,division), view(active employees), assignment relation,
+
+
+* provisioning dependencies?
+* provisioning scripts (e.g. create homedir, powershell/exchange?)
+
+* pre-create and delayed account deletion
+
+* Role catalog, simple approvals, notifications
+* Simple SoD
+
+* Manual connector
+* Password hashing, account initialization
+* Password policy, check exception (e.g. custom password dictionary, must not contain username)
+* Self-service password reset
+* Self-service registration
+
+* Bulk action: recompute active employees, executed manually
+
+* Recertification campaign
+
+* Setup custom logo in GUI
+* Custom columns in user list
+* Custom data in summary panel
+
+* multi-thread tasks
+
+* Use of REST (authorizations)?
+
+== HARD
+
+=== Governed Identities
+
+TODO:
+* Enroll external workers, assign them to project, approval by project manager, setup up a "sponsor", etc.
+
+TODO: NOT POSSIBLE NOW
+
+In addition to that there is one special requirement.
+The game of darts is taken very seriously in our company and there is a lot of rivalry.
+Every few months there is a company-wide championship and the winning team takes possession of _Golder Dart Cup_.
+The employees insist that their team has to be designed as the champion in the IDM system.
+Therefore we have to do several things:
+
+* Create a custom extension properties for dart championship.
+Each team should have a property that indicates whether that team is the champion.
+We also want timestamp that tells when the team won the championship for the last time.
+
+* We need to customize the _summary panel_ in team details page.
+The panel should clearly state that a particular team is current champion.
+
+* We need a custom task that awards the cup and set particular team to be a chamption.
+The task should make sure that only one team is a champion.
+The task should reset the champion flag of the previous champion and update timestamps accordingly.
+As administrator cannot be bothered to adjust task parameters all the time, we want an ability to execute this task from the context menu of team list.
+Therefore administrator will go to the team organizational structure and execute the task from the menu.
+
+
+=== Large Scale Deployment
+
+* Millions of identities
+* Livesync and recon
+* Cluster, at least 4 nodes
+* Load balancer
+* Cluster: multi-node tasks
+* Thresholds
+* Dashboards (resorces down, failed operation in 24h)
+** Custom fields in audit log, custom dashboard based on audit log
+* Audit log data pump/SIEM/ELK
+* DB table as source
+* In exercise use 100k identities. But setup as if you had millions.
+* Dedicated GUI and "task" nodes
+* Very simple orgstuct
+* LDAP groups, (large LDAP groups?)
+
+=== Other
+
+* Assignment parameters (parametric roles)
+
+* Personas
+
+* Semi-manual connector
+
+* Inbound multiaccounts
+
+* Data protection
+
+=== LDAP Posix Account
+
+* Sequences for uidNumber and gidNumber
+* Auxiliary object classes -> LDAP?
+* Both LDAP groups and posix groups
+
+=== Devel
+
+* Overlay project
+* post-initial objects
+
+* ITSM plugin
+* Complex connector (e.g. complex attributes)
+
+* Custom form (java)
+* Custom service
+* Custom task handler
+
+

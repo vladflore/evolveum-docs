@@ -1,0 +1,204 @@
+= Cross-Model Use Cases
+
+Those are Axiom use cases when several models interact.
+
+== Composition (Type Reuse)
+
+Model A is using a type from model B:
+
+----
+model prism {
+    type PolyString {
+        item orig { ... }
+    }
+}
+
+model midpoint {
+    namespace "https://midpoint.evolveum.com/ns/common";
+    object User {
+        item fullName {
+            type prism:PolyString;
+        }
+    }
+}
+----
+
+Example data (YAML):
+
+----
+@context: "https://midpoint.evolveum.com/ns/common"
+user:
+    fullName:
+        orig: "John Doe"
+----
+
+Prism type `PolyString` is re-used in midPoint `User` object, thus creating a composition.
+As an entire unmodified type is used and it is isolated within an _item_, the type may evolve independently and there is no potential for conflicts of `prism` and `midpoint` models.
+
+Item namespaces are *irrelevant*.
+Namespaces may not be used with the data as the namespaces can be programmatically determined from model definitions.
+Storing item namespace information with the data would be redundant information.
+
+This dependency is *safe*.
+If source model (`prism`) evolves in a compatible way the target model (`midpoint`) will be consistent and compatible.
+
+== Augmentation (Extension)
+
+Model A augments definition of type in model B with custom items.
+
+----
+model midpoint {
+    namespace "https://midpoint.evolveum.com/ns/common";
+    object User {
+        ...
+    }
+}
+
+model example {
+    namespace "https://example.com/ns";
+    augmentation ExampleUser {
+        target midpoint:User;
+        item personIdentifier { ... }
+    }
+}
+----
+
+Example data (YAML):
+
+----
+@context: "https://midpoint.evolveum.com/ns/common"
+user:
+    fullName: ...
+    "https://example.com/ns#personIdentifier": "007"
+----
+
+Example model augments midPoint `User` type with custom property `personIdentifier`.
+Whenever the `User` data structure is used, the `personIdentifier` property may be used with it.
+However, the `personIdentifier` property needs to be fully qualified with namespace information to distinguish it from any other properties that the midPoint model can have in the future.
+
+Item namespaces are *maintained* and it is *mandatory* to use them in data representation formats.
+Extension items are stored with the namespace of the model where the extension was defined (`example`).
+
+This dependency is *safe*.
+Both models can evolve independently.
+
+== Subtyping
+
+Model A defines a new data type that inherits items of data type from model B.
+
+----
+model midpoint {
+    type User {
+        item fullName { ... }
+    }
+}
+
+model example {
+    namespace "https://example.com/ns";
+    type FancyUser {
+        supertype midpoint:User;
+        item fancyStatus { ... }
+    }
+}
+----
+
+Example data (YAML):
+
+----
+@context: "https://example.com/ns"
+user:
+    fullName: ...
+    fancyStatus: "asleep"
+----
+
+Example model extends midPoint `User` type with a custom property `fancyStatus`, creating a new (sub)type `FancyUser`.
+Whenever `FancyUser` is used, it may include `fancyStatus` property without any need to specify namespace explicitly.
+Data processor can use model definitions to figure out definitions for all items.
+
+Item names (without namespace) must be unique across all the items, both superclass and subclass items.
+
+.Why do we want unique item names?
+TIP: We require that item names must be unique in the entire definition.
+This means that the item name without a namespace must be unique (a.k.a. "local name").
+This deliberate limitation simplifies the data, as it means that namespaces are irrelevant for data interpretation and therefore they do not need to be stored with each item.
+This also means that we can make simpler code generators, as most programming languages cannot apply namespaces for class fields and methods.
+Allowing conflicting local names in subclass and superclass can cause ambiguity when translating item names to generated code.
+Requiring unique names makes everything simpler.
+But there is a price to pay.
+Model authors must be very careful about evolution of the data models.
+
+Item namespaces are *irrelevant*.
+Namespaces may not be used with the data as the namespaces can be programmatically determined from model definitions.
+Storing item namespace information with the data would be redundant information.
+
+This dependency is *unsafe*.
+Even if source model (`midpoint`) evolves in a compatible way, such a change may be in conflict with the target model (`example`) and it may result in inconsistencies or non-compatible changes.
+
+WARNING: This method is *not recommended* for general use.
+It is recommended only in case where there is a strong coordination of evolution of both models.
+Or in case that the target model can adapt to any changes of source model and data compatibility is not an issue.
+Use of composition (type reuse) or augmenting should be considered instead of inheritance.
+
+.Subtyping versus inheritance
+NOTE: Subtyping is not the same as inheritance, even though they often go hand-in-hand.
+What we specify in Axiom is subtyping.
+Creating a subtype of complex data structure also inherits all data items from the supertype by default.
+This is the easiest way how a subtype can satisfy supertype "contract" and it is also the method that we want to use most of the time.
+However, inherited items can be modified (overridden) as long as the supertype "contract" is maintained.
+
+== Inclusion (Mixin reuse)
+
+Model A is using parts of model B by including them in its data structures (e.g. by using a mixin).
+
+----
+model prism {
+    mixin Documented {
+        item documentation { ... }
+    }
+}
+
+model midpoint {
+    namespace "https://midpoint.evolveum.com/ns/common";
+    type Object {
+        item name { ... }
+        include prism:Documented;
+        ...
+    }
+}
+----
+
+Example data (YAML):
+
+----
+@context: "https://midpoint.evolveum.com/ns/common"
+user:
+    name: "administrator"
+    documentation: "Omnipotent pseudo-user for emergency administration."
+----
+
+MidPoint `Object` is including `Documented` mixin from Prism model.
+The `Documented` mixing adds `documentation` property to midPoint objects.
+
+Mixins are data strucures intended to re-use.
+However, due to the limitations the re-use is intended mostly in a single model.
+When mixins are used across models the a great care needs to be exercised.
+
+Item namespaces are *irrelevant*.
+Namespaces may not be used with the data as the namespaces can be programmatically determined from model definitions.
+E.g. `documentation` will be used in `midpoint` model without need for explicit namespace.
+Storing item namespace information with the data would be redundant information.
+
+This dependency is *unsafe*.
+Even if source model (`prism`) evolves in a compatible way, such a change may be in conflict with the target model (`midpoint`) and it may result in inconsistencies or non-compatible changes.
+
+WARNING: This method is *not recommended* for general use.
+It is recommended only in case where there is a strong coordination of evolution of both models.
+Or in case that the target model can adapt to any changes of source model and data compatibility is not an issue.
+
+== Open Questions
+
+Prism is supposed to be a genaral-purpose reusable component.
+However, may Prism data structures will be subtyped and included in midPoint model.
+Those are unsafe uses.
+How can we provide independent evolution of Prism and midPoint?
+Will careful versioning and some recommendations do?

@@ -1,0 +1,35 @@
+= Starting with new repository
+:page-toc: top
+
+[WARNING]
+This is work-in-progress document for feature still in development!
+
+Most of the content was migrated to official document
+xref:/midpoint/reference/repository/native-postgresql/usage/[here].
+
+The rest left in this document is mostly for developers.
+
+== Running tests with new repository
+
+New repository has its own tests in `repo-sqale` module.
+Tests from `repo-sql-impl-test` are not usable for new repository at all, but the module contains
+support for running later integration tests with the new repository.
+
+To run integration tests (e.g. from `model-intest` or `story` modules) with the new repo,
+you have to enable Maven profile named `sqale`.
+Under the hood it adds JVM argument `-Dtest.config.file=test-config-new-repo.xml` for Surefire
+and Failsafe test plugins.
+This JVM argument also has to be used in IDEA run configurations for tests with new repository.
+
+Further `-Dmidpoint.repository.jdbc*=...` arguments can be added to point to the non-default database.
+Check the `test-config-new-repo.xml` in midPoint project for the default values.
+
+Dedicated Postgres database must be running just like for normal operation.
+
+== Vagrantbox with new DB
+
+If you're a friend with https://www.vagrantup.com/[Vagrant], you can use
+https://github.com/virgo47/midpoint-vagrantboxes/tree/master/vagrant-midpoint-db-pg-new-repo[this Vagrant box]
+prepared for new repository with Postgres 13.
+Just check the IP of the VirtualBox adapter on the host and adjust the IPs in `Vagrantfile`
+and provided `config.xml`.

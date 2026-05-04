@@ -34,7 +34,7 @@ MidPoint communicates with such systems primarily by using _connectors_.
 This approach is illustrated in the following diagram.
 
 .Foundational architecture of midPoint
-image::midpoint/architecture/environment.png["Foundational architecture of midPoint"]
+image::environment.png["Foundational architecture of midPoint"]
 
 MidPoint is designed with the assumption that the data in the various identity stores *are not consistent*. For example, a single user may have account `smith` in one system, `jsmith` in another and `js432543` in yet another one.
 A user's name could be stored in the `cn` attribute in one system and could be allowed to contain national characters (e.g., "Řezníček"), while it could be stored in the `gcos` attribute in another system, being restricted to us the ASCII character set and obligatorily supplemented with the user's organizational unit name.
@@ -42,7 +42,7 @@ The goal of midPoint is to merge these data and keep them as consistent as pract
 MidPoint has many controls, rules, expressions, and pre-built identity management logic to assist in solving this difficult problem.
 
 .MidPoint communicates with external systems using connectors
-image::midpoint/architecture/big-picture.png["MidPoint communicates with external systems using connectors"]
+image::big-picture.png["MidPoint communicates with external systems using connectors"]
 
 Connectors are the primary and the most frequently used integration points in midPoint deployments.
 However, they are not the only integration points.
@@ -72,7 +72,7 @@ MidPoint is composed of several subsystems, each subsystem contains several comp
 The high-level architecture is illustrated in the following diagram.
 
 .High-level component architecture of midPoint
-image::midpoint/architecture/high-level-component-structure.png["High-level component architecture of midPoint"]
+image::high-level-component-structure.png["High-level component architecture of midPoint"]
 
 The system core consists of infrastructure, repository, provisioning, and model subsystems.
 Repository subsystem is storing authoritative identity data, pointers to identity objects in other systems (such as accounts), definition of roles, expressions, synchronization policies, configuration, and almost all of the persistent data structures in the system.

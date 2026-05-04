@@ -1,0 +1,189 @@
+= Configuring individual task handlers
+:page-wiki-name: Configuring individual task handlers
+:page-wiki-id: 22741089
+:page-wiki-metadata-create-user: mederly
+:page-wiki-metadata-create-date: 2016-03-31T22:37:08.676+02:00
+:page-wiki-metadata-modify-user: mederly
+:page-wiki-metadata-modify-date: 2016-04-01T00:23:31.893+02:00
+
+[%autowidth]
+|===
+| Task handler | Category | workerThreads | objectType | objectQuery | objectclass | kind | intent | objectRef | dryRun | optionRaw | objectDelta | script | other 
+
+| LiveSyncTaskHandler
+| LiveSynchronization
+| 
+| 
+| 
+| Y
+| Y
+| Y
+| Y (resource)
+| Y
+| 
+| 
+| 
+| 
+
+
+| ReconciliationTaskHandler
+| Reconciliation
+| Y
+| 
+| 
+| Y
+| Y
+| Y
+| Y (resource)
+| Y
+| 
+| 
+| 
+| 
+
+
+| ImportAccountsFromResourceTaskHandler
+| ImportingAccounts
+| Y
+| 
+| 
+| Y
+| Y
+| Y
+| Y (resource)
+| Y
+| 
+| 
+| 
+| 
+
+
+| RecomputeTaskHandler
+| Recomputation
+| Y
+| Y
+| Y
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+
+
+| ExecuteChangesTaskHandler
+| ExecuteChanges
+| Y
+| Y
+| Y
+| 
+| 
+| 
+| 
+| 
+| 
+| Y
+| 
+| 
+
+
+| ScriptExecutionTaskHandler
+| BulkActions
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| Y
+| 
+
+
+| DeleteTaskHandler
+| Utility
+| 
+| Y
+| Y
+| 
+| 
+| 
+| 
+| 
+| Y
+| 
+| 
+| 
+
+
+| ShadowIntegrityCheckTaskHandler
+| Utility
+| Y
+| 
+| Y
+| 
+| 
+| 
+| 
+| Y
+| 
+| 
+| 
+| diagnose, fix, duplicateShadowsResolver, checkDuplicatesOnPrimaryIdentifierOnly
+
+
+| AccessCertificationCampaignCreationTaskHandler
+| AccessCertification
+| 
+| 
+| 
+| 
+| 
+| 
+| Y (campaign definition)
+| 
+| 
+| 
+| 
+| 
+
+
+| ValidityScannerTaskHandler
+| System
+| Y
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+
+
+| TriggerScannerTaskHandler
+| System
+| Y
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+| 
+
+
+|===

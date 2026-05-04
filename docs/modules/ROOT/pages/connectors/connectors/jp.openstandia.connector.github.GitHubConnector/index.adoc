@@ -1,0 +1,23 @@
+---
+layout: connector-page
+display-order: 500
+functionality-status: unknown
+development-status: community
+support-status: community
+origin: Openstandia
+support-provided-by: Openstandia
+target-systems: GitHub
+source-url-master: https://github.com/openstandia/connector-github
+description: Identity connector for GitHub.
+documentation-link: https://github.com/openstandia/connector-github
+upkeep-status: green
+---
+= GitHub Connector
+
+== Documentation and How-to
+How to setup the integration of midPoint and Github is available at: https://github.com/openstandia/connector-github/wiki
+
+== See Also
+
+* https://github.com/openstandia/connector-github
+* https://github.com/openstandia/connector-github/wiki

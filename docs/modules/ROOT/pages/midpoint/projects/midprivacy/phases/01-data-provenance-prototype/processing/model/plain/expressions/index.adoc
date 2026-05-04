@@ -1,0 +1,563 @@
+= Processing expressions
+
+See xref:/midpoint/reference/expressions/expressions/[Expression] for background information.
+
+An _expression evaluator_ converts _sources_ and _input variables_ to _output values_ under given _evaluation parameters_.
+
+Sources, input variables, and output values are usually _relativistic_ in the sense that they do not only comprise actual values,
+but _changes of values_ from their _old_ to _new_ states.
+
+image::expression context.png["Expression context"]
+
+There are various kinds of expression evaluators, for example script-based evaluators, `asIs` evaluator, `literal` evaluator,
+`generate` evaluator, and so on. We concentrate on basic principles of expression evaluation first, and only after that
+we will describe individual evaluators' features.
+
+== Inputs and outputs of expression evaluation
+
+=== Source
+[cols="2,8a"]
+|===
+| Overview | Primary input for expression evaluation.
+| Type | Named item-delta-item.
+| Structure |
+* name
+* item-delta-item
+| Multiplicity | There can be zero, single, or multiple sources.
+|===
+
+=== Input variable
+[cols="2,8a"]
+|===
+| Overview | Secondary input for expression evaluation.
+| Type | Named item-delta-item or named object.
+| Structure |
+* name (potentially null)
+* object
+** item-delta-item (such a variable is called _relativistic_)
+** or any object: item, value, plain Java object, etc.
+| Multiplicity | There can be zero, single, or multiple variables.
+|===
+
+=== Output
+[cols="2,8a"]
+|===
+| Overview | Output of the expression evaluation.
+| Type | Delta set triple.
+| Structure |
+* plus set
+* minus set
+* zero set
+| Multiplicity | There is a single output delta set triple. (Each set can contain zero, single, or multiple values.)
+|===
+
+Item-delta-item and delta set triple structures are described in article on
+xref:../../change-representation/[change representation] (and its
+xref:../../change-representation-with-metadata/[metadata-aware version]).
+
+=== Evaluation parameters
+
+TIP: You can skip reading about evaluation parameters at first.
+
+There are two kinds of evaluation parameters: static (specified as part of expression definition in `ExpressionType`)
+or dynamic (provided to expression evaluator at run time).
+
+==== Parameters for all evaluators
+
+===== Static parameters
+The following are contained in `ExpressionType` bean.
+
+====== Evaluator(s) definition
+This definition specifies the required processing. For example, a script that should be executed, a constant value that
+is to be the output of the expression evaluation, and so on.
+
+[cols="2,8a"]
+|===
+| Overview | Definition of expression evaluator(s)
+| Type | An element that can substitute `c:expressionEvaluator`
+| Structure | Specific for each evaluator definition. See e.g. `ScriptExpressionEvaluatorType`,
+`AssignmentTargetSearchExpressionEvaluatorType`, and so on.
+| Multiplicity | Exactly one, except for default `asIs` (can be omitted) or `value` evaluator (can be more of them).
+|===
+
+====== Other parameters
+
+[%header]
+[cols="2,8a"]
+|===
+| Parameter | Meaning
+| `allowEmptyValues` | TODO
+| `queryInterpretationOfNoValue` | TODO
+| `returnMultiplicity` (`single` or `multi`) | TODO
+| `variable` (multi)
+| Additional variables that will be available to expression evaluator. These can obtain either:
+
+* constant string value,
+* constant object value (specified by providing object reference, currently limited to type+OID only),
+* path (referencing an item in an existing variable or source).
+|===
+
+====== Auxiliary and unused parameters
+Just for completeness let's mention here parameters that have no effect on the computation at this
+level of abstraction or are not implemented at all.
+
+[%header]
+[cols="2,8a"]
+|===
+| Parameter | Meaning
+| `runAsRef` | Under what principal should the expression be evaluated.
+| `stringFilter` | Unused.
+| `parameter` and `returnType` | Currently not used for evaluation in most cases. Their use is currently
+limited to custom function libraries.
+| `extension` | Currently not used.
+| `trace` | Records evaluation information to the log.
+| `name`, `description`, `documentation` | For documentation purposes.
+|===
+
+====== Dynamic (run-time) evaluation parameters
+
+NOTE: The following parameters are formally available to all evaluators but in fact interpreted only for value-transformation ones.
+
+[%header]
+[cols="2,8"]
+|===
+| Parameter | Meaning
+| skipEvaluationPlus | Should we skip evaluation for values that would go to "plus" output set?
+| skipEvaluationMinus | Should we skip evaluation for values that would go to "minus" output set?
+|===
+
+==== Parameters for value-transformation evaluators
+
+These parameters are statically defined in `TransformExpressionEvaluatorType`. Their meaning is to be understood
+in the context of value-transformation evaluation algorithm.
+
+[%header]
+[cols="2,8"]
+|===
+| Parameter | Meaning
+| relativityMode | Selects between absolute and relative ("combinatorial") mode of evaluation.
+| includeNullInputs | Whether null inputs should be taken into account. TODO
+| condition | Whether to even start evaluation for a given value combination. (Currently ignored for absolute evaluation mode.)
+|===
+
+==== Parameters for the script evaluator
+
+These parameters are statically defined in `ScriptExpressionEvaluatorConfigurationType`.
+
+[%header]
+[cols="2,8"]
+|===
+| Parameter | Meaning
+| language | What language is the script written in?
+| returnType | TODO
+| objectVariableMode | TODO
+| valueVariableMode | TODO
+|===
+
+== Evaluators ==
+Currently, supported evaluators are:
+[%header]
+[cols="10,20,5,50"]
+|===
+| Evaluator | Implementation | Type | Description
+
+| `value` | `LiteralExpressionEvaluator` | Z |
+Returns zero set with literal value (values) specified in the evaluator. Plus and minus sets are empty.
+
+| `path` | `PathExpressionEvaluator` | D |
+Returns delta set triple derived from specified source (or default source) by resolving specified path.
+
+| `asIs` | `AsIsExpressionEvaluator` | D |
+Returns delta set triple of the default source. (The same behavior as `path` with empty path.)
+
+| `const` | `ConstExpressionEvaluator` | Z |
+Returns zero set with a single value obtained by resolving given xref:/midpoint/reference/expressions/constants/[constant].
+Currently limited to single-valued string constants. Plus and minus sets are empty.
+
+| `script` | `ScriptExpressionEvaluator` | VT |
+Executes specified script written e.g. in Groovy, JavaScript, Python, etc. Velocity template language is supported as well.
+
+| `assignmentTargetSearch` | `AssignmentTargetSearchExpressionEvaluator` | VT |
+Creates an assignment (or assignments) based on specified conditions for the assignment target. Can create target objects on demand.
+
+| `associationTargetSearch` | AssociationTargetSearchExpressionEvaluator | VT |
+Creates an association (or associations) based on specified condition for the associated object.
+
+| `referenceSearch` | `ReferenceSearchExpressionEvaluator` | VT |
+Creates a generic reference (or references) based on specified condition for the referenced object. (It seems to be not much used.)
+
+| `associationFromLink` | `AssociationFromLinkExpressionEvaluator` | Z |
+Creates an association (or associations) based on projections of given abstract role. I.e. a role has projection (e.g. group),
+and it also induces a construction of a user account. Using this expression evaluator the account can obtain groups
+that are projections of that particular role. To be used in mappings in induced constructions only i.e. not in template
+mappings or assigned focus mappings! Puts all the values into zero set. Plus and minus sets are empty.
+
+| `generate` | `GenerateExpressionEvaluator` | Z |
+Generates a string value based on given value policy. Puts it into zero set. Plus and minus sets are empty.
+
+| `function` | `FunctionExpressionEvaluator` | Z/D |
+Calls specified custom function expression. It is something like a macro: Arguments for the function call (expressions themselves)
+are evaluated into delta set triples. Non-negative values from these triples become additional (zero-only) sources for the
+function expression. (This is a bit questionable.) Then the function expression is evaluated, and the output triple is returned
+as an output triple for the whole function expression evaluation.
+
+| `sequentialValue` | `SequentialValueExpressionEvaluator` | Z |
+Returns current value of a given sequence object. The value is returned in the zero set. Plus and minus sets are empty.
+The value for a given sequence OID is stored in the model context, so it is returned each time this evaluator (with given
+sequence OID) is invoked.
+
+| `proportional` | `ProportionalExpressionEvaluator` | Z |
+Experimental evaluator to be used in dashboards, maybe reports. Formats number of actual items compared with the number
+of all items using specified style (percentage, "x of y", "x/y", etc). Produces single string value in the zero set.
+Plus and minus sets are empty.
+|===
+
+Evaluator types regarding value relativity:
+[%header]
+[cols="1,10"]
+|===
+| Type | Meaning
+| Z | Non-relativistic evaluator. All values are returned in the zero set. Plus and minus sets are empty.
+| D | Direct mapping of plus/minus/zero sets from sources to outputs, with no specific treatment.
+The `path` and `asIs` evaluators derive plus/minus/zero values directly from plus/minus/zero values
+of a selected source. Categorization of `function` evaluator is not quite clear.
+| VT | Value-transforming evaluator. See below.
+|===
+== Evaluation algorithms
+Algorithms for `Z` (non-relativistic) and `D` (direct delta set mapping) are specific for individual evaluators.
+They are sketched out in the table above. (And could be described in more details, if needed.)
+
+What is interesting is the value-transformation algorithm used for `script` evaluator and "object search" ones
+(`assignmentTargetSearch`, `associationTargetSearch` and `referenceSearch`).
+
+=== Value-transformation algorithm
+Let us describe value-transformation algorithm here. We will use `script` evaluator as an example.
+
+A typical script evaluator configuration looks like this:
+
+[source]
+----
+<script>
+    <code>givenName + ' ' + familyName</code>
+</script>
+----
+
+The interpretation is quite obvious: The evaluator expects two sources (let's forget about variables for the moment) -
+`givenName` and `familyName`. The output of the evaluator is a concatenation of the two, probably to be stored in
+the `fullName` property.
+
+For instance, if the source values would be `Jack` and `Sparrow`, the result would be:
+
+[cols="2,6"]
+|===
+2+| Sources
+| givenName | `"Jack"`
+| familyName | `"Sparrow"`
+2+| Output
+| fullName | `"Jack Sparrow"`
+|===
+
+==== Absolute vs. relative evaluation mode ====
+
+Now let's take less obvious - although a bit artificial - example:
+
+[source]
+----
+<script>
+    <code>
+        String.valueOf(organization)
+    </code>
+</script>
+----
+
+This evaluator expects `organization` source and provides its string representation. The organization is multi-valued
+property, though. So what should the script expect to receive in the `organization` variable?
+
+It depends. The script can be evaluated in one of two modes. The nomenclature is not stable yet, but let's call these modes
+_absolute_ (single-shot) and _relative_ (combinatorial). These are the values of `relativityMode` evaluation parameter.
+
+Absolute evaluation mode provides all the values of all sources to the script _at once_. So, in this case, the script
+should expect that `organization` will be a collection of values e.g. `org1`, `org2`, `org3`. It will then provide a result
+of `"[org1, org2, org3]"` (if the collection was a list, which is currently the case).
+
+Relative evaluation mode provides the values of the sources to the script _one after another_. In this case the script would
+be invoked three times, once for `org1`, then for `org2` and `org3`, respectively. The output would be a set of values
+consisting of strings `"org1"`, `"org2"`, and `"org3"`.
+
+[cols="2,6"]
+|===
+2+| Sources
+| organization | `"org1"`, `"org2"`, `"org3"`
+2+| Output
+| (in absolute mode) | `"[org1, org2, org3]"`
+| (in relative mode) | `"org1"`, `"org2"`, `"org3"`
+|===
+
+NOTE: The concept of relative and absolute evaluation is described (in more user-oriented way) also in
+xref:/midpoint/reference/expressions/mappings/#handling-multiple-values[Handling Multiple Values]
+and xref:/midpoint/reference/expressions/mappings/#absolute-script-evaluation-mode[Absolute Script Evaluation Mode]
+sections on Mapping page.
+
+What if there are more than one source?
+
+In the absolute mode the situation is the same as in single-source case. The script simply gets individual sources as
+collection-typed variables.
+
+However, in the relative mode the script will be invoked once for each _combination_ of values
+from individual sources. For example, if we have a script like this:
+
+[source]
+----
+<script>
+    <code>
+        String.valueOf(organization) + ':' + String.valueOf(organizationalUnit)
+    </code>
+</script>
+----
+
+and the source values are `ACME` and `Example` for `organization` and `Sales` and `Engineering` for `organizationalUnit` then
+the output will be:
+
+[cols="2,6"]
+|===
+2+| Sources
+| organization | `"ACME"`, `"Example"`
+| organizationalUnit | `"Sales"`, `"Engineering"`
+2+| Output
+| (in absolute mode) | `"[ACME, Example]:[Sales, Engineering]"`
+| (in relative mode) | `"ACME:Sales"`, `"ACME:Engineering"`, `"Example:Sales"`, `"Example:Engineering"`
+|===
+
+You can check for yourself using the following setup in the Mapping playground (requires enabling experimental features for GUI):
+
+Mapping:
+
+[source]
+----
+<mapping>
+	<source>
+		<path>organization</path>
+	</source>
+	<source>
+		<path>organizationalUnit</path>
+	</source>
+	<expression>
+		<script>
+		   <relativityMode>relative</relativityMode>
+			<code>
+				String.valueOf(organization) + ':' + String.valueOf(organizationalUnit)
+			</code>
+		</script>
+	</expression>
+	<target>
+		<path>description</path> <!-- ignoring the fact that description is single-valued -->
+	</target>
+</mapping>
+----
+
+Mapping request:
+
+[source]
+----
+<mappingExecutionRequest>
+	<sourceContext>
+		<user>
+			<organization>ACME</organization>
+			<organization>Example</organization>
+			<organizationalUnit>Sales</organizationalUnit>
+			<organizationalUnit>Engineering</organizationalUnit>
+		</user>
+	</sourceContext>
+</mappingExecutionRequest>
+----
+
+==== And now for some relativity ====
+
+Things look great. Remember, though, that evaluation source is _not_ a simple set of values. It is item-delta-item,
+i.e. old value, delta, and the new value. Also, the output is delta set triple (plus, minus, zero).
+
+For example, in the following situation, what should be the output in absolute mode? And in relative mode?
+
+[cols="2,8"]
+|===
+2+| Sources (item-delta-item)
+| organization | `"ACME"`, `"Example"` -> `"ACME"`, `"ExAmPLE"`
+| organizationalUnit | `"Sales"`, `"Engineering"` -> `"Management"`, `"Engineering"`
+2+| Output delta set triple
+| (in absolute mode) | plus: `?`, minus: `?`, zero: `?`
+| (in relative mode) | plus: `?`, minus: `?`, zero: `?`
+|===
+
+Or, to begin with something simpler:
+
+[cols="2,8"]
+|===
+2+| Sources (item-delta-item)
+| givenName | `"Jack"` -> `"JACK"`
+| familyName | `"Sparrow"`
+2+| Output delta set triple
+| fullName | plus: `?`, minus: `?`, zero: `?`
+|===
+
+[cols="2,8"]
+|===
+2+| Sources (item-delta-item)
+| organization | `"org1"`, `"org2"`, `"org3"` -> `"org1"`, `"org2"`
+2+| Output delta set triple
+| (in absolute mode) | plus: `?`, minus: `?`, zero: `?`
+| (in relative mode) | plus: `?`, minus: `?`, zero: `?`
+|===
+
+How is the output delta set triple computed:
+
+1. We assume that target item (i.e. item that will contain result of the computation) in "old" state has
+values corresponding to sources in their "old" state. (That might or might not be true. But it's a reasonable
+assumption we work with.)
+
+2. Therefore, the output delta set triple should be such that
+
+ * assuming the target item contains values corresponding to sources in their "old" state,
+ * after the application of output delta set triple to the target item it will contain values corresponding
+to sources in their "new" state.
+
+See also the link:formal/[expression evaluation model].
+
+Knowing this, the expected output for the above scenarios is quite straightforward:
+
+[cols="2,8a"]
+|===
+2+| Sources (item-delta-item)
+| givenName | `"Jack"` -> `"JACK"`
+| familyName | `"Sparrow"`
+2+| Output delta set triple computation
+| Output in old state | `"Jack Sparrow"`
+| Output in new state | `"JACK Sparrow"`
+| The difference |
+* plus: `"JACK Sparrow"`
+* minus: `"Jack Sparrow"`
+* zero: nothing
+|===
+
+[cols="2,8a"]
+|===
+2+| Sources (item-delta-item)
+| organization | `"org1"`, `"org2"`, `"org3"` -> `"org1"`, `"org2"`
+2+| Output delta set triple computation (absolute mode)
+| Output in old state | `"[org1, org2, org3]"`
+| Output in new state | `"[org1, org2]"`
+| The difference |
+* plus: `"[org1, org2]"`
+* minus: `"[org1, org2, org3]"`
+* zero: nothing
+2+| Output delta set triple computation (relative mode)
+| Output in old state | `"org1"`, `"org2"`, `"org3"`
+| Output in new state | `"org1"`, `"org2"`
+| The difference |
+* plus: nothing
+* minus: `"org3"`
+* zero: `"org1"`, `"org2"`
+|===
+
+[cols="2,6a"]
+|===
+2+| Sources (item-delta-item)
+| organization | `"ACME"`, `"Example"` -> `"ACME"`, `"ExAmPLE"`
+| organizationalUnit | `"Sales"`, `"Engineering"` -> `"Management"`, `"Engineering"`
+2+| Output delta set triple computation (absolute mode)
+| Output in old state | `"[ACME, Example]:[Sales, Engineering]"`
+| Output in new state | `"[ACME, ExAmPLE]:[Management, Engineering]"`
+| The difference |
+* plus: `"[ACME, ExAmPLE]:[Management, Engineering]"`
+* minus: `"[ACME, Example]:[Sales, Engineering]"`
+* zero: nothing
+2+| Output delta set triple computation (relative mode)
+| Output in old state |
+* `"ACME:Sales"`
+* `"ACME:Engineering"`
+* `"Example:Sales"`
+* `"Example:Engineering"`
+| Output in new state |
+* `"ACME:Management"`
+* `"ACME:Engineering"`
+* `"ExAmPLE:Management"`
+* `"ExAmPLE:Engineering"`
+| The difference |
+* plus: `"ACME:Management"`, `"ExAmPLE:Management"`, `"ExAmPLE:Engineering"`
+* minus: `"ACME:Sales"`, `"Example:Sales"`, `"Example:Engineering"`
+* zero: `"ACME:Engineering"`
+|===
+
+NOTE: For a discussion of relativity in evaluation (again, from more user-oriented point of view) see
+xref:/midpoint/reference/expressions/mappings/#relativity[Relativity] section on Mapping page.
+
+==== Implementation information
+
+===== Implementation for absolute (single-shot) mode
+
+The implementation for absolute mode follows the specification quite closely.
+
+1. First, it determines whether we need to evaluate both old and new modes:
+it looks if any of the sources or variables contain a delta.
+2. If there is no delta, the computation of `O'` is carried out for new state
+and results are put into `O~zero~`. (See also the link:formal/[evaluation model].)
+3. If there is a delta, the computation of both `O` and `O'` is carried out,
+and the delta set is computed according to the spec:
+* O~plus~ = O' - O
+* O~minus~ = O - O'
+* O~zero~ = O ∩ O'
+
+The absolute mode computation is invoked if `relativityMode` is `absolute` or if there are no sources.
+
+===== Implementation for relative (combinatorial) mode
+
+The implementation for relative mode works currently like this.
+
+1. *Compute source triples.* Transform each source into source value triple i.e. plus/minus/zero sets.
+Add `null` values if necessary.footnote:[This is to ensure at least one execution in "plus" and in "minus" evaluation mode.
+See `CombinatorialEvaluation.addFakeNullValues`.] Put source triples into a list,
+in the same order as the sources have.
+
+2. *Process all combinations* of values in respective source value sets so that the following will hold:
+* O~plus~ = results of transforming combinations of values from non-negative source values sets except for all-zero sourced values
+* O~minus~ = results of transforming combinations of values from non-positive source values sets except for all-zero sourced values
+* O~zero~ = results of transforming combinations of values from zero source values sets
+
+Processing of combinations works like this:
+
+A. Compute 'sets occupied' information: for each source we determine the sets (plus, minus, zero) that this source
+has. We put this information to two lists: `setsOccupiedPlusZero` for plus/zero sets and `setsOccupiedMinusZero`
+for minus/zero sets. These two lists will be used to generated value tuples later.
+
+B. Generate values for plus and zero output sets:
+* In the first step, select a combination of "source sets" (plus vs. zero) that will provide input values for individual
+sources. For example (having 4 sources), we select "plus - plus - zero - plus", meaning that input values for sources 1, 2, 4
+will be selected from their plus sets, and input value for source 3 will be selected from its zero set.
+* Having specific source sets we now take all value combinations from the respective sets. (This is done by
+`transform(sets, outputSet)` method.)
+- If all source sets are zero, then output set is also zero.
+- Otherwise (i.e. if any of the source sets is plus), then output set is plus.
+
+C. Generate values for minus set:
+* Similarly to above, select a combination of "source sets" (minus vs. zero) that will provide input values for individual
+sources. For example (having 4 sources), we select "zero - minus - minus - zero", meaning that input values for sources 2 and 3
+will be selected from their minus sets, and input values for sources 1 and 4 will be selected from their zero set.
+* Having specific source sets we now take all value combinations from the respective sets. We skip the evaluation
+when all sets are zero, because it was already done above. So at least one input set must be minus. Outputs of the
+evaluation go to the minus set.
+
+Note that when evaluating, we add values from input variables to the variables being prepared for the invocation
+of the condition and of the transformational function. For relational variables we use old/new versions, depending on
+the target set (zero, plus - we use new, minus - we use old). For non-relational variables we use the value as is.
+
+Then, we transform the tuple (i.e. compute output values):
+
+* If condition is present, we first evaluate the condition (on prepared variables).
+If it evaluates to false, the result of the transformation is considered to be an empty set.
+
+* If condition is non-present or true, we transform the tuple by calling the transformational
+function (on prepared variables).
+
+And finally, we put the result of the transformation (zero, one, or more values) to
+the appropriate target set (plus, minus, zero).
+
+NOTE: TODO: We have to update this text with information on how metadata are processed.

@@ -1,0 +1,191 @@
+= Setting up Jekyll Environment
+:page-toc: top
+
+This guide is for you if you plan to make any content or development changes to our Jekyll-based sites.
+It shows you how to set up your local instance of the Evolveum documentation site.
+In this local instance, you can edit and preview your changes instantly.
+
+To prevent mistakes, it is not recommended to push updates directly to production sites.
+Instead, use a local deployment for development.
+
+== Deploy Docs on Your Computer
+
+You need to install the following on your computer:
+
+* Ruby
+* Jekyll and Bundler
+* Evolveum themes and plugins
+
+While the following instructions target Ubuntu Linux, with some modifications, you should be able to deploy the local documentation instance also on other Linux distributions, macOS, or MS Windows.
+
+=== Install Ruby
+
+[source,bash]
+----
+sudo apt-get install ruby-full build-essential zlib1g-dev
+----
+
+=== Set up Local Ruby Environment for Your Account
+
+[source,bash]
+----
+echo '# Install Ruby Gems to ~/gems' >> ~/.bashrc
+echo 'export GEM_HOME="$HOME/gems"' >> ~/.bashrc
+echo 'export PATH="$HOME/gems/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+----
+
+=== Install Jekyll and Bundler as Ruby Gems
+
+[source,bash]
+----
+gem install jekyll bundler
+----
+
+This installs `jekyll` and `bundler` gems in your home directory (`~/gems/`).
+Bundler is a tool that manages dependencies of Ruby projects.
+It will automatically download all the public gems needed by our sites, and also keep the gems updated.
+
+=== Clone Evolveum Jekyll Theme and Plugins From GitHub
+
+The project referenced below contains components needed for our sites, such as the Jekyll theme and plugins.
+These are not published as public gems, so they need to be installed manually.
+
+[source,bash]
+----
+git clone https://github.com/Evolveum/evolveum-jekyll.git
+----
+
+=== Build and Install Evolveum Gems
+
+[source,bash]
+----
+cd evolveum-jekyll
+./build.sh
+----
+
+This installs the `evolveum-jekyll-plugin` and `evolveum-jekyll-theme` gems into your home directory (`~/gems/`).
+
+For easier merging to the master branch, you can use `./build.sh --local`. 
+With this option, the script writes the `_configLocal.yml` file to your home directory.
+When using this option:
+
+* Docs directory is `$HOME/docs`.
+* Directories for individual midPoint Git branches are `$HOME/mp-*`.
+* Samples directory is `$HOME/mp-samples`.
+
+If you want to change a directory name or path, don't use any options and adjust the `evolveum-jekyll-theme/_config.yml` file.
+
+=== Clone the Docs Repository From GitHub
+
+[source,bash]
+----
+cd ../
+git clone https://github.com/Evolveum/docs.git
+----
+
+=== Install the Jekyll Docs Project
+
+[source,bash]
+----
+cd docs
+bundle install
+----
+
+This installs the necessary gems for the docs site.
+You only need to run this once.
+In case the dependencies of our sites change, you may need to re-run `bundle install` or `bundle update`.
+In such a case, you'll see a bundler error that'll likely instruct you on what to do exactly.
+
+=== Build and Serve the Site
+
+[source,bash]
+----
+bundle exec jekyll build
+----
+
+If you used the `--local` option with `build.sh`, you must also add `--config _config.yml,../_configLocal.yml` to the end of this command.
+
+This builds the content and places it in the `_site` directory.
+You can open the generated pages in your browser.
+
+For a better browsing experience, you can also start the Jekyll server: 
+
+[source,bash]
+----
+bundle exec jekyll serve
+----
+
+You may also need to run `bundle add webrick` beforehand for the server to work,
+although the `webrick` gem should be installed along the other gems already.
+
+As with the `build` command, if you used the `--local` option, you must add `--config _config.yml,../_configLocal.yml` to the end of this command.
+
+Jekyll will run as an HTTP server on 
+http://localhost:4000[http://localhost:4000]
+
+=== Make Changes to the Site
+
+The best approach to edit the contents of the site is to open the project in link:https://www.jetbrains.com/idea/[IntelliJ IDEA].
+While the Jekyll server is running, it detects changes in the files and rebuilds the site automatically.
+You only need to reload the page in your browser to see the changes.
+
+== How It Works
+
+The site is built using https://jekyllrb.com/[Jekyll], a static site generator.
+The site is generated from Jekyll sources into static HTML files.
+There is no dynamic interpretation of HTTP requests.
+Everything has to be generated before the first request comes, including headers, footers, navigation, and everything else.
+
+Jekyll is written in https://www.ruby-lang.org/en/[Ruby].
+Ruby is an interpreted scripting programming language that mixes object-oriented paradigms with functional programming.
+It is a very efficient language: short code can accomplish a lot of tasks.
+As Jekyll is written in Ruby, Jekyll extensions (plugins) are also written in Ruby.
+
+Perhaps the most important plugin for Jekyll is https://asciidoctor.org/[Asciidoctor] (in the form of https://github.com/asciidoctor/jekyll-asciidoc[Jekyll AsciiDoc plugin]).
+Asciidoctor adds support for the https://asciidoc.org/[AsciiDoc] text format, which is used for the vast majority of our documents.
+Asciidoctor transparently converts AsciiDoc (`*.adoc`) documents to HTML when the Jekyll site is built.
+
+Jekyll is set up to use https://github.com/Evolveum/evolveum-jekyll/tree/master/evolveum-jekyll-theme[evolveum-jekyll-theme] as its theme.
+The theme contains stylesheets (SASS), page layouts, fonts, icons, the Evolveum logo, and anything else that is used on all our sites.
+The theme has a file structure that is almost the same as the Jekyll site structure.
+
+The theme needs https://github.com/Evolveum/evolveum-jekyll/tree/master/evolveum-jekyll-plugin[evolveum-jekyll-plugin] to work.
+The plugin is a small piece of Ruby code that adds some features to Jekyll.
+The Evolveum plugin mostly adds navigation features.
+
+Both the theme and the plugin are designed to be used as Ruby _gems_.
+There is the https://github.com/Evolveum/evolveum-jekyll/blob/master/build.sh[build.sh] script that builds and installs the gems.
+
+The use of the theme and the plugin is specified in the `_config.yml` file in the site.
+
+{% raw %}
+
+When our site refers to the `page` layout, that layout is taken from the theme, from the `_layouts` directory.
+Our `page` layout file (`_layouts/page.html`) specifies the structure of pages on our sites.
+This layout contains Liquid tags to render navigational elements (`{% breadcrumbs %}`, `{% navtree %}`).
+These are custom Liquid tags that are implemented in the `evolveum-jekyll-plugin`.
+The plugin is documented in the plugin source code files.
+
+{% endraw %}
+
+=== Redirects
+
+Jekyll generates the redirects as a series of Apache `RewriteRule` statements in the `.htaccess` file.
+The code is located in the `jekyll-redirect-plugin.rb` file in the `evolveum-jekyll-plugin` project.
+
+
+=== Limitations
+
+Jekyll themes can only contain _design_ files, such as CSS/SASS or images, but they cannot contain _content_ files.
+While it is generally recommended to separate design and content, this separation has consequences in Jekyll.
+
+For example, the theme cannot contain sitemap files (`sitemap.xml`, `sitemap.html`), which are considered to be _content._
+As a workaround, we are using a https://github.com/Evolveum/evolveum-jekyll/blob/master/evolveum-jekyll-plugin/lib/evolveum/jekyll-sitemap-plugin.rb[special plugin code] in the Evolveum Jekyll plugin. 
+This uses the `Jekyll::PageWithoutAFile` mechanism to create sitemap pages.
+
+== See Also
+
+* xref:writing-documentation/[]
+* https://jekyllrb.com/docs/[Jekyll documentation]
+* https://shopify.github.io/liquid/[Liquid documentation]

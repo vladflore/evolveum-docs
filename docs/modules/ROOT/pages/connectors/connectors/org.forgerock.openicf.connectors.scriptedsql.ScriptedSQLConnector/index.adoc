@@ -1,0 +1,76 @@
+---
+layout: connector-page
+display-order: 900
+functionality-status: stable
+development-status: abandoned
+support-status: unsupported
+origin: OpenICF
+target-systems: Generic SQL databases (JDBC)
+connector-protocol: JDBC
+source-url-master: https://github.com/Evolveum/openicf/tree/master/connectors/java/scriptedsql
+description: Generic identity connector for SQL databases, using custom script code.
+connid-bundle-name: org.forgerock.openicf.connectors.scriptedsql-connector
+upkeep-status: yellow
+---
+= Legacy ScriptedSQL Connector
+:page-wiki-name: ScriptedSQL Connector (deprecated)
+:page-wiki-id: 27820210
+:page-wiki-metadata-create-user: lazyman
+:page-wiki-metadata-create-date: 2019-02-21T15:56:10.264+01:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2019-07-09T14:11:19.460+02:00
+
+This is original OpenICF version of the scripted SQL connector.
+This development path is now abandoned.
+The development continues as xref:/connectors/connectors/com.evolveum.polygon.connector.scripted.sql.ScriptedSQLConnector/[Evolveum ScriptedSQL Connector].
+
+== Capabilities and Features
+
+[%autowidth,cols="h,1,1"]
+|===
+| Provisioning
+| YES
+|
+
+| Live Synchronization
+| YES
+|
+
+| Password
+| YES
+|
+
+| Activation
+| YES
+|
+
+| Filtering changes
+|
+|
+
+|===
+
+
+== History
+
+[%autowidth]
+|===
+| Version | Origin | Binary | Sources | Build Date | Description
+
+| 1.1.2.0.em3
+| OpenICF development version, built and tested by Evolveum
+| https://nexus.evolveum.com/nexus/repository/openicf-releases/org/forgerock/openicf/connectors/scriptedsql-connector/1.1.2.0.em3/scriptedsql-connector-1.1.2.0.em3.jar[download binary]
+|
+| Thu Jul 17 17:37:18 CEST 2014
+|
+
+|===
+
+
+== Documentation
+
+* N/A
+
+== Resource Examples
+
+* xref:/connectors/resources/sql/[Any Database (ScriptedSQL)]

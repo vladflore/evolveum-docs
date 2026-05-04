@@ -1,0 +1,360 @@
+= Repository Design
+:page-toc: top
+
+[NOTE]
+This page is part of MidScale project documentation and was freezed at the end of the project.
+See xref:/midpoint/reference/repository/native-postgresql/design-and-implementation.adoc[Design and Implementation]
+and xref:/midpoint/reference/repository/native-postgresql/db-maintenance.adoc[DB maintenance] for current pages.
+
+== Basic considerations
+
+* Capacity
+** Goal to support up to 20M users around end of 2021 (e.g. now 8M, growing around 300K monthly).
+
+* Is PostgreSQL enough from business perspective? What about Oracle?
+** If it's optimized for PG, tests must be run against PG as well, H2 will not cover the new repo at all.
+** Primary goal is PG, but let's not close the door for Oracle too soon.
+
+== Initial design assumptions
+
+* Focus on PostgreSQL only, without necessarily making Oracle usage impossible.
+* New repository will be SQL/JDBC based with http://www.querydsl.com/[Querydsl library] used for
+dynamic query construction.
+No Hibernate, ORM, JPA will be used.
+https://martinfowler.com/eaaCatalog/unitOfWork.html[Unit of work pattern] will not be utilized.
+Reasons are:
+** We need more control over query construction without switching between HQL (or JPQL) and native SQL.
+** We need dynamic columns for extensions or audit custom attributes.
+This is generally impossible with JPA/ORM solutions.
+(Alternatively we can use JSONB type in PostgreSQL.)
+** Unit of work pattern (Hibernate "session" or JPA "persistence context") is not beneficial for
+a repository clearly separated from midPoint model.
+There is no direct mapping of object model to the repository, repository is more operation oriented,
+even though the opreations are generic and may resemble typical "ORM repository" operations.
+** Each repository operation is transaction on its own.
+This is another reason why "unit of work" is meaningless in midPoint.
+** Without "unit of work" repository should be more memory efficient (no implicitly held data in session)
+and CPU efficient (no dirty checking, all modifications will be explicit).
+* We will start with DB objects close to existing repository, but
+https://www.postgresql.org/docs/current/ddl-inherit.html[table inheritance] will be used for `m_object`
+and related tables.
+* Because `m_shadow` is also object and declarative paritioning can't be combined with inheritance,
+we will use "application managed partitioning" (implemented with inherited tables) for `m_shadow`
+if the data volume requires it.
+
+== Database schema
+
+* Current DB schema problems:
+** `M_OBJECT` is too heavy (full object?)
+** `M_SHADOW` table is too big (10-20 times `M_USER` size), talk 200M expected soon.
+Indexes are not enough, little variance in data (resource, object class, kind, intent).
+*But inherited table cannot be partitioned* resulting in error: `[42P17] ERROR: cannot create partitioned table as inheritance child`
+We will use inheritance for application-managed shadow partitioning.
+Open question is how to do custom shadow attributes, if primary/secondary/tertiary ID is good enough
+solution we can forgo extension attributes (or use JSON indexes).
+*** Unique OID across table hierarchy can be solved http://blog.ioguix.net/postgresql/2015/02/05/Partitionning-and-constraints-part-1.html[by triggers]
+or separate OID-pool table - the latter was used for reasons described lower in the *Explored alternatives* section.
+** `M_REFERENCE` can be too big (goal >100M), can be split by `REFERENCE_TYPE` which is always used for the query.
+
+* Scalability, table hierarchy, relations:
+** Separate oid table for all objects - yes, this is used to keep OID unique index on a single place.
+This is, however, not the part of an `m_object` hierarchy and can be completely ignored even by the application.
+** `full_object` LOB will always be placed in concrete tables (even if defined in "abstract" table).
+Old-repo solution with `full_object` on a single table causes heavy contention on `M_OBJECT`.
+** What about search for supertype (like any focus with some attribute equals to...)?
+Examples: Searching all members of a role (assignment holder).
+Unsure how critical the performance is, optimizations possible for specific queries.
+It seems table inheritance would be a solution here (this may close the door https://stackoverflow.com/questions/17512871/how-to-create-inherited-table-in-oracle[for Oracle]).
+** But what about associations, e.g. assignments?
+We don't want to model them n-times for various types (we already don't).
+Can they reference all-objects table for referential integrity?
+Only owner side (currently `OWNER_OID`), but it's not possible to enforce FK to target (`TARGETREF_TARGETOID`).
+Owner can have reference/assignment to non-existing target.
+
+* What about task repository/manager?
+** No changes expected at this moment.
+Replacing core repository should not have impact on `task-quartz-impl` module.
+** But improvements in bucket selection are welcome, there is big contention.
+
+* Uniqueness - of names but also other attributes, often depending on other attributes.
+** E.g. username is normally unique, but we may need to change it to name+tenantId (deployment specific).
+** Should midPoint self-managed indexes and constraints (perhaps in 5.0 or later)?
+** What before that? Separate part of schema that can be customized (various options, some commented)?
+
+== Extension attributes, DB schema extensions
+
+* Extensions:
+** Currently, both single- and multi-values stored in tables (per data type), multi-values as multiple lines.
+*** There are separate sets of tables for "object extensions" and "assignment extensions".
+** Possible solution:
+*** Single valued extensions directly in the owning table.
+*** Multi values in separate tables created on demand for each extension attribute.
+Can indexable JSON array be solution?
+** Shadow is a bit different, there are various attributes depending on resource schema.
+Normally we don't cache attributes, in that case there is no problem, but what if we want to?
+There are still identifiers, primary is in `M_SHADOW`, we don't have secondary/tertiary.
+Problem also describe on the xref:/midpoint/devel/design/identifier-theory/[Identifier Theory page].
+** xref:/midpoint/reference/roles-policies/roles/rbac/[Parametric roles]
+can/will contain definition of extended attributes, how to apply these to DB schema?
+*** Assignment parameters are more like "shadow attributes" while schema extensions are global.
+** Ability to apply necessary DB schema changes without the restart would be nice,
+but reportedly not critical depending on the needed development effort.
+*** DB part of this is perhaps easier than the refresh of Prism schemas...?
+*** How to distribute new column information (or any change) across the cluster?
+If DB has a new column and runtime mapping doesn't, what happens? Or the other way around.
+** Audit custom properties (officially experimental) replace with schema extensions.
+*** Also consider `MAuditPropertyValue` what it is and why is it needed.
+Unify if possible - which is very likely.
+
+[NOTE]
+Larger-than-long numeric types are stored as `String` extensions (`RAnyConverter#getAggregatedRepoObject`)
+which makes direct comparison operations on them meaningless.
+Conversion must be used first which is inefficient without additional function based indexes.
+
+== Query execution performance
+
+* Partial queries of objects without `FULL_OBJECT`, no LOB, no parsing:
+** E.g. for some UI views or REST "return users only with names and..." (other data from columns).
+See `GetOperationOptions` and `RetrieveOption` for existing mechanism.
+** How to map it into schema types?
+How to indicate the object is not complete?
+** Performance of `getObject` must not get worse.
+This one already uses a single select and just two columns (`OID` and `FULL_OBJECT`).
+
+* Audit performance considerations:
+** Time partitions first, then we'll see.
+*** OPTIONAL: Consider alternative of old audit archival without search options.
+Detaching partitions is another option, if the data can stay in the same DB.
+Or we don't solve it at all and it's left to DB admin.
+** An asynchronous audit - optional, per node, no cluster-wide microservice.
+*** Point of audit should be still able to work like today (synchronous audit).
+*** Additionally, if async-audit is on it queues the audit event.
+*** Consumer batches the inserts.
+*** What if audit query is executed? Should it trigger the flush operation first?
+** How to change audit custom columns during existence of old partitions?
+We probably don't want to solve this now and it will probably require manual DB admin intervention.
+** Audit schema type currently does not contain DB primary key (serial).
+This limits scenario search + go to detail later, unless we use different "ID" like `eventIdentifier`.
+It seems we want to align the schema type with the repository identifier.
+Drawbacks: No way to distribute ID creation, but we accept this.
+
+== DB schema auto-management
+
+* Objects to manage:
+** Custom indexes - for extension columns.
+** Custom constraints (likely experimental) - uniqueness customizations.
+In 4.4 this still can be done manually, but the option must be there - separation of customizable
+constraints in SQL file? See notes at uniqueness above.
+*What if it collides with default index?*
+** Custom tables - for to-many extensions, unless JSON can solve this.
+*** OPTIONAL: Dynamic table creation can be also needed for shadow attributes (per resource).
+If additional identifier columns cover the search cases, we don't want this at all.
+*** UNWANTED: Possibly, this can also be used for assignments (per dynamic role?) or other objects
+(archetypes with dynamic schema extensions).
+
+* DB schema management capabilities:
+** What if MP will not be allowed to alter tables?
+If not what will create the columns conveniently yet safely (no typos, indexes when necessary)?
+Ninja or MP can fail on start if it can't create missing stuff, ideally all things, not just the first one.
+Admin can then see the log (or Ninja output) and act accordingly.
+
+* DB schema creation and upgrade between versions.
+** Cration can be done with SQL file execution for a fresh DB.
+** Schema still needs to be examined for custom columns (extensions) anyway.
+** Update between versions should be effortless, e.g. execution of `+*-upgrade-*.sql+`.
+
+== Modularity, API
+
+* API changes?
+Minimal changes, mostly cleanup.
+** Clean deprecated stuff like `searchShadowOwner`.
+** If some queries are prominent (e.g. by name), better recognize the query inside the current
+`searchObjects` method instead of introducing `searchByName`.
+** Possibly add low-level query capability for management/monitoring reports/dashboards.
+It would be described by input prism structure (parameters), output prism structure (projection)
+and query directly in SQL.
+Some (most used) reports would be predefined, the rest is up to the power user.
+Upgrade problems possible, admin user must deal with those.
+
+* Module design, currently audit is implemented in `repo-sql-impl`.
+This is left for later, it's not such a problem to restructure Maven modules for new code.
+Existing audit implementation, although separate, can still stay in `repo-sql-impl`.
+Unused Hibernate entities for audit tables are still used for automatic DB creation, especially handy for H2/tests.
+** Common SQL support (current "pure" package from the repo impl) should be extracted.
+** What about `repo-cache`, do we need (or want) to change it?
+*** Can be a performance problem on its own when there are too many queries.
+
+== Testing and evaluation
+
+* Testing considerations for automated TestNG tests:
+** We want to develop tests that will be run on both 4.2 version (support branch) and in master.
+** See xref:/midpoint/projects/midscale/design/testing-design/[Testing design] for more.
+
+* How to get to minimum viable product (MVP) as soon as possible?
+** In 4.3 we'd like to have rough implementation of `repo-api` (`RepositoryService`).
+** In 1-2 months to have representative DB schema covering most issues mentioned above.
+Testing on SQL level with many rows, etc.
+
+== Schema to repository mapping
+
+Table shows only descendands of `ObjectType`, not other containers, assignments, etc.
+See also image::/midpoint/reference/repository/generic/midpoint-db-4.2.png[schema diagram for midPoint 4.2].
+
+|===
+| Schema type | Repo Q-type | Rows (expected max or typical for smaller tables)
+
+3+| *Objects*
+| ObjectType | QObject .2+| no physical rows in new repo
+| \|- AssignmentHolderType | QAssignmentHolder (none in old repo)
+| \|{nbsp}\|-{nbsp}AbstractAccessCertificationDefinitionType | - |
+| \|{nbsp}\|{nbsp}\|-{nbsp}AccessCertificationDefinitionForReportType | ? |
+| \|{nbsp}\|{nbsp}`-{nbsp}AccessCertificationDefinitionType | QAccessCertificationDefinition |
+| \|{nbsp}\|-{nbsp}AccessCertificationCampaignType | QAccessCertificationCampaign |
+| \|{nbsp}\|-{nbsp}CaseType | QCase |
+| \|{nbsp}\|-{nbsp}ConnectorHostType | QConnector |
+| \|{nbsp}\|-{nbsp}ConnectorType | QConnectorHost |
+| \|{nbsp}\|-{nbsp}DashboardType | QDashboard |
+| \|{nbsp}\|-{nbsp}FocusType | QFocus |
+| \|{nbsp}\|{nbsp}\|-{nbsp}AbstractRoleType | QAbstractRole |
+| \|{nbsp}\|{nbsp}\|{nbsp}\|-{nbsp}ArchetypeType | QArchetype |
+| \|{nbsp}\|{nbsp}\|{nbsp}\|-{nbsp}OrgType | QOrg |
+| \|{nbsp}\|{nbsp}\|{nbsp}\|-{nbsp}RoleType | QRole |
+| \|{nbsp}\|{nbsp}\|{nbsp}`-{nbsp}ServiceType | QService |
+| \|{nbsp}\|{nbsp}\|-{nbsp}GenericObjectType | QGenericObject |
+| \|{nbsp}\|{nbsp}`-{nbsp}UserType | QUser | 20M
+| \|{nbsp}\|-{nbsp}FormType | QForm |
+| \|{nbsp}\|-{nbsp}FunctionLibraryType | QFunctionLibrary |
+| \|{nbsp}\|-{nbsp}LookupTableType | QLookupTable |
+| \|{nbsp}\|-{nbsp}NodeType | QNode |
+| \|{nbsp}\|-{nbsp}ObjectCollectionType | QObjectCollection |
+| \|{nbsp}\|-{nbsp}ObjectTemplateType | QObjectTemplate |
+| \|{nbsp}\|-{nbsp}ReportDataType | QReport |
+| \|{nbsp}\|-{nbsp}ReportType | QReportData |
+| \|{nbsp}\|-{nbsp}ResourceType | QResource |
+| \|{nbsp}\|-{nbsp}SecurityPolicyType | QSecurityPolicy | ~10, 100k possible for multi-tenant
+| \|{nbsp}\|-{nbsp}SequenceType | QSequence |
+| \|{nbsp}\|-{nbsp}SystemConfigurationType | QSystemConfiguration | 1
+| \|{nbsp}\|-{nbsp}TaskType | QTask |
+| \|{nbsp}`-{nbsp}ValuePolicyType | QValuePolicy |
+| `-{nbsp}ShadowType | QShadow | 200M (~10 per user)
+3+| *Containers*
+| AssignmentType | QAssignment | 200M (~10 per user)
+3+| *Refs* are split by type
+.4+| Referencable | QReference |
+| \|- QObjectReference | Ref types: archetype, delegated, include, projection,
+create/modify approver, parent org, persona, resource/business/approver, role membership.
+
+100M rows in most used tables.
+|  `- QAssignmentReference | Ref types: create/modify approver.
+
+500M rows possible.
+| TODO case WI, cert WI... |
+|===
+
+== Explored alternatives
+
+=== No `m_object_oid` table, trigger for OID uniqueness
+
+* OID must be unique across inherited tables, so `OID` on top-level table `m_object` was consulted.
+* Parent tables cannot assure uniqueness, also can't have any index.
+When select to OID was executed, UNION of all sub-tables was used internally.
+This was reasonably fast, each table had its own OID index, but with more inherited tables
+it was definitely slower than a single index check (see the table below).
+* This solution did not allow for FK against OID on the parent tables.
+
+Unique OID was assured by the following https://www.postgresql.org/docs/current/plpgsql-trigger.html[trigger]
+based on http://blog.ioguix.net/postgresql/2015/02/05/Partitionning-and-constraints-part-1.html[this article]:
+
+[source,sql]
+----
+-- This checks that provided OID is unique across all tables inherited from m_object.
+CREATE OR REPLACE FUNCTION object_oid_pk()
+    RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+BEGIN
+    -- If update doesn't change OID, we don't want the expansive check.
+    -- This can be also done with WHEN on CREATE TRIGGER, but only when INSERT and UPDATE
+    -- triggers are set separately.
+    IF NEW.oid = OLD.oid THEN
+        -- returned VALUE ignored for AFTER trigger
+        RETURN NULL;
+    END IF;
+
+    PERFORM pg_advisory_xact_lock(hashtext(NEW.oid::text));
+
+    IF count(1) > 1 FROM m_object WHERE oid = NEW.oid THEN
+    RAISE EXCEPTION 'duplicate m_object.OID value "%" while inserting into "%"',
+        NEW.oid, TG_TABLE_NAME;
+END IF;
+
+    RETURN NULL;
+END
+$function$;
+
+-- must be applied to all concrete (INSERT-able) tables like this:
+CREATE CONSTRAINT TRIGGER m_resource_oid_check_tr AFTER INSERT OR UPDATE ON m_resource
+    DEFERRABLE INITIALLY IMMEDIATE FOR EACH ROW EXECUTE PROCEDURE object_oid_pk();
+----
+
+Following table show the effects of the count of inherited tables and volume of already inserted
+rows on the time for adding 100k of new rows:
+
+|===
+| Inherited{nbsp}tables / Existing rows | 4 | 20 | 50 | 100
+
+| 0 | 7s | 10s | 29/35/36s | 63s
+| 500k | 6s | 10s | 21/32/23s | 63/34/65s
+| 1M | 6s | 10s | 20/33/33s| 66/66/45s
+| 5M | 16/10/21/7/7s | 11/13/13/12s | - | -
+|===
+
+Following loop was used, which is roughly 2x slower than `INSERT from SELECT` with `generate_series`
+but I assume loop better represents many INSERTs from the application:
+
+[source,sql]
+----
+DO
+$$
+    BEGIN
+        FOR r IN 1000001..1100000
+            LOOP
+                INSERT INTO m_user (name_orig, version)
+                VALUES ('user-' || LPAD(r::text, 10, '0'), 1);
+
+                -- regular commit to avoid running out of memory with locks (NOT NECESSARY NOW)
+                IF r % 1000 = 0 THEN
+                    COMMIT;
+                END IF;
+            END LOOP;
+    END;
+$$;
+----
+
+Commit after each 1000 rows had little-to-no impact on the performance.
+
+== Pagination
+
+Various types of pagination are summed up in https://www.citusdata.com/blog/2016/03/30/five-ways-to-paginate/[this article].
+
+For *pagination in the GUI* `OFFSET`/`LIMIT` seems to be the acceptable despite the performance
+degradation with big values of `OFFSET`.
+The reason is that GUI requires random access and first pages are accessed more than later/last pages.
+Also, any inconsistency (suddenly added entry) is easy to explain and user probably knows what is happening.
+
+For long term processes that need to process many items we use *keyset pagination*, e.g. using last
+ID from current page to define the next page without any `OFFSET`, only using `LIMIT`.
+This is very efficient *even when no additional index besides PK is used* - and it's natural, too.
+It is called "top-N query" and typically the best thing is to order and filter it by the same index.
+Even when ordered by ID with filters not using the index, it tends to be very fast unless
+the required number of rows satisfying the condition is far from the beginning of the search.
+While this may skip some items that are added after we processed the page (and at the same time
+process other items added later that appear on later pages) it is more or less deterministic.
+We can also avoid processing "future" items with `WHERE` clause using creation timestamp
+(or current maximal ID, if sequential) at the processing start time.
+
+Following techniques are generally not usable for us:
+
+* *TID Scan* and *Keyset with Estimated Bookmarks* does not support `WHERE` clauses.
+* *Cursor* pagination causes high client-server coupling and is state-full.
+We don't want to hold the cursor for operations that can take longer and need transactions.

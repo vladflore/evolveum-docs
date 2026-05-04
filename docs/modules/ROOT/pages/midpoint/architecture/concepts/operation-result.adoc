@@ -39,7 +39,7 @@ public class Foo {
 	private ResourceWhatever resource;
 
 	// We are getting parentResult here. It is the result that "belongs" to the caller.
-	public void bar(String param1,OperationResult parentResult) {
+	public void bar(String param1,OperationResult parentResult)) {
 
 		// Create "result" for this operation from the parentResult.
 		// The "result" will be automatically added as subresult of parentResult
@@ -73,7 +73,6 @@ public class Foo {
 			result.recordFatalError("Bar has failed. All the rum is gone.",ex);
 			throw ex;
 		}
-	}
 }
 
 ----

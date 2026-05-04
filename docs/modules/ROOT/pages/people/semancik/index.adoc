@@ -1,0 +1,100 @@
+---
+layout: personal
+job-title: Software Architect
+photo: semancik.jpg
+academic-titles: Ing (MSc), PhD.
+profile-github: semancik
+profile-linkedin-url: https://www.linkedin.com/in/semancik/
+evolveum-blog: https://evolveum.com/author/radovan-semancik_semancik/
+gpg-public-key: semancik-gpg-public.key
+links:
+  - title: "ORCiD 0000-0002-4903-1436"
+    url: https://orcid.org/0000-0002-4903-1436
+  - title: "SCOPUS 16417669700"
+    url: https://www.scopus.com/authid/detail.uri?authorId=16417669700
+  - title: "Atmosphere (Bluesky/Eurosky) @semancik.eurosky.social"
+    url: https://bsky.app/profile/semancik.bsky.social
+  - title: "Mastodon mastodon.social/@semancik"
+    url: https://mastodon.social/@semancik
+---
+
+= Radovan Semančík
+
+== Short Bio (Commercial)
+
+Radovan Semančík is a Co-Founder and Software Architect at Evolveum, the vendor of the leading open source IGA platform midPoint.
+Radovan was pioneering early identity management deployments in Europe in the 2000s.
+Since then, he has been combining identity governance and administration (IGA) expertise with more than 30 years of software development and architecture experience, channelling the knowledge into midPoint’s development.
+Radovan holds a Master’s and PhD degree in Software Engineering from the Slovak Technical University.
+His main areas of interest are digital identity and software architecture.
+
+== Short Bio (Academic/Activist)
+
+He graduated from the Slovak Technical University with a master degree in Software Engineering and PhD degree.
+He works as a software architect at Evolveum, and he is also one of the founders of the company.
+His main areas of interest are digital identity and software architecture.
+He was involved in deployment of identity management solutions since early 2000s.
+He is an open-source project contributor and participates in several software development projects.
+He dedicates most of his time to guide the midPoint project - the most comprehensive open source identity governance and administration (IGA) platform currently available.
+He is a retired Apache Foundation committer and project management committee member.
+
+== Education
+
+* Inžinier (Ing., master) degree from https://www.stuba.sk/[Slovak University of Technology]
+* Philosophiae Doctor (PhD.) degree from https://www.stuba.sk/[Slovak University of Technology]
+
+== Publications and Talks (selection)
+
+
+xref:/book/[Practical Identity Management with MidPoint] (book)::
+since 2016, continuously updated
+
+xref:/talks/files/2025-05-compliance.pdf[Regulatory Compliance with MidPoint]::
+2025, MidPoint Community Meetup
+
+link:https://www.youtube.com/watch?v=Lld43SzXkiw[Navigating the Access Control Maze]::
+2023, KuppingerCole & Evolveum Webinar
+
+xref:/talks/files/2021-06-oid2021-complexities-of-identity-provenance-metadata-paper.pdf[Complexities of Identity Provenance Metadata]::
+2021, Open Identity Summit 2021 conference contribution
+
+xref:/midpoint/projects/midprivacy/phases/01-data-provenance-prototype/identity-metadata-in-a-nutshell/[Identity Metadata In A Nutshell]::
+2020, supporting document for xref:/midpoint/projects/midprivacy/[midPrivacy] initiative.
+
+https://fosdem.org/2018/schedule/event/idm_midpoint/[Identity Governance and Data Protection with midPoint]::
+Presentation at FOSDEM 2018, Brussels (with Katarina Valaliková)
+
+xref:/talks/files/2015-11-ldapcon-complete-open-source-iam-solution.pdf[Complete Open Source IAM Solution]::
+Presentation at LDAPcon 2015, Edinburgh (with Katarina Valaliková)
+
+link:2008-semancik-dissertation.pdf[Revised World Wide Web Architecture]::
+2008, dissertation
+
+link:2007-semancik-basic-properties-of-persona-model.pdf[Basic Properties of the Persona Model]::
+2007, Computing and Informatics, Vol. 26, 2007, pp. 105-121.
+
+https://dracones.ideosystem.com/work/papers/2006-infosecon-semancik.pdf[Choosing the Best Identity Management Technology for your Business]::
+InfoSeCon 2006 Conference, Dubrovnik, Croatia
+
+== Project Participation (selection)
+
+xref:/midpoint/[MidPoint]::
+since 2011, software architect and project co-founder
+
+https://github.com/Evolveum/connector-ldap[MidPoint/ConnId LDAP Connector]::
+since 2015, contributor and project co-founder
+
+http://connid.tirasa.net/[ConnId]::
+since 2013, contributor
+
+https://directory.apache.org/api/[Apache Directory API]::
+2015-2023, committer and project management committee (PMC) member (retired)
+
+https://github.com/Evolveum/slapdconf[slapdconf] (project discontinued)::
+2014-2025, developer and maintainer
+
+OpenIDM version 1 (project discontinued)::
+2010-2011, developer and architect
+
+OpenICF (project discontinued)::
+2011-2014, contributor

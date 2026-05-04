@@ -1,0 +1,14 @@
+= Continuous Integration
+:page-toc: top
+
+== CI Server
+
+Jenkins: link:https://jenkins.evolveum.com/[https://jenkins.evolveum.com/]
+
+On the Jenkins you can see the state of our builds.
+
+== See Also
+
+* xref:/midpoint/devel/[Developer Zone]
+
+* xref:/community/development/[Development Participation]

@@ -1,0 +1,92 @@
+= Community Sites
+:page-wiki-name: MidPoint public tools
+:page-wiki-id: 3146087
+:page-wiki-metadata-create-user: mamut
+:page-wiki-metadata-create-date: 2011-10-21T21:08:33.731+02:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2020-09-24T17:30:09.667+02:00
+
+This is a list of public sites that may be useful to the midPoint community.
+
+|====
+| Name | URL | Description
+
+| Evolveum Docs
+| https://docs.evolveum.com/[https://docs.evolveum.com/]
+| A documentation site.
+MidPoint's public documentation, guides, library, talks, and more.
+
+| Support Portal
+| https://support.evolveum.com[https://support.evolveum.com]
+| An issue tracking system for midPoint.
+
+| Evolveum IAM
+| https://iam.evolveum.com[https://iam.evolveum.com]
+| An identity access management (midPoint) for the community and partner users.
+Here you can register to acces our other services, or reset your password.
+
+| GitHub
+| https://github.com/Evolveum[https://github.com/Evolveum] +
+https://github.com/Evolveum/midpoint[https://github.com/Evolveum/midpoint]
+| A source code repository for midPoint and related projects.
+
+| Jenkins
+| https://jenkins.evolveum.com[https://jenkins.evolveum.com]
+| Evolveum's continuous integration system.
+Jenkins drives the automated testing of midPoint and related components.
+
+| Nexus
+| https://nexus.evolveum.com/[https://nexus.evolveum.com/]
+| Maven repository.
+The binaries of our products and components are published here.
+
+| MidPoint Mailing Lists
+| https://lists.evolveum.com/[https://lists.evolveum.com/]
+| Community mailing lists.
+See xref:../mailing-lists/[mailing list description] for more details.
+
+| Gitter
+| https://gitter.im/Evolveum/midpoint[https://gitter.im/Evolveum/midpoint]
+| A chat and networking place for the midPoint developer and contributor community.
+
+| Evolveum's Newsletter
+| https://evolveum.com/newsletter-subscription/[https://evolveum.com/newsletter-subscription/]
+| An official newsletter that is sent approximately once a month, covering the latest midPoint and Evolveum updates as well as industry news.
+
+| Transifex
+| https://explore.transifex.com/evolveum/midpoint/[https://explore.transifex.com/evolveum/midpoint/]
+| Localization service for community translations of midPoint.
+
+| Connector Development Guide
+| https://docs.evolveum.com/connectors/connid/1.x/connector-development-guide/[https://docs.evolveum.com/connectors/connid/1.x/connector-development-guide/]
+| A guide describing the principles and methods used to develop ConnId connectors for midPoint.
+
+| MidPoint Testing Guidelines
+| https://docs.evolveum.com/community/development/code-contribution-guidelines/#tests[https://docs.evolveum.com/community/development/code-contribution-guidelines/#tests]
+| Guidelines for writing story tests with specific midPoint use cases or to address particular issues.
+
+| Samples Contribution Directory
+| https://github.com/Evolveum/midpoint-samples/tree/master/samples/contrib[https://github.com/Evolveum/midpoint-samples/tree/master/samples/contrib]
+| A place where you can contribute your own midPoint configuration samples and share them with the community.
+
+| Operations Manual Contributions
+| https://docs.evolveum.com/midpoint/operations-manual/[https://docs.evolveum.com/midpoint/operations-manual/]
+| Contributions to the operations manual.
+
+| MidPoint Studio
+| https://docs.evolveum.com/midpoint/tools/studio/[https://docs.evolveum.com/midpoint/tools/studio/]
+| An integrated development environment for developing solutions based on midPoint.
+
+| Midscribe
+| https://github.com/Evolveum/midscribe[https://github.com/Evolveum/midscribe]
+| A tool for generating documentation from midPoint configuration objects in AsciiDoc format with HTML export capabilities.
+
+| Schrödinger Framework
+| https://docs.evolveum.com/midpoint/tools/schrodinger/[https://docs.evolveum.com/midpoint/tools/schrodinger/]
+| A testing framework designed to test the midPoint user interface in a user-friendly and maintainable way.
+
+|====
+
+== See Also
+
+* xref:/community/related-projects/[MidPoint-related projects]

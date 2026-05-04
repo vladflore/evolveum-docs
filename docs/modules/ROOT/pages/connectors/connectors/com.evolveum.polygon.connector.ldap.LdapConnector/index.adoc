@@ -1,0 +1,934 @@
+---
+layout: connector-page
+display-order: 10
+functionality-status: stable
+development-status: active
+support-status: supported
+origin: Evolveum
+support-provided-by: Evolveum
+target-systems: Standard LDAP servers (LDAPv3)
+connector-protocol: LDAP/LDAPS
+source-url-master: https://github.com/Evolveum/connector-ldap
+description: Identity connector for standard LDAPv3 directory servers.
+connid-bundle-name: com.evolveum.polygon.connector-ldap
+upkeep-status: yellow
+bundling: bundled
+wiki-name: LDAP Connector
+wiki-id: 7307464
+wiki-metadata-create-user: semancik
+wiki-metadata-create-date: 2013-01-29T10:14:15.054+01:00
+wiki-metadata-modify-user: semancik
+wiki-metadata-modify-date: 2021-03-31T17:42:47.700+02:00
+---
+= LDAP Connector
+
+== Capabilities and Features
+
+// Later: This will be moved to individual connector version page (automatically generated)
+// Maybe we want to keep summary of the latest version here
+
+[%autowidth,cols="h,1,1"]
+|===
+| Schema | YES | Determined from standard LDAP schema.
+
+| Provisioning
+| YES
+|
+
+| Live Synchronization
+| YES
+| For LDAP servers that support Sun-style changelog (Retro ChangeLog) or modifyTimestamp.
+There is a contributed code for OpenLDAP synchronization.
+However, this is not included in "bundled" support.
+
+| Password
+| YES
+| It is assumed that the server will hash the password and store it securely.
+Support for connector-side hashing is limited.
+
+| Activation
+| PARTIAL
+| No activation for generic LDAP as there is not LDAP standard for that.
+This can be simulated in midPoint.
+
+| Filtering changes
+| PARTIAL
+| currently limited
+
+| Paging support
+| YES
+| Simple Paged Results and VLV
+
+| Native attribute names
+| YES
+| Use `ri:dn` instead of `icfs:name`.
+Use `ri:entryUUID` instead of `icfs:uid`.
+
+| Scripting
+| NO
+| Use of dedicated scripting connectors (SSH) is recommended.
+
+| Native references
+| YES
+|
+
+| Last login date
+| YES
+| Via configuration property `lastLoginDateAttribute`.
+
+|===
+
+== Interoperability
+
+In theory the connector should work with any LDAPv3 compliant LDAP server.
+However, many servers claim LDAPv3 compliance while the reality is far from ideal.
+The connector supports "quirks" of several popular LDAP servers and it tolerates some violations of LDAPv3 standards.
+
+The connector was successfully tested with the following LDAP servers (assuming reasonably recent versions of the servers):
+
+* OpenLDAP
+* ForgeRock OpenDJ / wren:DS
+* 389 directory server / Red Hat Directory Server / Fedora Directory Server
+* Oracle Directory Server Enterprise Edition (DSEE) / Sun One / Sun Java System / iPlanet Directory Server
+* ViewDS
+
+We know that at least some operations of the connector works with these servers and they are supported in some midPoint deployments.
+However, support for any specific server is not part of standard midPoint subscription and it has to be negotiated separately (see below).
+
+If you are using this connector with a different directory server please let us know.
+We would like to know both about the positive and negative experiences.
+
+[#_limitations]
+=== Limitations
+
+* Additional search filter does not work for "Sun changelog" synchronization strategy.
+The structure of changelog does not allow direct application of the filter on server-side.
+Client side application of filter is not straightforward due various complexities and the implementation is not planned for now.
+
+* Synchronization based on modifyTimestamp has a simplistic implementation.
+It does not support SPR, VLV or referral-following functionality.
+This synchronization method is inherently inefficient and unreliable.
+It should be used only as a last resort, if no other method is available.
+
+* There are specific limitations for the xref:#_native_references[Native References] capability, see xref:#_native_references_limitations[below].
+
+== History
+
+// This is temporary, we want to replace it with auto-generated (or semi-auto-generated) pages.
+
+[%autowidth]
+|===
+| Version | Origin | Binary | Sources | Build Date | Framework version | Bundled with midPoint | Description
+
+| 1.4.1.23
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.1.23/connector-ldap-1.4.1.23.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.4.1.23[GitHub]
+| August 2015
+|
+|
+| Experimental version.
+
+| 1.4.2.0
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.2.0/connector-ldap-1.4.2.0.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.4.2.0[GitHub]
+| December 2015
+| 1.4.2.0
+|
+| LDAP stable, AD experimental
+
+| 1.4.2.14
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.2.14/connector-ldap-1.4.2.14.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.4.2.14[GitHub]
+| April 2016
+| 1.4.2.14
+| 3.3.1
+| Stable.
+
+| 1.4.2.15
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.2.15/connector-ldap-1.4.2.15.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.4.2.15[GitHub]
+| April 2016
+| 1.4.2.14
+|
+| Stable.
+
+
+| 1.4.2.16
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.2.16/connector-ldap-1.4.2.16.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.4.2.16[GitHub]
+| June 2016
+| 1.4.2.14
+|
+| Fixes timeout errors and resource leaks during AD connector resets.
+
+| 1.4.2.17
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.2.17/connector-ldap-1.4.2.17.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.4.2.17[GitHub]
+| June 2016
+| 1.4.2.14
+| 3.4
+| Minor fixes.
+
+| 1.4.2.18
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.2.18/connector-ldap-1.4.2.18.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.4.2.18[GitHub]
+| September 2016
+| 1.4.2.14
+| 3.4.1
+| Minor improvements.
+
+| 1.4.2.19
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.2.19/connector-ldap-1.4.2.19.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.4.2.19[GitHub]
+| October 2016
+| 1.4.2.18
+|
+| Minor improvements.
+
+| 1.4.3
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.3/connector-ldap-1.4.3.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.4.3[GitHub]
+| December 2016
+| 1.4.2.18
+| 3.5
+| Minor improvements.
+
+| 1.4.4
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.4/connector-ldap-1.4.4.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.4.4[GitHub]
+| April 2017
+| 1.4.2.18
+| 3.5.1
+| CredSSP and Exchange powershell support, bugfixes, minor improvements.
+
+| 1.4.5
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.5/connector-ldap-1.4.5.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.4.5[GitHub]
+| 3rd July 2017
+| 1.4.2.18
+| 3.6
+| Powershell bugfixes, minor improvements.
+
+| 1.5
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.5/connector-ldap-1.5.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.5[GitHub]
+| 4th October 2017
+| 1.4.2.18
+| 3.6.1
+| More powershell execution alternatives and improvements, alternative auxiliary object class detection, explicit object class filter, configurable timestamp presentation, better error messages.
+
+| 1.5.1
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.5.1/connector-ldap-1.5.1.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.5.1[GitHub]
+| 11th December 2017
+| 1.4.2.18
+| 3.7, 3.7.1
+| Release coupled with AD connector.
+
+| 1.6
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.6/connector-ldap-1.6.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.6[GitHub]
+| 4th May 2018
+| 1.4.2.18
+| 3.7.2, 3.8
+| Release coupled with AD connector.
+
+| 1.6.1
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.6.1/connector-ldap-1.6.1.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v1.6.1[GitHub]
+| 17th April 2019
+| 1.4.2.18
+| none
+| xref:/midpoint/security/advisories/004-ad-and-ldap-connectors-do-not-check-certificate-validity/[Fix of security vulnerability: missing check of certificate validity.]
+
+| 2.0
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/2.0/connector-ldap-2.0.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v2.0[GitHub]
+| 7th November 2018
+| 1.5.0.0
+| 3.9
+| Native timestamp support.
+Support for delta-based updates.
+Additional search filter support.
+
+| 2.1
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/2.1/connector-ldap-2.1.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v2.1[GitHub]
+| 17th April 2019
+| 1.5.0.0
+| none
+| OpenLDAP access log synchronization (contributed by Jonathan Gietz) +
+Object class handling improvements (contributed by Matthias Wolf) +
+Experimental support for "language-tagged" attributes. +
+xref:/midpoint/security/advisories/004-ad-and-ldap-connectors-do-not-check-certificate-validity/[Fix of security vulnerability: missing check of certificate validity.]
+
+| 2.2
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/2.2/connector-ldap-2.2.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v2.2[GitHub]
+| 31st May 2019
+| 1.5.0.0
+| none
+| Upgrade of Apache Directory API (may fix some connection issues) +
+Support for substring filter anchors (MID-5383) +
+Fixing localization of configuration properties
+
+| 2.3
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/2.3/connector-ldap-2.3.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v2.3[GitHub]
+| 13th August 2019
+| 1.5.0.0
+| 4.0
+| Upgrade of Apache Directory API +
+Support for defaultSearchScope
+
+| 2.4
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/2.4/connector-ldap-2.4.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v2.4[GitHub]
+| 22nd November 2019
+| 1.5.0.0
+| TBD
+| Removed legacy support for eDirectory +
+Upgrade of Apache Directory API (2.0e1) +
+Support for "tree delete" LDAP control.
+
+| 2.4.1
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/2.4.1/connector-ldap-2.4.1.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v2.4.1[GitHub]
+| 23rd September 2020
+| 1.5.0.0
+| TBD (probably 4.0.3)
+| Fix configuration order (MID-6312)
+
+| 3.0
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.0/connector-ldap-3.0.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.0[GitHub]
+| 3rd April 2020
+| 1.5.0.0
+| 4.1
+| Fixed detection of polystring attributes. +
+Implemented `baseContextToSynchronize` in timestamp-based synchronization. +
+Java 11 support (no Java 8 support any more).
+
+| 3.1
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.1/connector-ldap-3.1.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.1[GitHub]
+| 20th October 2020
+| 1.5.0.0
+| 4.2
+| Additional filter fixes at several places. +
+Improved VLV detection. +
+Proper SPR "abandon". +
+Improved error handling. +
+Misc minor fixes.
+
+| 3.2
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.2/connector-ldap-3.2.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.2[GitHub]
+| 31th March 2021
+| 1.5.0.0
+| 4.3
+| Optional unbind before disconnect +
+Improved connection handling (connection reuse, reconnects) +
+Upgraded Directory API to Evolveum version 2.0.1e1, which fixes file descriptor leak +
+Slightly improved logging +
+includeObjectClassFilter set to true by default
+
+| 3.3
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.3/connector-ldap-3.3.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.3[GitHub]
+| 8th October 2021
+| 1.5.0.0
+| 4.4
+| Fixed problem with excessive abandons +
+Several fixes and improvements related to timeouts and unbind operations +
+Support for TCP keepalive +
+Connection logging (terse format) +
+Smarter handling of root DSE fetches +
+Finer-grained timeouts +
+Root DSE fetch option for checkAlive +
+SHA-2 hash support (contribution, untested)
+
+| 3.3.1
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.3.1/connector-ldap-3.3.1.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.3.1[GitHub]
+| 22nd December 2021
+| 1.5.0.0
+| N/A
+| Fixing AD "range" mechanism (used for large AD groups)
+
+| 3.4
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.4/connector-ldap-3.4.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.4[GitHub]
+| 25th March 2022
+| 1.5.0.0
+| 4.5
+| Fail-over support.
+Improved error messages.
+Minor bugfixes.
+
+| 3.5
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.5/connector-ldap-3.5.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.5[GitHub]
+| 10th October 2022
+| 1.5.1.3
+| 4.6
+| Added support for configuration discovery.
+Various AD fixes around userParameters and flags.
+
+| 3.5.1
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.5.1/connector-ldap-3.5.1.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.5.1[GitHub]
+| 17th March 2025
+| 1.5.2.0
+|
+| Bumped mina-core to 2.2.4.
+
+| 3.6
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.6/connector-ldap-3.6.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.6[GitHub]
+| 21st March 2023
+| 1.5.1.3
+|
+| OpenLDAP `pwdAccountLockedTime` can be used for activation (contributed feature).
+LDAP integer syntax is mapped to BigInteger, supporting large numbers (bug:MID-4424[])
+
+| 3.6.1
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.6.1/connector-ldap-3.6.1.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.6.1[GitHub]
+| 27th March 2023
+| 1.5.1.3
+| 4.7
+| Fixes handling of `\__ENABLE__` attribute when OpenLDAP pwpolicy is used.
+
+| 3.7
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.7/connector-ldap-3.7.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.7[GitHub]
+| 10th October 2023
+| 1.5.1.3
+| 4.8
+| Fixing of repeated adding of removed UAC attributes.
+
+| 3.7.1
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.7.1/connector-ldap-3.7.1.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.7.1[GitHub]
+| 10th January 2024
+| 1.5.1.3
+| 4.8.1
+| Fixing of default value for 'connectTimeout', 'writeOperationTimeout', 'readOperationTimeout', 'closeTimeout' and 'sendTimeout' configuration attributes.
+
+Adding configuration property `rawUserParametersAttribute` for muting any error with reading or writing the user parameters attribute.
+
+Improve processing of fetching existing entry when updating it in AD connector.
+
+| 3.7.2
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.7.2/connector-ldap-3.7.2.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.7.2[GitHub]
+| 16th August 2024
+| 1.5.2.0
+| 4.8.4
+| Update dependencies.
+
+| 3.7.3
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.7.3/connector-ldap-3.7.3.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.7.3[GitHub]
+| 8th October 2024
+| 1.5.2.0
+| 4.8.5
+| Addition of third error code for AD X_BIND_REQUIRED error
+
+| 3.7.4
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.7.4/connector-ldap-3.7.4.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.7.4[GitHub]
+| 17th March 2025
+| 1.5.2.0
+| 4.8.7
+| Bumped mina-core to 2.2.4.
+
+| 3.8
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.8/connector-ldap-3.8.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.8[GitHub]
+| 17th October 2024
+| 1.5.3.0-M3
+| 4.9
+|
+Native references support.
+Possibility to choose attributes that should not be returned by default.
+Possibility to choose to encode string values in case of the presence of non standard ASCII characters.
+Workaround for open-ldap mandatory member attribute.
+Possibility to specify used auxiliary object classes in connector configuration.
+
+| 3.9
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.9/connector-ldap-3.9.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.9[GitHub]
+| 10th February 2025
+| 1.5.3.0-M3
+|
+|
+Added support for `\_LAST_LOGIN_DATE_` attribute (capability).
+Added new configuration option `logSchemaErrors` to log errors during schema operation.
+By default, for AD errors are not being logged, for other LDAP servers errors are logged.
+Fix in the listing of ('out of the scope') attributes in object queries while using native references.
+
+| 3.9.1
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.9.1/connector-ldap-3.9.1.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.9.1[GitHub]
+| 17th March 2025
+| 1.5.3.0-M3
+| 4.9.2
+| Bumped mina-core to 2.2.4.
+
+| 3.9.2
+| Evolveum
+| http://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.9.2/connector-ldap-3.9.2.jar[download jar]
+| link:https://github.com/Evolveum/connector-ldap/tree/v3.9.2[GitHub]
+| 25th November 2025
+| 1.5.3.0-M3
+| 4.10
+| Bumped commons-lang3 to 3.18.0.
+
+|===
+
+
+// Later: when we can auto-generate connector version pages:
+//
+//Click on a version number to get the details about a particular connector version.
+//
+//++++
+//{//% include connector-history.html %//}
+//++++
+
+This is an LDAP connector completely rewritten from scratch in 2015.
+It is using Apache Directory API and it is designed and built to work with recent ConnId versions and to take all the advantages of that.
+This is the supported and recommended LDAP and AD connector for midPoint.
+The old LDAP and AD connectors are now deprecated and they are no longer supported.
+
+== Support
+
+LDAP connector is bundled with midPoint distribution.
+Support for LDAP connector is included in standard midPoint support service (a.k.a. xref:/support/bundled-support/[bundled support]) - however, there are limitations.
+This "bundled" support only includes operations of LDAP connector that 100% compliant with LDAP standards.
+Any non-standard functionality is explicitly excluded from the bundled support.
+
+It is a sad fact that so far we haven't seen any LDAP server that would be 100% standard-compliant or that would not require any non-standard extensions to work.
+Therefore if you want to be sure that this LDAP connector will work with your LDAP server, we strongly recommend to negotiate support for that specific server in your midPoint support contract.
+
+For the purposes of this definition "standard" means RFC specifications that reach at least a "proposed standard" status.
+Drafts, informational documents, vendor specifications or any other documents are not considered to be part of LDAP standards.
+
+This means that the bundled support does not include support for any specific LDAP server.
+Support for specific servers needs to be explicitly negotiated in the support contract.
+
+NOTE: There may be exception to this rule for the customers that purchased support before the release of midPoint 4.0.
+In case of any doubts please contact Evolveum sales representatives.
+
+When dealing with connector issues, please make sure to follow xref:troubleshooting/[LDAP Connector Troubleshooting Guide].
+
+== Notes
+
+The LDAP connector bundle also contains xref:/connectors/connectors/com.evolveum.polygon.connector.ldap.ad.AdLdapConnector/[connector for Active Directory].
+These connectors are specializations of the LDAP connector and support the LDAP quirks needed to work with AD.
+
+=== ConnId Result Handlers
+
+[WARNING]
+====
+We strongly recommend to disable all the handlers when working with well-designed connectors in general and when working with our LDAP or xref:/connectors/connectors/com.evolveum.polygon.connector.ldap.ad.AdLdapConnector/[AD/LDAP] connectors in particular.
+====
+
+Those "result handlers" are an artifact of an original xref:/connectors/connid/1.x/icf-issues/[original Identity Connector Framework over-engineering]. The handlers are supposed to assist connectors by implementing "mechanism" that the connector or resource does not support - such as search result filtering, data normalization and so on.
+However, those handler are generic and they know nothing about the particulars of the resource that the connector connects to.
+Therefore in vast majority of cases those handlers just get into the way and they distort the data.
+Good connectors usually do not need those handlers at all.
+Unfortunately, these handler are enabled by default and there is no way for a connector to tell the framework to turn them off.
+The handlers needs to be explicitly disabled in the resource configuration.
+
+[source,xml]
+----
+<icfs:resultsHandlerConfiguration>
+  <icfs:enableNormalizingResultsHandler>false</icfs:enableNormalizingResultsHandler>
+  <icfs:enableFilteredResultsHandler>false</icfs:enableFilteredResultsHandler>
+  <icfs:enableAttributesToGetSearchResultsHandler>false</icfs:enableAttributesToGetSearchResultsHandler>
+</icfs:resultsHandlerConfiguration>
+----
+
+=== Date and Time Formats
+
+You can control the way LDAP connector presents dates and times by by using timestampPresentation configuration property.
+It has three possible values:
+
+* `native`: LDAP connector will present timestamps in native ConnId date format.
+This is the most natural and default setting.
+
+* `unixEpoch`: LDAP connector will present timestamps in UNIX epoch format (number of seconds since 1970)
+
+* `string`: LDAP connector will present timestamps in LDAP-native format (generalized time, ISO 8601)
+
+In a normal case all timestamps in midPoint are in link:https://www.w3.org/TR/NOTE-datetime[W3C DateTime format]. When using the `native` time representation, MidPoint automatically converts all the date/time values to this format.
+
+However, older versions of ConnId framework did not have any way how to express date/time information in the schema.
+The `native` time representation was not possible.
+ConnId framework was representing date/time information as (long) integers in UNIX timestamp format.
+For these cases there are options to represents time as long integer or string.
+This is mostly a historical feature now.
+
+=== ObjectClass Filters
+
+Natural way to use LDAP is to use "short" search filters, such as `(cn=foo)`. However, such search filter can match objects of several incompatible objectclasses, producing incorrect results.
+Therefore a strict way to construct a search filter is to always add an objectclass clause to the filter, resulting in `(&(objectclass=inetOrgPerson)(cn=foo))` filter.
+Use of such search filter ensures that the results will be correct.
+
+This search filter should work flawlessly on standard-compliance and correctly-configured LDAP servers.
+Therefore since connector version 3.2, use of such search filters is tuned on by default.
+However, such search filters may cause issues on non-compliant and/or incorrectly configured and populated servers.
+In such case, the behavior can be controlled by `includeObjectClassFilter` configuration property.
+
+=== Apache Directory API Warnings [[dirapi-warnings]]
+
+You may be getting warnings and info messages in your log, like this:
+
+[source]
+----
+WARN (org.apache.directory.api.ldap.model.entry.DefaultAttribute): ERR_13207_VALUE_ALREADY_EXISTS The value 'telephoneNumber' already exists in the attribute (m-may)
+INFO (org.apache.directory.api.ldap.model.schema.registries.helper.MatchingRuleHelper): ERR_13765_MR_MUST_REFER_EXISTING_SYNTAX The created MatchingRule must refers to an existing SYNTAX element
+WARN (org.apache.directory.api.ldap.model.entry.DefaultAttribute): ERR_13207_VALUE_ALREADY_EXISTS The value 'telephoneNumber' already exists in the attribute (m-may)
+2021-04-27 13:35:58,121 [] [http-nio-8080-exec-35] INFO (org.apache.directory.api.ldap.model.schema.registries.helper.MatchingRuleHelper): ERR_13765_MR_MUST_REFER_EXISTING_SYNTAX The created MatchingRule must refers to an existing SYNTAX element
+----
+
+Generally speaking, those messages are benign.
+We are using Apache Directory API as an LDAP client library in our LDAP connector.
+The Directory API is quite pedantic when it comes to adherence to LDAP standards and schema consistency.
+However, there is perhaps no single LDAP server that is 100% compliant with LDAP standards (see xref:/iam/ldap/ldap-survival-guide/[]).
+Hence the warnings and info messages in log files.
+
+As we cannot really fix the serves, and the behavior of Directory API is technically correct, there is no _right_ way to solve this issue.
+The easiest practical way to get rid of the messages is to set levels for particular loggers:
+
+[%autowidth]
+|====
+| Logger | Lever
+
+| org.apache.directory.api.ldap.model.entry.DefaultAttribute
+| ERROR
+
+| org.apache.directory.api.ldap.model.schema.registries
+| ERROR
+
+|====
+
+Setting Directory API loggers to these levels should still be safe.
+In case of any major problem the connector itself should log appropriate error message.
+
+=== Fail-over [[failover]]
+
+Since version 3.4 of the connector, LDAP connector has a support for fail-over functionality.
+Several LDAP servers can be configured in LDAP connector.
+The connector will fail over to a secondary server(s) in case that the primary server fails.
+This can be configured using the `servers` configuration property:
+
+[source,xml]
+----
+    <connectorConfiguration>
+        <configurationProperties>
+            <host>primary.ldap.example.com</host>
+            <baseContext>dc=evolveum,dc=com</baseContext>
+            <servers>host=secondary.ldap.example.com</servers>
+            ...
+        </configurationProperties>
+    </connectorConfiguration>
+----
+
+The _main_ LDAP server configured using the usual configuration properties (`host`, `port` and similar) is considered a _primary_ server.
+Secondary servers can be configured using `servers` configuration property.
+The example above is a configuration of two LDAP servers:
+
+* Server `primary.ldap.example.com` as a _primary_ LDAP server for base context `dc=evolveum,dc=com`.
+
+* Server `secondary.ldap.example.com` as a _secondary_ LDAP server.
+Base context, port, bind DN and password, connection security settings and all other connection details are "inherited" from primary server definition.
+
+There are several requirements, assumptions and limitations to this functionality:
+
+* All LDAP servers (primary and secondary) are expected to be homogeneous and replicated in a *multi-master* (mirror) way.
+I.e. the servers should have exactly the same configuration and the same data.
+The connector will try to execute the same operations on the servers, regardless of whether it is primary or secondary.
+Therefore schema, indexes, optional features (supported controls and extensions, such as VLV), access control and data must be the same on all servers.
+Deployments with partial replication, read-only replicas or any other non-homogeneous configurations are not supported.
+
+* This feature is designed for *fail-over*, not load balancing.
+The connector will try to access the primary server if it is available.
+The communication will be switched to secondary server only in case primary server is not available.
+The connector will switch back to primary server as soon as possible (with short _switch-back interval_, to avoid too many failed connection attempt to primary).
+Which means that most of the load is still placed on primary server.
+Even if the connector switches to secondary server, it will remain focused on a single secondary server as long as it work, not using other secondary servers.
+The reason for this "sticky" behavior is to reduce data consistency risks.
+
+* The connector no longer support LDAP referrals.
+All LDAP referrals are ignored, regardless of the (legacy) referral configuration in the connector.
+Fail-over functionality is supposed to replace the need for referrals, that never really provided any practical solution anyway.
+
+* The fail-over functionality is designed for use with LDAPv3 standard-compliant (to applicable degree) servers.
+It is not designed for use with non-standard LDAP servers, such as Active Directory, eDirectory and similar servers.
+
+* There is a theoretical possibility to define servers for LDAP base contexts that are different than the base context of the main server, thus supporting a _hierarchy_ of LDAP servers (also known as _delegation_ or _distributed directory_).
+However, this functionality is considered *experimental*, it is not officially supported.
+Only configuration that use the same base context for all servers is officially supported.
+
+* The main server (the one configured with `host`, `port` and similar properties) is always considered to be primary.
+In theory, other servers defined in the `servers` property can be marked as primary.
+However, this configuration is not supported.
+There must be exactly one primary server for each base context.
+
+LDAP replication functionality is quite common in LDAP server implementations.
+The fail-over functionality of LDAP connector takes advantage of this functionality.
+However, LDAP servers generally implement only weak consistency guarantees for replicated directory topologies, which is somehow given by the design of LDAP protocol and directory data structures.
+Weak consistency has its significant advantages, yet it has also disadvantages.
+When it comes to operation of LDAP connector, perhaps the most problematic is a read-after-write scenario.
+The connector may write data to primary server, then the primary server goes down, connector fails over to the secondary server, which means that subsequent read gets outdated data from a secondary server.
+As the fail-over happens transparently in the connector, the application (midPoint) is not aware that fail-over took place, it has no idea that the data may be out of date.
+This may cause temporary fluctuations, where old data may be presented as current data for a limited period of time.
+However, both LDAP servers and midPoint are built for _eventual consistency_, converging data values _eventually_.
+However, data consistency has to be kept in mind, and proper method should be employed both at the LDAP side (e.g. replication failure recovery) and midPoint side (e.g. regular reconciliation) to make the entire system _eventually consistent_.
+
+[#_native_references]
+== Native References
+
+Starting from the connector version 3.8, the LDAP connector is capable of working with _reference attributes_ that describe the relation between resource objects, like between accounts and groups they are members of.
+
+This behavior is governed by the `managedAssociationPairs` multivalued configuration property.
+
+Each value of this property is a string with a specific formatting convention.
+Based on this information the connector figures out which object classes have a relation between each other and also which attributes should be used for such relation.
+
+.An example: Defining a relation between `inetOrgPerson` and `groupOfNames`
+[#_example_m_association_pairs_one]
+[source,xml]
+----
+<connectorConfiguration>
+    <configurationProperties>
+        <host>primary.ldap.example.com</host>
+        <baseContext>dc=evolveum,dc=com</baseContext>
+        <operationalAttributes>memberOf</operationalAttributes>
+        <managedAssociationPairs>"inetOrgPerson"+memberOf -# "groupOfNames"+member</managedAssociationPairs>
+        ...
+    </configurationProperties>
+</connectorConfiguration>
+----
+
+The value of `"inetOrgPerson"+memberOf -# "groupOfNames"+member` specifies that:
+
+* Object classes `inetOrgPerson` and `groupOfNames` are in a relationship.
+* `inetOrgPerson` is the *subject* (the one who receives an entitlement), while `groupOfNames` is the *object* (the entitlement being granted).
+* The binding attributes on the `inetOrgPerson` side is `memberOf`.
+The related groups for a given account are determined by looking at this attribute.
+* The binding attribute on the `groupOfNames` side is `member`.
+The related members are determined by looking at this attribute.
+Also, this attribute is used to update the membership information.
+
+[#_note_subject_object]
+[NOTE]
+====
+*Subject and object*
+
+As mentioned above,
+
+* *subject* is the resource object which receives an entitlement, typically an account;
+* *object* is the resource object which represents an entitlement, typically a group.
+
+They have a relation between them, typically, a subject (an account) is member of a group.
+More information about this topic can be found in xref:/midpoint/reference/resources/entitlements/[Entitlements and Associations].
+====
+
+The `managedAssociationPairs` values have the following formatting convention:
+
+     "SubjectObjectClassName"+SubjectAttribute -# "ObjectObjectClassName"+ObjectAttribute
+
+* `SubjectObjectClassName` is the object class representing the _subject_ of this relation.
+* `SubjectAttribute` is the attribute of that object class containing the list of related objects, typically groups that the account is a member of.
+* `ObjectObjectClassName` is the object class representing the _object_ of this relation.
+* `ObjectAttribute` is the attribute of that object class containing the list of related subjects, typically the members of the group.
+
+By using the above example, the connector will manage the relations between the object class `inetOrgPerson`
+and the object class `groupOfNames` based on the values present in the parameters `memberOf` (for `inetOrgPerson`) and `member` (for `groupOfNames`).
+
+As this is a multivalued property, you can specify multiple pairs of object types, each of them having a relation between them marked as managed by the connector.
+
+.An example: Defining two relations between object classes
+[source,xml]
+----
+<connectorConfiguration>
+    <configurationProperties>
+        ...
+        <managedAssociationPairs>"inetOrgPerson"+memberOf -# "groupOfNames"+member</managedAssociationPairs>
+        <managedAssociationPairs>"groupOfNames"+memberOf -# "groupOfNames"+member</managedAssociationPairs>
+        ...
+    </configurationProperties>
+</connectorConfiguration>
+----
+
+The addition of this parameter will signal to the connector that it should use the native references handling.
+This also changes the way the schema is generated by the connector, see below.
+
+=== Representation of Native References in the Schema
+
+When you define the relation between object classes, the following changes automatically occur:
+
+. The original attributes used to provide the relation, e.g. `memberOf` and `member` in the above examples, will disappear from the schema.
+. The subject-side attribute, e.g. `memberOf`, will be replaced by the reference attribute `group`.
+. The object-side attribute, e.g. `member`, will be replaced by the reference attribute `member`.
+
+Both of the attributes, `group` and `member`, are currently constants in the connector code.
+
+Reference attributes are special kinds of attributes that do not have simple values (string, integer, and so on), but contain _references_ to other objects.
+
+NOTE: The new `member` attribute on the object (entitlement) side is marked as "not readable" and "not returned by default", because fetching of this attribute is not currently supported by midPoint.
+
+If you already have a schema generated before the xref:#_native_references[Native References] configuration has been set up, you have to refresh the connector schema.
+
+=== Other Things to Consider
+
+If you use operational attributes in the values for the `managedAssociationPairs` configuration property, please also specify these attributes in the `operationalAttributes` configuration property.
+As we can see in the xref:#_example_m_association_pairs_one[example] above.
+
+In rare cases, when using an "Object" object class (i.e. `groupOfNames`) which is extended via an auxiliary object class, please also add the `auxiliaryObjectClasses` xref:#_auxiliary_object_classes[configuration property] to your resource configuration, and specify the auxiliary object classes which are used.
+The reason for this is that, the object-side attribute (i.e. `member`) is, in some cases, explicitly removed from object searches.
+
+As there can be no empty groups, at least based on the LDAP specification, we had to implement a feature working around this.
+You can read about it the section, xref:#_no_member_native_references[Groups Without Members And Native References].
+
+[#_native_references_limitations]
+=== Limitations
+
+. This feature assumes that there is the `memberOf` (or equivalent) attribute on the subject size that is used to provide the membership information.
+On some LDAP servers this has to be provided by specific plugin (extension).
+Also, the referential integrity must be ensured, again, typically provided by specific "referential integrity" plugin.
++
+NOTE: If this attribute is missing, the native references feature of the connector cannot be used.
+
+. Only one class of objects (entitlements) is supported per subject-object relation (e.g., for `memberOf` attribute of `inetOrgPerson`, we assume that all referenced objects will be of the object class `groupOfNames`).
+
+. Events related to object relations (like adding or deleting a group membership to an account) cannot be currently detected by the live synchronization.
+
+[#_attributes_not_returned_by_default]
+=== Marking Attributes as Not Returned by Default
+
+The `attributesNotReturnedByDefault` parameter gives us the possibility to mark some of the standard attributes of the resource object with the `NOT_RETURNED_BY_DEFAULT` flag.
+Such attributes will be by default omitted from ldap search requests, unless the IAM explicitly requests them.
+We can use this configuration if some attributes are too large or expensive to retrieve (i.e. the `member` attribute).
+
+The attributes specified in this property will be marked as `NOT_RETURNED_BY_DEFAULT` for all object classes.
+
+If you already have a schema generated and add or modify this property in your configuration, you will have to refresh the connector schema.
+
+If you are intending to use this configuration property, and your object classes are extended via an auxiliary object class, please also add the `auxiliaryObjectClasses` xref:#_auxiliary_object_classes[configuration property] to your configuration.
+
+[#_auxiliary_object_classes]
+=== Auxiliary Object Classes
+
+The current implementation of the connector uses a wildcard (`*`) to return all non-operational attributes of an object in a search request, operational attributes are added to the request explicitly.
+In some cases we need to explicitly enumerate the non-operational attributes as well (rather than use a wildcard).
+The only problem here is that the connector does not know about the Auxiliary Object Classes, and is not capable of requesting the proper non-structural objectClass attributes.
+
+The solution to this is to specify the Auxiliary Object Classes as values of the `auxiliaryObjectClasses` configuration property.
+Each value of this property is a string following a specific convention.
+
+.An example: Defining the structural object class `inetOrgPerson` with an auxiliary object class `posixAccount`
+[source,xml]
+----
+<connectorConfiguration>
+    <configurationProperties>
+        ...
+        <auxiliaryObjectClasses>inetOrgPerson:posixAccount</auxiliaryObjectClasses>
+        ...
+    </configurationProperties>
+</connectorConfiguration>
+----
+
+What the value `inetOrgPerson:posixAccount` represents:
+
+* `inetOrgPerson` is the name of the structural object class
+* `:` delimiter between the name of the structural object class and auxiliary object classes
+* `posixAccount` is the name of the auxiliary object class
+* Any number of additional auxiliary object classes may be added to the value by using the delimiter `,` between the names of the auxiliary object classes
+
+[#_no_member_native_references]
+=== Groups Without Members And Native References
+
+One of the requirements specified in the LDAP standard is that the group attribute `member` xref:/iam/ldap/ldap-survival-guide/#no-empty-groups[is mandatory].
+This can be problematic during the creation and modification of groups (i.e. no initial values in `member`, removal of the last value in `member`).
+
+If you are not using the native references configuration, you can work around this limitation with mappings in the resource configuration.
+With the native references, if you configure an object class amongst the values of the `managedAssociationPairs` property ,the schema for the `member` attribute of this object class changes.
+
+Because of this a workaround was implemented directly in the ldap connector, wherever a new group is created or the last member of a group is removed a `dummy` member is added to the group as a `placeholder`.
+
+This is mandated by the `placeholderMember` configuration property.
+The value of this property is a string representing the `DN` of a dummy member which is going to be used in the create or update operations.
+
+.An example: Usage of the `Placeholder Member` configuration property
+[source,xml]
+----
+<connectorConfiguration>
+    <configurationProperties>
+        ...
+        <placeholderMember>cn=dummy,o=whatever</placeholderMember>
+        ...
+    </configurationProperties>
+</connectorConfiguration>
+----
+
+This feature is currently supported only together with the `Native References` configuration.
+
+== Resource Examples
+
+* xref:/connectors/resources/ldap/openldap/[OpenLDAP]
+
+* xref:/connectors/resources/ldap/opendj/[OpenDJ]
+
+* xref:/connectors/resources/ldap/dsee/[Directory Server Enterprise Edition]
+
+== See Also
+
+* xref:troubleshooting/[LDAP Connector Troubleshooting]
+
+* xref:/iam/ldap/ldap-survival-guide/[]
+
+* xref:/connectors/connectors/com.evolveum.polygon.connector.ldap.ad.AdLdapConnector/[Active Directory Connector (LDAP)]

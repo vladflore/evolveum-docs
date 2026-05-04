@@ -1,0 +1,304 @@
+= Axiom Design Notes
+
+_Axiom_ is a new data modeling language for Prism and midPoint.
+It is developed as part of midPrivacy project.
+
+== Design Principles
+
+Axiom is used to model (abstract) data structures.
+Axiom is format-independent.
+It is not used to model data in any specific representation format such as XML or JSON.
+
+Axiom can be used to model data in several data representation languages, such as JSON or XML.
+This means that data modeled in Axiom can be expressed in such representation languages.
+But this does *not* work both ways.
+We have no ambition to be able to model any arbitrary JSON data.
+We have no ambition to parse any XML file.
+Only "Axiom-compliant" data structures can be processed.
+
+Axiom should be *web-friendly*, it should be designed with web in mind.
+That means, Axiom should be easy to use for data on the web such as RESTful interfaces, semantic web and linked data.
+E.g. objects can be identified with UUID, but how do we identify them in RESTful interfaces where we need URIs?
+Axiom is using namespaces and qualified names (QName) for data types and items.
+But namespaces should work well with web.
+We should think about resolvability of namespaces, mapping of QNames to URIs and so on.
+
+Axiom should be human-friendly.
+Which means that Axiom should be easy to read, write and understand by humans.
+We try to limit the boilerplate and ceremony to necessary minimum.
+Of course, Axiom should be machine-processable, it must be unambiguous, as close to minimalism as possible and so on.
+But the primary audience of Axiom are humans.
+Therefore the language should also be pleasant, readable and elegant.
+We have no ambition to make Axiom super efficient for binary processing, we do not optimize the language for parsing speed and so on.
+We create Axiom for human users.
+
+Note: Axiom could be expressed in Axiom. Which means that we should be able to express Axiom schemas in JSON or any other format.
+We may later create a supereficient binary format for Axiom data and we can use that to store Axiom schemas.
+That should give us sufficient performance for almost any need.
+
+== Requirements
+
+* Similar basic capabilities than existing schema languages:
+
+** Primitive data types (approx. the level of support of XSD primitive types used by midPoint)
+
+** Complex data types (including support for data types, equivalent to complex types in XSD)
+
+* Insensitive to element ordering
+
+* Extensibility points: ability to extend the data model in runtime.
+
+* Human-readable and preferable human-friendly.
+
+* Optional complex data "keys" instead of current container identifiers.
+
+* ItemPath concept should remain almost the same.
+
+* Support for objects (identified by OID) and object references.
+
+** Tip: think about "RESTifying" the model.
+What happens if the data are exposed in REST?
+Would it make sense to replace OIDs with URIs/URLs?
+Think about _semantic web_ concepts.
+
+* Support for semantic versioning of the model
+
+* Built-in support for lifecycle properties: `since`, `deprecated`, `plannedRemoval`, etc.
+
+* Support for meta-data (e.g. provenance meta-data). Meta-data schema extensible in runtime.
+
+* Support for "rich" primitive types such as polystring and protected string.
+
+* Built-in documentation support (similar to xsd:documentation, but maybe we would prefer asciidoc?)
+
+* Ability to add custom annotations (similar to XSD annotations)
+
+* Idea: consider data lifecycle/retention.
+E.g. we have _operational_ data that are computed.
+We have meta data that are _transient_ (not stored) and _persistent_ (stored).
+Maybe we can somehow merge and generalize those concepts?
+
+* Question: what about data presentation?
+E.g. do we want support for human-readable labels for data model items?
+
+* Tip: think about how new query/filter language can be aligned.
+
+* Tip: think about how midPoint bulk action language can be aligned.
+
+* Tip: think about "natural" representation of objects (non-XML/JSON/YAML).
+
+* Nice to have: ability to define itself (such as XSD syntax can be specified in XSD).
+
+=== Data Completeness
+
+We have to distinguish several cases for completeness of data:
+
+* We know that item has values X, Y and Z.
+It has no other values.
+This is the common case.
+
+* We know that item has no value.
+E.g. we are sure that there are no criminal records for this person.
+
+* We know nothing about an item.
+
+* We know that item used to have values X, Y, Z recently.
+E.g. values that were removed by a particular mapping.
+
+* We know that the item has some value, but we do not know the value (the value is "unknowable").
+E.g. there is a hashed password, we do not even want to disclose the hash, but we want to indicate that the password is already set.
+
+* We know that the item has some, we do not know the value now, but we can easily find out when needed.
+E.g. values that are not returned in the query because they are big or expensive.
+But we can easily construct a query that requests them explicitly.
+Or values, for which we have an expression that can be used to determine them.
+But we do not want to execute that expression if the value is not needed.
+
+* We know that the item has value X, but the item may also have other values that we do not know.
+
+Note: we may still want to keep metadata for such values.
+E.g. "We are sure that there are no criminal records for this person, we know that with high LOA, and this information is 2 days old".
+
+*Solution*: we need _item completeness_ and _value significance_:
+
+* Item completeness. Item can be:
+
+** Complete (default): we have all the values of the item. We are sure that are no more values that we have.
+
+** Incomplete: we do not have all the values of the item. There may be more values of the item and we do not know anything about such values.
+
+* Value significance. Value can be:
+
+** Positive (default): We know the value and it is the normal, usual value of the item.
+
+** Negative: We know that the item used to have the value, but it may no longer have that value. E.g. the value was removed by a mapping.
+
+** Unknown: We know that the item has a value, but we we do not know what the value is.
+E.g. the value may be hashed or encrypted by an unknown key, the value may be determined by an expression that was not evaluated yet and so on. +
+Question: do we need shades of meaning here? E.g. unknowable, expensive, dynamic
+
+
+[cols="h,1,1"]
+|===
+| | Item complete | Item incomplete
+
+| Value positive
+| Normal data
+| We know that item has some values, but it may also have other values that we do not know.
+
+| Value negative
+| Value was removed by the delta. We know all the remaining values (if any).
+| Value was removed, but we have no information about other values.
+
+| Value unknown
+| We know that the item has a value, but we do not know the value (the value is "unknowable").
+E.g. hashed password ("unknowable" value), value that is not returned (expensive value), expression (dynamic value)
+| We know that the item has (unknown) value, but it may also have other values.
+
+| No value or null value
+| We are sure that item has no value.
+E.g. "no criminal records"
+| We do not know anything about the item.
+|===
+
+=== Metadata
+
+Considered Option: Metadata Definition using Augmentation
+
+Not a good option. Metadata may be too complex to be handled by simple augmentation.
+This is also not very readable.
+
+[source]
+----
+model midpoint {
+    augmentation ValueMetadata {
+        target axiom:ValueMetadata;  // Magic type
+        item storage {
+            type StorageMetadata;
+        }
+    }
+
+    type StorageMetadata {
+        item creation { ... }
+        item modification { ... }
+    }
+}
+----
+
+
+== Design Decisions
+
+=== Metadata and Completeness Belong To Axiom?
+
+Question: Do metadata and completeness belong to Axiom? Or would they rather belong to Prism?
+
+Answer: They probably belong to Axiom, because:
+
+* Representation formats may have native way how to express metadata.
+In that case Axiom has to know about it to use it.
+
+* Data may often be serialized without metadata, e.g. for readable presentation.
+Axiom has to understand what metadata are to be able to serialize data without them.
+
+* Using metadata at this level of abstraction is relatively new.
+We are not sure about implementation details, performance and all the other unforeseen circumstances.
+Having metadata concept natively in Axiom allows us to hard-code things, make adjustments in the future, etc.
+This lowers the risk that Axiom specs are inconsistent.
+
+Same arguments apply to completeness concepts.
+
+Problem: We do not want to apply metadata to metadata.
+How do we distinguish data and metadata?
+
+Question: Do we want to apply completeness to metadata?
+
+Answer: Yes, we want to.
+Metadata may also be incomplete.
+Or missing entirely.
+We may want to indicate that there are metadata, but we have not returned them.
+Therefore support completeness concepts for all Axiom items, including metadata.
+
+
+== Why We Do Not Just Use XSD?
+
+There are many reasons why we do not want to continue using XSD:
+
+* *Element ordering*: It is not very convenient to create schema in which element ordering does not matter.
+Prism/midPoint ignored element ordering almost since the beginning because that feature is needed for reliable application of deltas.
+It is also much better from ease-of-use point of view.
+However, XSD definition required correct ordering.
+Which was a problem for validation.
+
+* XSD is *verbose*.
+XSD may have nice structure for machine processing.
+But it is quite difficult to read and maintain for a human.
+
+* XSD is built especially for *XML*.
+It has concepts that do not easily map to other languages, su as attributes.
+Overall, XSD is burdened by complexity of the XML world.
+It may be OK to simply not use those features.
+But then we will need to create dialect of XSD which will not be real XSD any more.
+
+* Over the existence of midPoint we introduced xref:../xsd-keywords-use/[large number of XSD annotations], which are used for modeling data and system behaviour.
+These annotations are not first-level citizens of XSD, but are necessary for midPoint to work.
+Introducing language where most of them would be first-level citizens would simplify model lifecycle and readability.
+Which means we have create an XSD dialect already.
+
+* XSD-processing libraries are aging, falling into disrepair and many becoming quite obsolete.
+We would gladly contribute and improve the libraries.
+However, many of those libraries are based on development project of big corporations that are not very active any more (e.g. Sun Microsystems).
+They are open source by name only.
+There is no real community around them.
+Therefore it looks like there is little perspective in XSD development.
+
+== Why We Do not Just use YANG, JSON Schema or SCIM?
+
+We xref:../existing-languages-analysis/[considered several existing languages] for schema modeling in the context of midPrivacy.
+Based on our existing experience with using custom XSD annotations in *midPoint* and implementation of *YANG* language in OpenDaylight project.
+The result was that none of XSD, YANG, JSON Schema or SCIM meets our requirements, without significant hit on readability, or lot of extensions to extend schema language.
+
+
+== Ideas
+
+Miscellaneous ideas for the future.
+
+=== Namespace Resolvability
+
+We can make namespaces resolvable.
+HTTP GET on namespace could return the definition (we need to figure out how to pass a version).
+That would be a very simple way how to get a model definitions.
+
+=== Extension Criticality
+
+Let's have this:
+
+[source,yaml]
+----
+user:
+    name: foo
+    "https://unknown.com/#id": bar
+----
+
+We have no model for `https://unknown.com/` and we are not able to retrieve it.
+What do we do?
+Do we continue working with the data ignoring the unknown item?
+Or do we end up with an error, stopping all processing?
+
+Maybe we can explicitly specify how critical an extension is:
+
+[source,yaml]
+----
+user:
+    name: foo
+    "https://unknown.com/#id":
+      @value: bar
+      @criticality: critical
+----
+
+Now we know that we have to stop processing with an error.
+
+=== Efficient Binary Models
+
+The fact that axiom could be expressed in Axiom also means that we should be able to express Axiom models in JSON or any other format.
+We may later create an efficient binary format for Axiom data and we can use that to store Axiom schemas.
+That should give us sufficient performance for almost any need.

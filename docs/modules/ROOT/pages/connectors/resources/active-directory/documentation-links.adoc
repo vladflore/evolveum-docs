@@ -1,0 +1,34 @@
+= Active Directory Documentation Links
+:page-nav-title: Documentation Links
+:page-wiki-name: Active Directory Documentation Links
+:page-wiki-id: 21528775
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2015-11-23T15:07:01.078+01:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2019-06-11T12:33:40.797+02:00
+:page-upkeep-status: green
+
+== LDAP and ADSI Structures
+
+
+=== Data Types: Constructed Security Types
+
+link:https://msdn.microsoft.com/en-us/library/cc230313.aspx[https://msdn.microsoft.com/en-us/library/cc230313.aspx]
+
+(Includes description of nTSecurityDescriptor)
+
+
+== Schema
+
+
+=== Native Schema Data Types
+
+link:https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/7cda533e-d7a4-4aec-a517-91d02ff4a1aa[https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/7cda533e-d7a4-4aec-a517-91d02ff4a1aa]
+
+
+== Performance
+
+
+=== Creating More Efficient Microsoft Active Directory-Enabled Applications
+
+link:https://docs.microsoft.com/en-us/previous-versions/ms808539(v=msdn.10)[https://docs.microsoft.com/en-us/previous-versions/ms808539(v=msdn.10)]

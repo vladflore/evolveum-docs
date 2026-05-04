@@ -1,6 +1,7 @@
 = Shadow
 :page-upkeep-status: green
 :page-toc: top
+:page-description:
 
 Discover what shadows in midPoint are,
 why they are important for seamless resource account provisioning and synchronization,
@@ -15,7 +16,7 @@ They use fixed predetermined schema and usually contain only basic information a
 Shadows serve as lightweight projections or pointers to their corresponding resource objects.
 
 .Simplified diagram of relations between objects related to shadows
-image::midpoint/architecture/concepts/shadow/shadows-in-midpoint-simple-schema.svg["Diagram of relations between objects related to shadows"]
+image::shadows-in-midpoint-simple-schema.svg["Diagram of relations between objects related to shadows"]
 
 .Why call it a shadow
 [NOTE]
@@ -26,7 +27,7 @@ At the same time, we wanted to avoid _replica_, _copy_, _proxy_ or similar heavi
 
 == Why midPoint needs shadows
 
-Shadows exist to bridge midPoint's internal identity model and external resource identifiers.
+Shadows exist to bridge midPoint’s internal identity model and external resource identifiers.
 They provide a stable repository representation that links subjects (for example, users) to their remote resource-side counterparts that use identifiers native to the particular resource (LDAP DNs, UUIDs, database keys).
 As such, shadows enable reliable correlation of identities across various resources.
 

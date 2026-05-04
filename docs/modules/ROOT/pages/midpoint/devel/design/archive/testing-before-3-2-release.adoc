@@ -1,0 +1,182 @@
+= Testing before 3.2 release
+:page-wiki-name: Testing before 3.2 release
+:page-wiki-id: 17761617
+:page-wiki-metadata-create-user: mederly
+:page-wiki-metadata-create-date: 2015-07-08T10:04:44.946+02:00
+:page-wiki-metadata-modify-user: peterkortvel@gmail.com
+:page-wiki-metadata-modify-date: 2016-02-20T15:49:13.180+01:00
+
+*Primary source:* xref:/midpoint/devel/testing/test-scenarios/[Test Scenarios].
+As a minimum, we should cover all tests described there, before releasing midPoint 3.2.
+Please note the result of testing each of test group into the table below.
+
+*Alternative sources:*
+
+* Gusto has tested things from xref:/midpoint/demo/[Live Demo] (from "Have a look around" to "Organizational Structure", inclusive).
+
+* Kate is creating automated Selenium-based tests: xref:/midpoint/devel/testing/gui/[GUI Testing]
+
+So, tests (from Test Scenarios) that have been covered by some of these alternative sources, *do not have* to be tested manually.
+But please indicate this fact in the table below.
+
+
+
+[%autowidth]
+|===
+| Area | Tester | Status
+
+| Account Tests
+| honchar, oscar
+| OK, new issues were created: MID-2463, MID-2462, MID-2454, bug:MID-2465[], bug:MID-2474[], demo: #5, #6 OK, resource: addresbook
+
+
+| User - Account Tests
+| honchar,oscar
+| OK MID-1856 is reproduced (scenario #8)demo: OK, new improvement created: MID-2469
+
+
+| User Photo Tests
+| honchar,oscar
+| OK,demo: OK
+
+
+| Organization Structure Tests
+| honchar,oscar
+| OKdemo: OK expect #1 (examle.xml?) and #4 (only inbound from CSV)
+
+
+| PolyString Tests
+| honchar,oscar
+| OKdemo: OK
+
+
+| Synchronization Tests
+| honchar,oscar
+| #2 - OK, #6 - #10 - OK, tested with CSV resource (localhost-csvfile-resource-advanced-sync.xml), couldn't configure for OpenDJ resource, bug:MID-2478[] is createddemo: #1, #3, #4, #5 OK
+
+
+| Advanced Account Tests
+| honchar
+|
+
+
+| Outbound Mappings
+|
+|
+
+
+| Object Template Tests
+| honchar
+| OK, TODO #5, #6, #7 (were not tested due to malformed configuration)new issues were created bug:MID-2464[], bug:MID-2466[]
+
+
+| Password Policy Tests
+| oscar
+| demo: OK
+
+
+| Provisioning Errors And Consistency Tests
+| honchar
+| OK,  #14 and #15 - bug:MID-1085[] is still reproduced; #12 and #13 - new issue is created bug:MID-2481[]
+
+
+| Multi-node task manager component with HA support
+|
+|
+
+
+| Import From File And Resource Tests
+| oscar
+| demo: #1,#2,#3,#4: OK
+
+
+| Assignment Enforcement Policy Options Tests
+| honchar
+| OK
+
+
+| Mapping Features Tests
+| honchar
+| OK
+
+
+| GUI authorization
+| oscar
+| demo: OK expected #3 (new issue bug:MID-2467[]) and #6 (old issue bug:MID-1420[])#3 in new 3.2 MP instance is OK
+
+
+| Roles
+| honchar
+| OK, TODO #6, #7, #8, #9 (were not tested yet) bug:MID-2132[] is reproduced
+
+
+| Reports
+| oscar
+| demo: #1, #2 OK, after new issue bug:MID-2468[],#3: FATAL_ERROR: Neither query, nor script defined in the report.#4, #5 TODO...
+
+
+| Workflow Features
+| honchar
+| OK, #6 and #7 are not tested due to the absence of test case bug:MID-2475[] is created.
+
+
+| Notifications
+| honchar
+| OK
+
+
+| Generic Synchronization
+|
+|
+
+
+| Bulk actions
+| honchar
+| OK, #6 wasn't tested because the necessary file (*log-selected-users.xml*) is absent; new issues created: bug:MID-2479[], bug:MID-2480[]
+
+
+| Misc Features
+| oscar
+| demo: OK (with all subparts expected Universal checks)
+
+
+| Resource Wizard
+|
+|
+
+
+| "Forgotten password" functionality
+|
+|  TODO This functionality isn't described in Test Scenarios
+
+
+| Database new/upgrade scripts
+|
+|
+
+
+| Database cumulative scripts ("all" directory)
+| oscar
+| demo: postgre upgrade from 3.1.1 to 3.2 OK
+
+
+| Security checks
+| oscar
+| clean MP with no password policy: 1.2.a and 1.2.c OK,SOAP TODO: problem with 'An error happened processing a Username Token: "A replay attack has been detected"'
+
+
+| Testing in other app servers (WLS?)
+|
+|
+
+
+|===
+
+
+
+
+== External links
+
+* What is link:https://evolveum.com/midpoint/[midPoint Open Source Identity & Access Management]
+
+* link:https://evolveum.com/[Evolveum] - Team of IAM professionals who developed midPoint

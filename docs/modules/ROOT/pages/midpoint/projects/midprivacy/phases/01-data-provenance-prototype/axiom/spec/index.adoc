@@ -1,0 +1,42 @@
+= Axiom Specification v0.1
+:version: 0.1
+:page-toc: top
+
+WARNING: This is a *snapshot* of the specification that was created during xref:../..[midPrivacy: provenance prototype project].
+For the latest development version of the document please look in xref:/midpoint/devel/axiom/[Axiom workspace].
+
+Axiom is data modeling language used to model data (and metadata) in an abstract, representation-independent way.
+
+This document describes the syntax and semantics of version {version} of Axiom language.
+This document will also describe how a data model defined in Axiom model is
+encoded in XML, JSON, YAML and Axiom language.
+
+== Introduction
+
+Axiom is representation-independent data modeling language.
+Axiom can be used to model data in their abstract form.
+Unlike other modeling languages, Axiom is not bound to specific data representation from such as JSON or XML.
+Data modeled in Axiom can be represented (serialized and parsed) in many representation formats.
+Simply speaking, the same data can be expressed in XML, JSON, YAML and possibly also in other formats, including Axiom itself.
+
+:leveloffset: +1
+
+include::terminology.adoc[]
+
+include::design-principles.adoc[]
+
+include::overview.adoc[]
+
+include::syntax.adoc[]
+
+include::namespaces.adoc[]
+
+include::item-path.adoc[]
+
+include::completeness.adoc[]
+
+include::metadata.adoc[]
+
+include::versioning.adoc[]
+
+include::background.adoc[]

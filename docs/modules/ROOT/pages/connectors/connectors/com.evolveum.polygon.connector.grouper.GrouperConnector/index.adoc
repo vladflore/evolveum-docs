@@ -1,0 +1,304 @@
+---
+layout: connector-page
+display-order: 200
+functionality-status: stable
+development-status: active
+support-status: supportable
+origin: Evolveum
+support-provided-by: Evolveum
+target-systems: Grouper (Internet2 et al.)
+connector-protocol: JDBC
+source-url-master: https://github.com/Evolveum/connector-grouper
+description: Identity connector for Grouper. Using JDBC to connect to a PostgreSQL database.
+upkeep-status: yellow
+---
+= Grouper Connector (JDBC)
+:page-wiki-name: Grouper Connector (JDBC)
+
+Connector for Grouper access management system.
+
+It supports group and group membership management, management of the "Subject" object type and also
+capabilities to read additional extension attributes of all object types. PostgreSQL database JDBX driver
+is a part of the connector distribution.
+
+Grouper is exporting data to intermediary PostgreSQL database using https://spaces.at.internet2.edu/spaces/Grouper/pages/243080699/Grouper+MidPoint+provisioner[midPoint provisioner] from where this connector reads all the data. This architecture uses the grouper provisioning capabilities which are optimized for performance and throughput.
+
+== Capabilities and Features
+
+[%autowidth,cols="h,1,1"]
+|===
+| Schema
+| YES
+| Group and Subject object type.
+Extension schema is fetched dynamically during configuration discovery. Or can be extended
+as configuration property.
+
+| Provisioning
+| NO
+|
+This connector was designed as read-only.
+
+| Live Synchronization
+| Yes
+|
+Using last modification timestamps. Supports "Group", "Subject" and "All" object classes.
+
+| Password
+| NO
+| Not needed for group membership management.
+
+| Activation
+| NO
+|
+
+| Filtering changes
+| NO
+|
+
+| Paging support
+| YES
+| Pagination using the Private Key which represents object ID
+
+| Native attribute names
+| YES
+|
+
+|===
+
+
+== History
+
+
+[%autowidth]
+|===
+| Version | Origin | Binary | Sources | Build Date | Framework version | Bundled with midPoint | Description
+
+| 1.0.0.0
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-grouper/1.0.0.0/connector-grouper-1.0.0.0.jar[download jar]
+| link:https://github.com/Evolveum/connector-grouper[Evolveum git repository (master)]
+| Sep 11 2023
+| Stable version
+| No
+| Change in groupId in comparison to previous SNAPSHOT versions to comply to polygon standards
+
+| 1.0.1.0
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-grouper/1.0.1.0/connector-grouper-1.0.1.0.jar[download jar]
+| link:https://github.com/Evolveum/connector-grouper[Evolveum git repository (master)]
+| Oct 19 2023
+| Stable version
+| No
+| Bug fix related to issues in reconciliation and some association cases
+
+| 1.1.1.0
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-grouper/1.1.1.0/connector-grouper-1.1.1.0.jar[download jar]
+| link:https://github.com/Evolveum/connector-grouper[Evolveum git repository (master)]
+| Nov 8 2023
+| Stable version
+| No
+| Default database name changed to contain prefix 'gp', otherwise custom prefix cna be added via 'Table Prefix' configuration parameter.
+
+| 1.2.0.0
+| Evolveum
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-grouper/1.2.0.0/connector-grouper-1.2.0.0.jar[download jar]
+| link:https://github.com/Evolveum/connector-grouper[Evolveum git repository (master)]
+| July 24 2024
+| Stable version
+| No
+| Default database name changed to contain prefix 'gr', performance improvements were made.
+
+| 1.2.0.1
+| Evolveum
+| link:https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-grouper/1.2.0.1/connector-grouper-1.2.0.1.jar[download jar]
+| link:https://github.com/Evolveum/connector-grouper[Evolveum git repository (master)]
+| September 12 2024
+| Stable version
+| No
+| Default Port value removed.
+
+|===
+
+
+== Interoperability
+
+* ConnId 1.5.1.3 (Evolveum release), which is part of midPoint 4.6.
+* Any supported PostgreSQL version (tested with PostgreSQL 15.2).
+* Grouper version 4.7.0 or higher.
+
+== Support
+
+This connector is _supportable_ by Evolveum.
+
+Evolveum can provide support for this connector.
+However, support for this connector is not provided on a routine basis and some special arrangements
+and customizations may be needed.
+Please contact Evolveum representative for the details.
+
+== Configuration parameters
+
+[%autowidth]
+|===
+| Parameter | Note | Example | Configuration discovery
+
+| Host
+| Hostname / ulr pointing to the grouper database.
+| 127.0.0.1
+| No
+
+| TCP Port
+| Enter the port number for the connection to the database server.
+| 5432
+| No
+
+| Database name
+| Name of the database schema containing grouper object tables.
+| grouper
+| No
+
+| User Name
+| Name of the management account on the database server with permissions to the grouper schema.
+| midpoint
+| No
+
+| Validation Timeout
+| The number of seconds which represent the limit for connection validation. Setting this parameter to '0' means indefinite.[default value is 10]
+| 15
+| Yes, configuration discovery will show default value with the possibility of override.
+
+| Password
+| Password to the management account.
+| 5ecr3t
+| No
+
+| Subject Extensions
+| Extension Attributes for Subject Object Type. Multivalued property.
+| Foo, Baar
+| Yes, Configuration discovery will offer possible values.
+
+| Group Extensions
+| Extension Attributes for Group Object Type
+| Foo, Baar
+| Yes , Configuration discovery will offer possible values.
+
+| Exclude Objects marked as Deleted
+| This option if set to 'True' excludes the objects marked as Deleted from search results. If set to 'False' this could cause the IAM to misinterpret the object as 'not deleted' in the event of a reconciliation.
+| True
+| Yes , Configuration discovery will offer possible values.
+
+| Enable ID based Paging
+| Id based pagination using the Private Key representing object ID for pagination. [default value is false]
+| True
+| Yes , Configuration discovery will offer possible values.
+
+| Maximum Page Size
+| The maximum number of records which will be returned by any connector operation, after which is processed a next set of records will be requested from the resource for further processing. [Used when 'Enable ID based Paging' is set to true]
+| True
+| Yes , Configuration discovery will offer possible values.
+
+| Include in 'ALL' searches
+| Define a set of attributes which will be explicitly fetched in an 'ALL' object class search. This serves as an workaround for the lack of "ATTRS_TO_GET" operation options values.  (Please see 'notes' and also please see https://docs.evolveum.com/connectors/connid/1.x/connector-development-guide/#attributes-to-get[Attributes To Get] ) +
+LiveSync task that work with all object classes requires this parameter to contain values 'members' and 'member_Of'.
+| members, member_Of
+| No
+
+|===
+
+[#_limitations]
+=== Limitations
+
+* The LiveSync task which synchronizes both object classes requires 'Include in ALL searches' configuration parameter.
+The parameter will have to contain the names of attributes which are not returned by default, yet we want them in the response, i.e. "member_of" in case of the "Subject" object class.
+
+== Resource Examples
+Resource template example with basic mapping and association configuration.
+
+.*Grouper Resource Template Sample*
+[%collapsible]
+====
+
+link:https://github.com/Evolveum/midpoint-samples/blob/master/samples/resources/grouper-jdbc/resourceTemplate/resource-template-grouper.xml[Git]
+
+sampleRef::samples/resources/grouper-jdbc/resourceTemplate/resource-template-grouper.xml[]
+
+====
+
+== LiveSync Task Examples
+* The liveSync task is processing both Groups and Subject object at the same time. That will prevent race condition types of conflicts when a new group is created and populated with users. In that case it's important to process the group before the subjects (and their memberships).
+* The LiveSync task which synchronizes both object classes requires 'Include in ALL searches' configuration parameter contains values 'members' and 'member_Of'.
+See bug:MID-8996[] for details.
+
+.*LiveSync Task Example*
+[%collapsible]
+====
+link:https://github.com/Evolveum/midpoint-samples/blob/master/samples/resources/grouper-jdbc/tasks/grouper-liveSync.xml[Git]
+
+sampleRef::samples/resources/grouper-jdbc/tasks/grouper-liveSync.xml[]
+====
+
+== Notes
+
+Connector requires PostgreSQL based intermediary database. Grouper might use arbitrary database engine.
+
+Connector supports pagination and a 'max page size' configuration parameter. This will divide the query into multiple ones
+with outputs containing smaller number of rows (based on page size or the 'max page size' configuration parameter).
+There still can be the possibility of higher number of rows returned in case of an object having a large number of members or
+group memberships or a large number of auxiliary attributes.
+
+With 'Exclude Objects marked as Deleted' set to true the rows marked as 'deleted' are handled as not present.
+In case of rows present in the 'main' object tables, the objects will be handled as deleted. In case of
+rows present in the membership or auxiliary attributes tables the lack of the row will mean a removal of parameter value.
+
+The "Configuration discovery" operation among other functions will provide you with a list of possible names of auxiliary attributes which if selected will be incorporated in the attribute schema.
+This list of attributes can be changed in the resource configuration, after which the schema should be 'regenerated' ('refreshed').
+
+The "members" and "member_of" ("virtual" attributes) are not retrieved by default, the attribute configuration in the IAM has to be set up to *explicitly request* these attributes (one of them or both, based on the use-case), in order to process them in IAM operations (i.e. LiveSync).
+The same applies to attributes originating from other tables as the main ones (Tables referred to as the main tables: "gr_mp_subjects" and "gr_mp_groups").
+To achieve this the mappings have to be augmented by the parameter "fetchStrategy" set to the value "explicit".
+
+Most configuration will need just one of those two attributes.
+In case of associations the preferred one is the subject attribute holding the reference, in our case "member_of".
+In regards to this please also see the xref:#_limitations[Limitations section]
+
+[source]
+----
+ <attribute xmlns:ri="http://midpoint.evolveum.com/xml/ns/public/resource/instance-3">
+    <ref>ri:member_of</ref>
+    <fetchStrategy>explicit</fetchStrategy>
+ </attribute>
+----
+
+In case you need to use the "members" attribute of the object class "group", the recommendation would be to turn off the default shadow caching functionality for this attribute.
+
+[source]
+----
+<attribute xmlns:ri="http://midpoint.evolveum.com/xml/ns/public/resource/instance-3">
+    <ref>ri:members</ref>
+    <fetchStrategy>explicit</fetchStrategy>
+    <cached>false</cached>
+</attribute>
+----
+
+== Migration from legacy Grouper connector.
+
+Following steps will guide you though migration from xref:/connectors/connectors/com.evolveum.polygon.connector.grouper.rest.GrouperConnector/[legacy Grouper Connector].
+
+CAUTION: Following migration guide is based on the examples of https://github.internet2.edu/docker/midPoint_container/tree/master/demo/grouper[InCommon midPoint and Grouper integration demo]. You might need to attune it to your environment.
+
+. Deploy the new Grouper connector and configure basic settings for the connector. Do not configure mappings of synchronization yet. Goal is to successfully test the resource and be able to list accounts and entitlements.
+. Configure correlation for both accounts and entitlements (groups). Make sure the accounts are correlated to existing users and entitlements are correlated to corresponding objects (typically Org. units).
+You can verify the correlation configuration with xref:/midpoint/reference/simulation/[Simulation]. See also xref:/midpoint/reference/simulation/tutorial/#step-ldap-3-correlation-on-employee-number[correlation scenario tutorial].
+. Now you can add attributes mappings and synchronization configuration.
+. Configure association including inbound mapping from association. Set the same subtype assignments as it was used in the legacy connector (typically "grouper-group")
+. Stop synchronization tasks for the legacy Grouper resource. Typically that will be reconciliation and asynchronous update tasks.
+. Remove mapping from user object template that was executing shadow query to create assignments of users to orgs that are representing groups. Also stop Group Scavenger task.
+. Reconcile groups using the new Grouper resource. When the reconciliation tasks finishes reconcile users.
+. Next steps is to remove assignments with grouper-group subtype that shouldn't exist. Deploy cleanup mapping to the users object template. You will find it in examples section above. It will be applied later by recomputation of all users.
+. Configure liveSync and periodic reconciliation for the new Grouper resource. Now the new resource is fully operational.
+. Decommission the old Grouper resource and related settings. Remove reconciliation task, asynchronous update task, Grouper Scavenger task and functional library with functions for legacy Grouper connector. Remove all shadows for the old Grouper resource and remove the resource itself.
+. Recompute all users. That will apply the user template mapping for cleaning up of grouper-group assignment and also it will clean up account links from users to the removed Grouper resource.
+
+== See Also
+
+Example of midPoint and Grouper integration is available in InCommon TAP Workbench. You can see https://github.internet2.edu/internet2/InCommonTAP-Examples/blob/main/Workbench/midpoint_server/container_files/mp-home/post-initial-objects/resources/100-grouper-new.xml[the resource configuration] example there or find other related objects in the same repository.

@@ -1,0 +1,271 @@
+= Testing Design
+:page-toc: top
+
+This document covers only new tests needed for midScale.
+These are mostly performance tests, typically comparing state before and after.
+
+The baseline for the tests can be obtained using:
+
+* The current 4.2 version or the head of its support branch (little to no performance improvements are expected in the branch).
+* "Old" implementations of components still available in the `master`, e.g. current Hibernate-based repository.
+
+This means that some performance comparison tests may be executed in the `master` comparing
+two flavours of the component (like the repository).
+Other tests will be run both on the `support-4.2` branch and the `master` comparing the same parts
+before and after the improvements.
+
+For consistency reasons, the baseline will be measured on `support-4.2` even for cases
+where the old implementation is preserved in the `master`.
+
+== Testing Design Meeting
+
+*Guests:*
+
+* Igor
+* Rado
+* Katka
+* Pavol
+* Tony
+* Richard
+
+* midPoint monitoring (performance, actuators, ...) - who?
+
+* Technical testing - advanced coordination and design decisions make it part of the infra - who?
+
+=== Assumptions
+
+* Focus is to make it work in our private cloud. No effort shall be spent on the abstractions and preparation on the other clouds.
+
+* system components: mP, LDAP, PSQL, other resource prefer DBTables (PSQL) not files (scalability).
+
+* We will focus on docker and dockerization, not hybrids for now (VM/Windows).
+
+* Developers profiling only local: Prism (Pavol, Tony), partially Repo (Riso, maybe in combination with some DB profiler), GUI (open question for profiler)
+
+* System level profiling (mP built-in tool - Tracing by Pavol)
+
+* We will concentrate on new implementation, do not concentrate on existing implementation in new releases
+
+
+=== Requirements
+
+* Monitoring - we would need to sample environment metrics, ideally to provide with a context of a test being executed
+** midPoint metrics - midPoint is doing itself, but how to leverage those data is open question
+** Spring actuators - we will sample also these. open question - what data?
+** Profiling - open question for now
+** PSQL - performance monitoring and tuning. Open question
+
+* We shall update system requirement page with all the information and recommendations we compile during this project
+** Include also requirements for garbage collector configuration recommendations
+
+* Space optimization - systems with tens of mio records are sensitive to consumed space. We have to measure and evaluate space consumption for new old/new versions.
+We have to take into consideration DB, Filesystem, memory.
+** DB mainly Auditing, but also storage for all main objects. There are also problems some indexes are much bigger than the actual data (audit index is 5:1 audit data).
+** Filesystem ( logs, reports, ...).
+*** For logs, we are polluting logs with much unnecessary information, log stacks, wrong log levels for typical operations, repeating the same errors (MID-5632, MID-5511)
+** For memory mainly heap, when working with so many objects in the IDM logic, caches, connectors, assignments, report processing.
+
+* Generic/system performance requirements
+** Entitlement membership handling for large entitlements (groups) (MID-5785)
+** Optimize change execution (MID-5566)
+** Improve performance of typical operations (MID-5539)
+*** Reduce number of unnecessary operation, number of evalutations and so on (templates, mappings, ...)
+** Optimize the number of repository operations (MID-6147)
+** Thresholds and limits (MID-5348)
+
+* Repository
+** System down, huge amount of delta events stored for later
+
+* Tasks
+** User friendliness, user experience, data visibility (MID-6384, MID-5840)
+** Resiliency, error recovery (MID-6674, MID-6417, MID-6416, MID-6412, MID-6345, MID-6011)
+** Auto-scaling (cluster management/auto reconfig, (semi)automatic tasks distribution) (MID-6421, MID-6367)
+
+* GUI
+
+* Thread safety (aka Prism)
+** Raw type thread safety MID-6542
+** Resource and connector manager thread safety MID-5954
+** Optimize object cloning on RepositoryCache MID-5465
+** Time/load(CPU) optimization
+** (Optional) Space/memory footprint optimization
+** (Optional) Reporting/dashboards (space/performance) improvements.
+
+* Schrodinger
+
+* Query DSL
+
+Do we have some *performance* or *scalability* targets?
+Do we know how big a system do we want to support?
+How many users, how many requests per second, special usage patterns (bursts), anything else?
+
+*Performance and scalability goals:*
+
+* Start with 1mio of records, target 10+ mio, in order of magnitude tens of millions
+
+* The records are like cartesian product: 10 mio of users, each 10 accounts is like 100 million shadows
+
+* Open question: number of other objects? Like roles, services, orgs? And also many assignments slow down problem
+
+* Problem of many attributes for an object (100+).
+
+Performance issues areas identified so far:
+
+* To slow Tasks (multi-threads, multi-nodes, ...), re-indexing
+* Handling of large groups
+* slow large org structures (Maybe just GUI problem)
+
+== Performance testing environment
+
+Please, refer our infrastructure section to learn more about xref:/midpoint/projects/midscale/infrastructure[lab performance testing environment]
+
+== Tooling
+
+TestNG already used for unit and integration testing will be used also for performance tests.
+MidPoint runs tests in multiple modules, often testing anything below the currently tested module.
+
+* For Prism tests we can add more unit-style tests in the Prism module.
+These do not use Spring framework and have minimal overhead.
+* For pure repository testing we can implement them in `repo-sql-impl-testing`.
+These initialize Spring context with the repository and dependent components, but without higher-level
+midPoint components like provisioning, model or GUI.
+* GUI and end-to-end integration testing will be supported by our Schrödinger module,
+effectively running midPoint in its entirety.
+* Cluster - TBD
+
+Tooling must work both for testing on some reference setup and when run on the developer's machine.
+Obviously, results can only be compared with other results in the same environment.
+
+=== Jenkins job
+
+Jenkins can run the tests repeatedly, but we don't want to run all the other tests,
+just as we don't want to slow down existing quick/nightly tests with performance tests.
+For this reason the performance tests are controlled by Maven profile `perftest`.
+This profile modifies surefire (or, in some modules, failsafe) plugin configuration to run only
+tests from `testng-perf.xml` suite.
+No other tests are run during the build.
+Maven test plugin configuration also sets the system property that causes `TestMonitor` to report to files.
+
+See https://jenkins.evolveum.com/job/MidPoint_performance/[MidPoint_performance] Jenkins job.
+Test outputs are archived with the post-build shell-script step.
+
+== Performance test output
+
+* Monitor name conventions?
+First part is implied - it's the class simple name.
+Second part is simple symbolic name, prefer `lowerCamelCase` parts separated by `.`.
+Avoid any CSV related separator and quoting like any of `"|;,'` and spaces.
+Note was added to describe the monitor in human readable form.
+* Distinguish the symbolic name for test and production monitors?
+TBD, no need yet.
+* The metric name is the tuple [test, monitor's symbolic name].
+* How do we want to identify the run?
+Report file name contains test class name, build number, short commit ID and build timestamp.
+File contains header section with BUILD_NUMBER, BRANCH, full GIT_COMMIT and test class name.
+* How to chart it?
+TBD: This can be work for infrastructure team.
+* Results must be postprocessed somehow - first there are various monitors from single run.
+We want to add each monitor to its time series (results of multiple runs).
+Here the run identification is important.
+
+== Test NG Performance tests
+
+TestNG performance tests are based on usual midPoint abstract test classes, ultimately either
+`AbstractUnitTest` or `AbstractSpringTest`, and mixin interface `PerformanceTestMixin`.
+`PerformanceTestMixin` must be added to the test class directly, not to the superclass,
+otherwise the lifecycle methods (`@Before/AfterClass`) don't work.
+These are important to initialize the `TestMonitor` and then report the results.
+
+.Simple TestNG Performance test
+[source,java]
+----
+public class PerfTestExample extends AbstractUnitTest implements PerformanceTestMixin { // <1>
+
+    ItemPath PATH  = ... ;
+
+    @Test
+    void testPerfomance() {
+        // Invariant section
+        PrismContainer root = ...;
+        Stopwatch watch = stopwatch(monitorName("prism", "findItem"), "human readable description"); // <2>
+
+        // Measurement cycle
+        for(int i = 0; i <= 1000; i++) { // <3>
+            Object result; // <4>
+            // Actual measurement
+            try (Split ignored = watch.start()) { // <5>
+                result = root.findItems(PATH); // <6>
+            }
+            assertNotNull(result); // <7>
+        }
+    }
+}
+----
+<1> Test class extends from midPoint support unit-test abstract class and implements
+`PerformanceTestMixin` - both classes work in tandem to support `TestMonitor`.
+<2> Creates a named stopwatch which computes min, max, avg, and total for measured time.
+Convenience method provided by `PerformanceTestMixin` is a shortcut to `testMonitor.stopwatch()`.
+<3> Repetition cycle - we need to make multiple measurements to obtain more precise result
+<4> We need to have side effect so `JIT` does not optimize our test code out.
+<5> Actual measurement, `start` returns `Autocloseable` which when closes stops time measurement.
+Ideally used as try-with-resources.
+<6> Actual operation to be measured.
+<7> Side effect, doing anything with the result so the call is not optimized out.
+
+=== Parametric (comparison) measurements
+
+Sometimes it is good to run similar test with different parameters, which may
+have different timing characteristics.
+
+The proposed format for measurement name is: {measurementName}.{param1Value}.{param2Value}
+
+.Comparison of Parsing formats
+[source,java]
+----
+public class PerfTestCodecObject extends AbstractSchemaTest implements PerformanceTestMixin {
+
+    List<String> FORMAT = ImmutableList.of("xml", "json", "yaml");
+    List<String> NS = ImmutableList.of("no-ns", "ns");
+    int REPETITIONS = 20_000;
+
+    @Test
+    void testAll() throws SchemaException, IOException {
+        for (String format : FORMAT) {
+            for (String ns : NS) {
+                testCombination(format, ns);
+            }
+        }
+    }
+
+    void testCombination(String format, String ns) throws SchemaException, IOException {
+        String inputStream = getCachedStream(Paths.get("common", format , ns ,"user-jack." + format));
+        Stopwatch timer = stopwatch(monitorName("parse", format, ns),
+            "Parsing user as " + format + " with " + ns);
+        for(int i = 1; i <=REPETITIONS;i++) {
+            PrismObject<Objectable> result;
+            try(Split ignored = timer.start()) {
+                PrismParser parser = PrismTestUtil.getPrismContext().parserFor(inputStream);
+                result  = parser.parse();
+            };
+            assertNotNull(result);
+
+        }
+    }
+
+      private String getCachedStream(Path path) throws IOException {
+          ....
+      }
+}
+----
+
+.Example output of test (header parts excluded)
+,===
+test,monitor,count,total(us),avg(us),min(us),max(us),note
+
+PerfTestCodecObject,parse.xml.no-ns,20000,11317688,565,494,85792,Parsing user as xml with no-ns
+PerfTestCodecObject,parse.xml.ns,20000,10310138,515,494,3910,Parsing user as xml with ns
+PerfTestCodecObject,parse.json.no-ns,20000,9645527,482,440,208260,Parsing user as json with no-ns
+PerfTestCodecObject,parse.json.ns,20000,8694757,434,425,4927,Parsing user as json with ns
+PerfTestCodecObject,parse.yaml.no-ns,20000,11243275,562,527,53407,Parsing user as yaml with no-ns
+PerfTestCodecObject,parse.yaml.ns,20000,10790540,539,526,2997,Parsing user as yaml with ns
+,===

@@ -1,0 +1,13 @@
+= MidPoint Deployment Fundamentals Training Page
+
+Please refer to link:https://evolveum.com/training-and-certification/midpoint-deployment-fundamentals/[MidPoint Deployment Fundamentals Description] page for more information about the training.
+
+TIP: The training has been updated for midPoint 4.4 LTS.
+
+The training can be delivered as a instructor-led session either:
+
+* on-site in Evolveum's premises (Bratislava, Slovakia)
+* online
+* on-site in customer's premises
+
+Preview of the training is available link:preview/[here].

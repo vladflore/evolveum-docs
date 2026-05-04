@@ -1,0 +1,59 @@
+---
+layout: connector-version-page
+title: LDAP Connector
+origin: Evolveum
+version: 3.0
+framework-version: 1.5.0.0
+bundled-with-midpoint: 4.1
+release-date: 2020-04-01
+binary-url-jar: https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/3.0/connector-ldap-3.0.jar
+source-url-master: https://github.com/Evolveum/connector-ldap
+source-url-release: https://github.com/Evolveum/connector-ldap/tree/v3.0
+change-description: "Separated PowerShell code to a separate connector."
+release-status: SNAPSHOT
+bundle-name: com.evolveum.polygon.connector-ldap
+connector-name: com.evolveum.polygon.connector.ldap.LdapConnector
+visibility: hidden
+---
+
+// TODO: description ..... was: include::../description.adoc[]
+
+== Connector Capabilities
+
+include::gen-capabilities.adoc[]
+
+== Connector Features
+
+|===
+|Feature |Supported |Description
+
+|Protocol
+|LDAP, LDAPS
+|
+
+|Schema
+|Yes
+|Determined from standard LDAP schema.
+
+|Password
+|Yes
+|It is assumed that the server will hash the password and store it securely. Support for connector-side hashing is limited.
+
+|Activation
+|Partial
+|No activation for generic LDAP as there is not LDAP standard for that. This can be simulated in midPoint.
+
+|Paging support
+|Yes
+|Simple Paged Results and VLV
+
+|Native attribute names
+|Yes
+|
+|===
+
+
+== Configuration Properties
+
+include::gen-config.adoc[]
+

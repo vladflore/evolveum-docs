@@ -1,0 +1,154 @@
+= Identity and Access Management Myths
+:page-nav-title: IAM Myths
+:page-wiki-name: Antipatterns
+:page-wiki-id: 13991939
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2014-02-18T14:45:48.225+01:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2020-02-14T19:52:06.274+01:00
+:page-display-order: 800
+:page-moved-from: /iam/antipatterns/
+:upkeep-status: yellow
+
+image::myths-logo.png[Logo,float="right"]
+
+There are often practices and ideas that are very common - and very wrong.
+They are used often, but they usually fail miserably.
+These are the IAM _myths_, misconceptions, antipatterns and pitfalls.
+Identity and access management is not a simple field, that are many obstacles and complexities to handle.
+Quite understandably, there are many ways to do thing incorrectly, many dead ends.
+Due to the complexity, the dead ends are often not very obvious.
+Implementation teams may spend years, only to find out that the huge invested effort was utterly pointless.
+
+This section of the documentation documents _IAM myths_ - for you to be able to avoid them.
+Each myth starts with an idea that may look good at first sight.
+However, it ends up in tears.
+
+
+++++
+{% children style: table, heading: Myth %}
+++++
+
+== See Also
+
+* link:https://docs.evolveum.com/talks/files/2025-06-is2-dead-ends-in-identity-management-paper.pdf[Dead Ends in Identity Management], Information Security Summit 2025 conference contribution
+
+// IDEAS:
+//
+// Everything is an attribute
+//      Using attributes to model identity concepts, such as typing and birthright (employeeType, userType), organizational structure (orgUnit attribute), roles (businessCategory), locations, etc.
+//      In fact, it is quite rare for an attribute to take part in access control policy.
+//      Most attributes are used to synchronize (free-form) data, such as names and identifiers.
+//      If you have something like "if foo==bar" in your policy, your policy is probably wrong.
+//      See also: problems of ABAC
+//      Solution: use structure instead of attributes, go for full-featured objects, use relationships.
+//
+// IGA is all about joiner/mover/leaver alt. "IGA is based on HR": it is not. HR-based JML are for employees only, and even there they are not complete.
+//      e.g. mover process is mostly ad-hoc, cf. access request and certification.
+//      There are other identity types: supplier, partner, community (e.g. self-registered).
+//      These have their own lifecycles. HR or JML is not going to help here at all.
+//      And then there are NHIs.
+//
+// IAM is all about authentication (MFA, etc.): More components that just auth are needed. IAM component big picture.
+//      Explaining why "administration" (IGA) part is necessary. Policies, inventory, responsibility.
+//      ref: Everything in LDAP
+//
+// IGA is just about provisioning. Use SCIM in your SSO and you do not need IGA.
+//
+// IGA is just about access control. In fact, IGA is primarily about responsibility.
+//      It is about inventorization, risk management, high-level (business-oriented) policies and compliance.
+//      Recommendation: IGA can bring much more than access control, yet the program has to mature to reach the value.
+//
+// "Source of truth": Single authoritative source: there is no single authoritative source, there are many sources that need to be merged.
+//     They may be contradictory, often have outdated data.
+//      Various sources for emps, contractors, students. - or no authoritative source at all (suppliers, partners, "community")
+//      Various sources for individual attributes.
+//      "Names do not belong to us", they are "given" to us by other people.
+//      Various NHI identity types, sources, updates, sync, etc.
+//      The old recommendation of having just one authoritative source is misleading, it is not feasible
+//
+// Organizational role: create role for entire department, team, project or location.
+//      Wrong! This is one of the reasons why people hate RBAC. However, this is gross abuse of RBAC.
+//      You should not maintain separate role for org.
+//      You should make role behave like a role. Org _is_ a role after all! It is a "policy concept".
+//      If you maintain a separate role, you have to care about lifecycle of two (or more - managers) things.
+//      This is a nightmare.
+//      See how midPoint does it.
+//
+// Cloud applications do not have location: There is no cloud. Location matters, even for could apps.
+//      Control matters even more than datacenter location. Especially now. Legislation, etc.
+//
+//  Authorization is all about allow/deny decisions (search query, autz preview: e.g. enabled/disabled buttons, properties noaccess/read/write)
+// Also, reverse query: answering question "who has access to this?"
+// Also, you have to handle change of policies, e.g. situations that were allowed in old policy, but are denied in new policy. E.g. deny assignment of privileged access: how to handle access which is already assigned and becomes marked as privileged? (e.g. adding privileged app role into existing business role).
+//
+//   Certification reduces access:
+//     Certification is an effective tool to reduce access, thus reducing risk.
+//     It isn't. People are just approving everything (rubber-stamping). They are mostly just a security theater.
+//     Certification is a bread&butter of compliance (reference ISO, CSF and other frameworks)
+//     Solution: assisted certification - indicate risk level
+//               divide cerifications: smaller risk-based campaigns, microcertification
+//               best of all: avoid certifications by using rules (PD-RBAC)
+//
+//   IGA is process-oriented:
+//     All the wise IDM advice from 2000s and 2010s said: IDM is all about processes.
+//     Map your IDM processes, automate them, and you have great IDM solution.
+//     This is an advice that may look reasonable, especially from process management point of view.
+//     Yet it was not working well for IDM, it will certainly not work for IGA.
+//     IGA is not "process-based". It might be "algorithm-oriented" at best. In fact, IGA is *policy-oriented*.
+//     IGA is all about policies, not processes.
+//     Processes are just a consequence of policy enforcement.
+//     *Do not use process as a substitution for policy*. It will not work.
+//     Policy has to be enforced consistently, in various situations, under all circumstances.
+//     It is extremely difficult to set up a process that handles all the situations and circumstances well.
+//     However, IGA platform is designed to do just that. Rely on the platform, not processes.
+//     Note: we are not saying that processes are not interesting.
+//     Current processes have policy information embedded in them, information that is not recorded anywhere else.
+//     Analyze the processes, discover the policies hidden in them, then discard the processes and implement the policies correctly and consistently.
+//
+//   IGA must adapt to your processes:
+//     You can do that.
+//     However, it will be costly, slow and very difficult to maintain.
+//     It may be better idea to adapt your processes to IGA,
+//     as many IGA platforms come with "best practice" configuration pretty much out-of-the-box.
+//     Admit it, your processes are likely to be wrong anyway.
+//     You will have to change them anyway, otherwise you will have difficulty to comply with new wave of regulations and standards.
+//     At least, go half the way, adapt IGA to your needs and adapt your processes to IGA.
+//
+//   Pump&dump provisioning (pull provisioning). E.g. pulling data from HR to LDAP, from LDAP to application databases (copying data, on-demand, on first login)
+//     Both antipattern and common industry practice
+//     Problem: low visibility Where are my data?
+//              Are data deprovisioned? You can disable auth, but the data may stay (and often they do)
+//              How often do the app synchronizes? Does the sync work?
+//              In-app permissions, not visible to IGA
+//     If you have to do it, do at least this:
+//              Must use centralized auth, otherwise problem with credential sync and emergency disable
+//              Double checks, triple check that you have good error handling and reporting
+//              Must have system monitoring framework and centralized logging, reporting sync errors there (e.g. missed delete)
+//              Must include the application in regular audits and data protection reviews, comparing data
+//
+
+// PRIVACY is all about hiding PII
+// Very common misconception is that privacy is all about the secrecy of personally identifiable information (PII).
+// This belief is wrong in all of its aspects.
+// Firstly, privacy is not just about secrecy of information.
+// Privacy is primarily concerned about appropriate use of information.
+// The sole fact that an organization legally posses personal data does not entitle the organization to unlimited processing of the data.
+// Secondly, privacy is not just about personally identifiable information, such as national identifiers.
+// Privacy is concerned with much broader concept of personal data, which includes information that may not be necessarily identifiable, such as information about gender or medical condition of subjects.
+// Overall, understanding the nature of privacy is much more complex than it may seem.
+// Consultation with a privacy professional is more than recommended.
+
+// No exceptions: there are always exceptions to the rule. Given a sufficiently large organization, there are always exceptions to the policy. Exceptions are needed at least temporarily ... however, temporary solutions tend to become permanent. RBAC can handle exceptions. Can PBAC? How to record the exceptions? How to review them?
+// As security cannot be perfect, policy cannot be perfect too. Policy is an approximation of reality. Exceptions are unavoidable. If you do not have exception, then your policy is probably too "broad", it allows more access than necessary.
+// Ref: Policies are easy
+
+//  Other:
+//   * Messaging-based data feed without reconciliation, relying on message broker not to loose messages
+//   * Access Cloning: copying all access from a "donor" to a new employee - mix with some RBAC myth, maybe application roles?
+// * Policy is never done, RBAC is never done. Identity maintenance never stops. Removing old stuff is just as important as adding new stuff. xref: IDM big bang, Identity project
+//
+// Inspiration:
+// * App inventory, owners, replacing owners, NHI linking, asset management
+// * Start simple, refine, go complex
+// * Group management, sprawl, hybrid id (AD/Entra)

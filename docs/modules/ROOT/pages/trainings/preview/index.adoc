@@ -1,0 +1,21 @@
+= MidPoint Training Previews
+
+The following content is taken from our real training materials.
+It is provided to present how our trainings look like if you consider attending one of them.
+
+== MidPoint Deployment Fundamentals
+
+The following links provide a sample of *MidPoint Deployment Fundamentals* (MID-101) training.
+
+TIP: The training has been updated for midPoint 4.4 LTS.
+
+* https://docs.evolveum.com/trainings/mid-101/preview/midpoint-deployment-fundamentals-sample-slides.pdf[Sample Overhead Slides (PDF)]: contains the introduction slides and then a fragment from one of the modules
+* https://docs.evolveum.com/trainings/mid-101/preview/LABS-MID101-sample.pdf[Sample Lab Guide (PDF)]: contains the student lab guide with a fragment of the labs for the same module
+
+== MidPoint Advanced Customization
+
+The following links provide a sample of *MidPoint Advanced Customization* (MID-102) training.
+
+* https://docs.evolveum.com/trainings/mid-102/preview/midpoint-advanced-customization-sample-slides.pdf[Sample Overhead Slides (PDF)]: contains the introduction slides and then a fragment from one of the modules
+* https://docs.evolveum.com/trainings/mid-102/preview/LABS-MID102-sample.pdf[Sample Lab Guide (PDF)]: contains the student lab guide with a fragment of the labs for the same module
+

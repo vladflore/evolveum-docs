@@ -1,0 +1,26 @@
+= MidPoint Features
+:page-nav-title: Features
+:page-display-order: 82
+:page-upkeep-status: green
+
+MidPoint is a comprehensive and feature-rich platform.
+It has numerous features, that are even difficult to completely enumerate.
+However, we have tried to do our best, enumerating the features:
+
+* xref:unique/[Unique Features of MidPoint]
+* xref:current/[List of All Current Features]
+
+MidPoint is also a vibrant project, with very active development.
+Therefore new features are added all the time.
+Before a feature is added, there is usually a simple description of the functionality.
+Following pages list such description:
+
+* xref:planned/[Planned Features]
+
+Features are planned, developed, supported, deprecated and removed, following a predictable xref:/midpoint/versioning/feature-lifecycle/[feature lifecycle model].
+
+== See Also
+
+* xref:/midpoint/roadmap/[]
+
+* xref:/midpoint/versioning/feature-lifecycle/[]

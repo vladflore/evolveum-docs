@@ -1,0 +1,58 @@
+---
+layout: personal
+job-title: Expert Identity Engineer
+photo: noris.jpg
+academic-titles: Ing. (MSc)
+profile-github: dejavix
+profile-linkedin-url: https://www.linkedin.com/in/ivannoris/
+evolveum-blog: https://evolveum.com/author/vix/
+---
+
+= Ivan Noris
+
+== Short Bio
+
+Graduated from the Slovak Technical University with a master degree in Software Engineering.
+He works as an expert identity engineer and training instructor at Evolveum,
+being one of the first team members.
+
+== Education
+
+* Inžinier (Ing., master) degree from https://www.stuba.sk/[Slovak University of Technology]
+
+== Publications and Talks (selection)
+
+xref:/talks/files/2025-05-first-steps-methodology.pdf[First Steps Methodology Workshop]::
+MidPoint Community Meetup, 2025
+
+xref:/talks/files/2025-05-entitlements.pdf[How to Manage Entitlements via MidPoint's User Interface]::
+MidPoint Community Meetup, 2025
+
+xref:/talks/files/2024-11-group-management.pdf[Group Management with MidPoint Webinar] + https://youtu.be/4CdhXfSm2dA[video]::
+Evolveum webinar, 2024
+
+xref:/talks/files/2023-11-first-steps-methodology.pdf[First Steps Methodology Webinar] + https://www.youtube.com/watch?v=suo775ym_PE[video]::
+Evolveum webinar, 2023
+
+== Training Development
+
+He created/co-created, delivers and maintains the following midPoint training courses
+
+https://evolveum.com/training-and-certification/midpoint-deployment-intermediate-configuration/[MidPoint Deployment: Intermediate Configuration (MID303)]::
+since 2025
+
+https://evolveum.com/training-and-certification/midpoint-deployment-group-synchronization/[MidPoint Deployment: Group Synchronization (MID302)]::
+since 2024
+
+https://evolveum.com/training-and-certification/midpoint-deployment-first-steps/[MidPoint Deployment: First Steps (MID301)]::
+since 2023
+
+MidPoint Deployment Fundamentals (MID-101)::
+2017-2023
+
+MidPoint Advanced Customization (MID-102)::
+2018-2022
+
+
+//== Project Participation (selection)
+

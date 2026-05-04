@@ -1,0 +1,105 @@
+= Mapping Notes
+
+Notes from Mapping review 2021/2022.
+
+== Challenges
+
+* Complexity
+
+** Difficult to understand mappings
+
+*** Solution: better documentation? docs? Dedicated chapter in book?
+
+*** Solution: Metaphors? Describe mappings using terms that common people/engineers understand?
+
+*** Solution: More pictures, diagram, visualizations
+
+** Difficult to configure mappings
+
+*** Solution: more reasonable defaults? (e.g. default range)
+
+** Terminology
+
+*** Weak,normal,strong: better names?
+
+** Apparent paradoxes
+
+*** Condition vs range
+
+*** Null, non-null
+
+* Lightweight synchronization (recon)
+
+** Avoid reading data from resources when not needed (even for strong mappings)
+
+*** Solution: "incremental" (fully relativistic) mode?
+
+** Single-resource inbound sync (in multi-resource configurations, with multi-source configuration, overlapping mappings)
+
+*** Solution: metadata + smart range?
+
+*** Solution: caching source data in shadow?
+
+** Consideration: can we evaluate mappings only for one resource? E.g. only for HR? +
+Problem: Evaluate inbound mappings, store data in user, but the deltas are lost.
+If we would continue, we can use the deltas to relativistically propagate changes to outbound mappings, maybe even skipping reading current values for strong mappings (see above). +
+Similarly, evaluating only for one outbound resource can be problematic.
+Where do we get the deltas from?
+
+* Implementation
+
+** Code could be improved, made nicer and more consistent. TODO
+
+** Containers as mapping output, e.g. to parse complex inbound attibutes presented as string, storing output in extension container.
+
+== Possible Optimizations
+
+* Skip reading current values if we have only strong mappings to single-valued attributes.
+Or maybe have "always overwrite" mode.
+May be faster than read-check-update.
+
+* Mark _expensive_ mappings, re-evaluate them only if really necessary.
+
+== Requirements
+
+* Roll-out new provenance metadata to production.
+We need to record mapping that produced value to have smart range expressions.
+
+* New scenarios needed by "flexible correlation"
+  - pre-processing of resource object being synchronized (before correlation or even before classification)
+  - interacting with external correlator (i.e. transformation between resource or midPoint schema and correlator schema)
+
+== What To Do
+
+=== Documentation
+
+* Reference documentation
+
+** xref:/midpoint/reference/expressions/mappings/[]
+
+** xref:/midpoint/reference/expressions/expressions/[]
+
+** Describe algorithms:
+
+*** Domain/range, how condition is applied, merging values from several mappings (consolidation), relavive/absolute mode, etc.
+
+** Other subpages
+
+** Start with full complexity, describe all options
+
+* Guide/tutorial
+
+** Starting from simple, explaining how to do things.
+
+** where to place it?
+
+** Later make a dedicated book chapter from the text?
+Maybe we would need to add object templates and roles to the mix?
+
+** Examples: how to set up mappings for authoritative source, how to set up mappings with two sources, etc.
+
+* Implementation documentation
+
+** xref:/midpoint/projects/midprivacy/phases/01-data-provenance-prototype/processing/model/plain/[]
+
+* Document the theory?

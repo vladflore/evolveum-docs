@@ -1,0 +1,33 @@
+= eDirectory
+:page-wiki-name: eDirectory
+:page-wiki-id: 20086892
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2015-08-11T15:59:01.295+02:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2015-08-11T15:59:02.295+02:00
+:page-obsolete: true
+:page-toc: top
+
+
+== Status
+
+Somehow works
+
+
+== Description
+
+...
+
+
+== Recommended Connectors
+
+[%autowidth]
+|===
+| Type | Description | Comments
+
+| Polygon LDAP connector
+| xref:/connectors/connectors/com.evolveum.polygon.connector.ldap.LdapConnector/[LDAP Connector]
+|
+
+
+|===

@@ -1,0 +1,50 @@
+= Build and Release
+:page-nav-title: Build and Release
+
+== Build
+
+There are tree types of Studio builds or channels as they are called in JetBrains marketplace:
+
+|====
+| Build type | Quality | Description
+
+| stable
+| production
+| Production-quality official releases.
+
+| snapshot
+| alpha
+| Intended for testing, evaluation of new features, gathering of community feedback and so on. Development happens here.
+When `4.8.0` is released as stable build, beta releases for next version `4.9.0` will be released here.
+
+| support
+| beta
+| Intended for testing, evaluation of mostly bugfixes, gathering of community feedback and so on.
+When `4.8.0` is released as stable build, beta releases `4.8.*` will be released here.
+|====
+
+
+== Adding Plugin Repository
+
+Custom repository needs to be added to use snapshot builds:
+
+. Go to menu `File` → `Settings (Preferences)` → `Plugins` → `Manage plugin repositories`
+
+. Add repository:
+
+** `https://plugins.jetbrains.com/plugins/Snapshot/list` for snapshot builds
+
+** `https://plugins.jetbrains.com/plugins/Support/list` for support builds
+
+. Search for `MidPoint Studio` and click on `Install`
+
+== Migrating to other channel in plugin repository
+
+. Go to menu `File` -> `Settings (Preferences)` → `Plugins`
+.. Uninstall MidPoint Studio plugin
+... This will not remove any configuration or project settings.
+If necessary you can still revert back to the previous version of the plugin.
+. Go to menu `File` → `Settings (Preferences)` → `Plugins` → `Manage plugin repositories`
+.. Add or edit existing url of repository.
+. Search for `MidPoint Studio` and click on `Install`
+

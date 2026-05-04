@@ -1,0 +1,311 @@
+---
+release-version: '2.1'
+---
+= MidPoint 2.1 "Coeus"
+:page-layout: release-skeleton
+:release-version: 2.1
+:page-wiki-name: Release 2.1
+:page-wiki-id: 5341209
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2012-08-15T11:42:20.893+02:00
+:page-wiki-metadata-modify-user: mederly
+:page-wiki-metadata-modify-date: 2013-04-18T21:52:14.876+02:00
+:page-liquid:
+
+Release {release-version} is a sixth midPoint release code-named _Coeus_.
+The {release-version} release brings new features, better stability and robustness.
+It is introducing new way of attribute mapping, password policies, provisioning dependencies and robustness features, organizational structure support and a lot of other features.
+
+++++
+{% include release-data.html %}
+++++
+
+== Features
+midPoint 2.1 provides following features:
+
+* Account provisioning (create, read, update, delete accounts)
+
+** xrefv:/midpoint/reference/before-4.8/synchronization/examples/[Enabling and disabling accounts]
+
+** Support for xrefv:/midpoint/reference/before-4.8/expressions/[mapping and expressions] to determine account attributes
+
+** Support of multi-value attributes
+
+** Processing and computation fully based on xrefv:/midpoint/reference/before-4.8/concepts/relativity/[relative changes]
+
+** xrefv:/midpoint/reference/before-4.8/resources/provisioning-dependencies/[Provisioning dependencies]
+
+** xrefv:/midpoint/reference/before-4.8/synchronization/consistency/[Provisioning robustness] - ability to provision to non-accessible (offline) resources
+
+** xrefv:/midpoint/reference/before-4.8/synchronization/consistency/[Provisioning consistency] - ability to handle provisioning errors and compensate for inconsistencies
+
+** Support for tolerant attributes
+
+
+* Integration of xref:/connectors/connectors/[Identity Connector Framework (OpenICF)]
+
+** xref:/midpoint/architecture/archive/subsystems/provisioning/ucf/[Unified Connector Framework (UCF) layer to allow more provisioning frameworks in the future]
+
+** Automatic generation and caching of xrefv:/midpoint/reference/before-4.8/resources/resource-schema/[resource schema] from the connector
+
+** xref:/midpoint/architecture/archive/data-model/midpoint-common-schema/connectortype/[Local connector discovery]
+
+** Support for connector hosts and remote xref:/midpoint/architecture/archive/data-model/midpoint-common-schema/connectortype/[connectors], xref:/connectors/connectors/[identity connector] and xref:/midpoint/architecture/archive/data-model/midpoint-common-schema/connectorhosttype/[connectors host type]
+
+** Remote connector discovery
+
+
+* Improved administration xref:/midpoint/architecture/archive/subsystems/gui/[GUI]
+
+** Preview changes page
+
+** Basic account-centered views (browse and search accounts directly)
+
+
+* xref:/midpoint/architecture/archive/subsystems/repo/identity-repository-interface/[Flexible identity repository implementations] and xrefv:/midpoint/reference/before-4.8/repository/generic/implementation/[SQL repository implementation]
+
+** xrefv:/midpoint/reference/before-4.8/repository/generic/implementation/[Identity repository based on relational databases]
+
+
+* xrefv:/midpoint/reference/before-4.8/synchronization/introduction/[Live synchronization]
+
+* xrefv:/midpoint/reference/before-4.8/concepts/relativity/[Reconciliation]
+
+* Advanced RBAC support and flexible account assignments
+
+** xrefv:/midpoint/reference/before-4.8/expressions/expressions/[Expressions in the roles]
+
+** Hierarchical roles
+
+** Parametric roles (including ability to assign the same role several times with different parameters)
+
+
+* Several xrefv:/midpoint/reference/before-4.8/synchronization/projection-policy/[assignment enforcement modes]
+
+* xrefv:/midpoint/reference/before-4.8/expressions/expressions/[Customization expressions]
+
+** xrefv:/midpoint/reference/before-4.8/expressions/expressions/script/groovy/[Groovy]
+
+** xrefv:/midpoint/reference/before-4.8/expressions/expressions/script/javascript/[JavaScript (ECMAScript)]
+
+** xrefv:/midpoint/reference/before-4.8/expressions/expressions/script/xpath/[XPath version 2] and xrefv:/midpoint/reference/before-4.8/legacy/xpath2/[XPath Tutorial]
+
+
+* xrefv:/midpoint/reference/before-4.8/concepts/polystring/[PolyString] support allows automatic conversion of strings in national alphabets
+
+* xrefv:/midpoint/reference/before-4.8/schema/custom-schema-extension/[Custom schema extensibility]
+
+* xref:/midpoint/architecture/concepts/common-interface-concepts/[Enhanced logging and error reporting]
+
+* xrefv:/midpoint/reference/before-4.8/tasks/task-manager/[Multi-node task manager component with HA support]
+
+* Rule-based RBAC (RB-RBAC) ability by using conditional mappings in xrefv:/midpoint/reference/before-4.8/expressions/object-template/[user template]
+
+* Basic xrefv:/midpoint/reference/before-4.8/security/audit/[auditing]
+
+** Auditing to xrefv:/midpoint/reference/before-4.8/security/audit/#logfile-auditing[file (logging)]
+
+** Auditing to xrefv:/midpoint/reference/before-4.8/security/audit/#database-table-auditing[SQL table]
+
+
+* xrefv:/midpoint/reference/before-4.8/security/credentials/password-policy/[Password policies]
+
+* Lightweight deployment structure
+
+* Support for Apache Tomcat web container
+
+* Import from file and resource
+
+** xrefv:/midpoint/reference/before-4.8/schema/object-references/[Object schema validation during import] (can be switched off)
+
+** xrefv:/midpoint/reference/before-4.8/schema/object-references/[Smart references between objects based on search filters]
+
+
+* Simple xrefv:/midpoint/reference/before-4.8/synchronization/consistency/[handling of provisioning errors]
+
+* xrefv:/midpoint/reference/before-4.8/resources/resource-configuration/protected-accounts/[Protected accounts] (accounts that will not be affected by midPoint)
+
+* xrefv:/midpoint/reference/before-4.8/roles-policies/segregation-of-duties/[Segregation of Duties] (SoD)
+
+** xrefv:/midpoint/reference/before-4.8/roles-policies/segregation-of-duties/[Role exclusions]
+
+
+* Export objects to XML
+
+* Enterprise class scalability (hundreds of thousands of users)
+
+
+== Changes
+
+When compared to the previous version, Coeus is introducing following changes:
+
+* xrefv:/midpoint/reference/before-4.8/security/credentials/password-policy/[Password policies]
+
+* xrefv:/midpoint/reference/before-4.8/security/audit/#database-table-auditing[SQL table][Auditing to SQL tables] (see also xrefv:/midpoint/reference/before-4.8/security/audit/[basic information about auditing])
+
+* Recording xref:/midpoint/architecture/archive/subsystems/model/user-synchronizer/[synchronization] situations in the shadows
+
+* xrefv:/midpoint/reference/before-4.8/resources/provisioning-dependencies/[Provisioning dependencies]
+
+* xref:/midpoint/architecture/concepts/consistency-model/[Provisioning consistency]
+
+* xref:/midpoint/architecture/archive/data-model/midpoint-common-schema/connectorhosttype/[Remote connector discovery]
+
+* Improved attribute xrefv:/midpoint/reference/before-4.8/expressions/[mappings and expressions]
+
+* xrefv:/midpoint/reference/before-4.8/expressions/mappings/[Support for conditions in attribute mappings] (roles, outbound/inbound mapping)
+
+* Experimental xrefv:/midpoint/reference/before-4.8/cases/workflow-3/[workflow integration]
+
+* Organizational structure
+
+* GUI improvements
+
+** Preview changes page
+
+** Basic account-centered views (browse and search accounts directly)
+
+
+* Rule-based RBAC (RB-RBAC) ability by using conditional mappings in xrefv:/midpoint/reference/before-4.8/expressions/object-template/[user template]
+
+* Export objects to XML
+
+* Several xrefv:/midpoint/reference/before-4.8/synchronization/projection-policy/[assignment enforcement modes]
+
+* Support for tolerant attributes
+
+* Experimental JasperReports integration
+
+Changes in the internals, minor improvements and quality assurance:
+
+* Significantly increased number of integration tests
+
+* Improved overall quality, usability, stability and performance during testing phase that focused on requirements from customers
+
+* Internal search query representation was re-engineered
+
+* ValueConstruction changed completely to Mapping (non-compatible schema change)
+
+* Switching object name to PolyString for better national environment support
+
+* Improved internal support for asynchronous processes (still experimental)
+
+* Improved logging and presentation of operation results
+
+* Better GUI resilience in case of resource failures
+
+* Recording value origin (inbound, outbound, etc.) and displaying that in GUI
+
+* Ability to limit mapping to a specific channel
+
+* XML editor encrypts sensitive values
+
+* Support maven3 in the build process
+
+== Quality
+
+Release 2.1 (_Coeus_) is intended for full production use in enterprise environments.
+All features are stable and well tested.
+
+== Platforms
+
+MidPoint is known to work well in the following deployment environment.
+The following list is list of *tested* platforms, i.e. platforms that midPoint team or reliable partners personally tested this release.
+The version numbers in parentheses are the actual version numbers used for the tests.
+However it is very likely that midPoint will also work in similar environments.
+Also note that this list is not closed.
+MidPoint can be supported in almost any reasonably recent platform (please contant Evolveum for more details).
+
+
+=== Java
+
+* Sun/Oracle Java SE Runtime Environment 6 update 26 or above (1.6.0_26, 1.6.0_35 64bit, 1.6.0_37)
+
+* Sun/Oracle Java SE Runtime Environment 7 (1.7.0_09)
+
+
+=== Web Containers
+
+* Apache Tomcat 6 (6.0.32, 6.0.33)
+
+* Apache Tomcat 7 (7.0.30, 7.0.32)
+
+* Sun/Oracle Glassfish 3 (3.1.2.2)
+
+
+=== Databases
+
+* H2 (embedded, only recommended for demo deployments)
+
+* PostgreSQL (8.4.14, 9.1, 9.2)
+
+* MySQL (5.5)
+
+* Oracle 11g (11.2.0.2.0)
+
+
+=== Unsupported Platforms
+
+Following list contains platforms that midPoint is known *not* to work due to various issues.
+As these platforms are obsolete and/or marginal we have no plans to support midPoint for these platforms.
+
+* Sun/Oracle Java SE Runtime Environment 6 update 25 or older
+
+* Sun/Oracle GlassFish 2
+
+
+
+++++
+{% include release-download-v1.html %}
+++++
+
+== Background and History
+
+midPoint is roughly based on OpenIDM version 1. When compared to OpenIDM v1, midPoint code was made significantly "lighter" and provides much more sophisticated features.
+Although the architectural outline of OpenIDM v1 is still guiding the development of midPoint almost all the OpenIDM v1 code was rewritten.
+MidPoint is now based on relative changes and contains advanced identity management mechanisms such as advanced RBAC, provisioning consistency, etc.
+
+For the full project background see the xref:/midpoint/history/[midPoint History] page.
+
+
+== Known Issues
+
+. Consistency mechanism fails to operate correctly in case new user is added (under some cirmustances) (bug:MID-1056[])
+
+. Strong mappings fail in presence of replace deltas for mapping targets (bug:MID-1067[])
+
+. Weak mappings are not processes correctly in modify situations (bug:MID-1068[])
+
+. Two consecutive modifications may produce strange results when resource is down (bug:MID-1054[])
+
+
+== Change secret key in keystore
+
+To generate new secret key (with different key size), you have to proceed through this steps:
+
+. shudtown midpoint
+
+. find JCEKS keystore in midpoint.home (by default it's keystore.jceks, but file name can be different)
+
+. generate new key +
+`keytool -genseckey -alias <SOME_ALIAS> -keystore <KEYSTORE_FILENAME> -storetype jceks -keyalg AES -keysize <KEY_SIZE>` +
+
+Supported key sizes are: 128 (doesn't require JCE), 192 and 256 (JCE required)
+
+. change configuration in config.xml in midpoint.home +
+`<encryptionKeyAlias>default</encryptionKeyAlias>` change 'default' to <SOME_ALIAS>
+
+. add/edit <xmlCipher></xmlCipher> in <keystore> element.
+You can use smaller cipher key size for encryption.
+For: +
+
+AES_128 use "http://www.w3.org/2001/04/xmlenc#aes128-cbc" +
+
+AES_256 use "http://www.w3.org/2001/04/xmlenc#aes256-cbc" +
+
+AES_192 use "http://www.w3.org/2001/04/xmlenc#aes192-cbc" +
+
+without quotation.
+This element is optional, if it doesn't exist AES_128 is used.
+
+. From now every encryption operation uses new key, for decryption old key is used.

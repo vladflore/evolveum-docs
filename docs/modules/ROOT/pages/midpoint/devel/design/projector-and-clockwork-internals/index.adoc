@@ -1,0 +1,28 @@
+= Projector and clockwork internals
+:page-wiki-name: Projector and clockwork internals
+:page-wiki-id: 48824579
+:page-wiki-metadata-create-user: mederly
+:page-wiki-metadata-create-date: 2020-04-22T20:25:06.766+02:00
+:page-wiki-metadata-modify-user: mederly
+:page-wiki-metadata-modify-date: 2020-07-03T10:21:22.343+02:00
+
+[WARNING]
+====
+This is a work in progress (and probably will stay such for a long time).
+
+====
+
+How midPoint does work internally?
+
+Answering this question is maybe quite hard.
+In the meantime please enjoy the following diagrams aimed at providing an overview of two key components: _Projector_ and _Clockwork_.
+
+image::projector.png[]
+
+
+
+image::clockwork.png[]
+
+
+
+(link:https://github.com/Evolveum/midpoint-design/blob/master/pictures/Projector%20and%20Clockwork.drawio[source])

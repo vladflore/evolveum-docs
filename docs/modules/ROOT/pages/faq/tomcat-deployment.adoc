@@ -1,0 +1,35 @@
+= Is Tomcat deployment still supported?
+:page-wiki-name: Is Tomcat deployment still supported?
+:page-wiki-id: 26214436
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2018-06-20T13:04:46.233+02:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2020-10-01T19:24:57.482+02:00
+
+TL;DR: For versions up to and including 4.4, yes, but it is deprecated.
+It is unsupported for 4.5 and impossible with version 4.6 and newer!
+Please use stand-alone deployment instead.
+
+Midpoint 3.7 introduced stand-alone deployment model for midPoint.
+There were many good reasons for that change.
+But perhaps the strongest motivation was to lower entry barrier by making midPoint installation simpler.
+There are other advantages too: midPoint is now bundled with a matching version of Tomcat.
+This combination gets better testing, as it is unrealistic to test midPoint with all existing versions of Tomcat.
+The bundling may make some upgrade easier (especially upgrades where Tomcat needs to be upgraded as well).
+With stand-alone deployment we are bundling startup scripts that are customized for midPoint and ready to use.
+And so on, and so on.
+There is a lot of small advantages that make it easier to use midPoint in stand-alone mode - especially for users that are not entirely at home in Java EE world.
+
+Stand-alone deployment is now the primary deployment method.
+
+Up to version 4.4, both methods were possible:
+
+* Stand-alone deployment (recommended)
+* Tomcat deployment (deprecated)
+
+The deprecation must have come to an end - and with midPoin 4.5 it is no longer supported.
+Since version 4.6 the binary is delivered exclusively as a JAR which can't be deployed on Tomcat.
+
+== See Also
+
+* xref:/faq/[Frequently Asked Questions]

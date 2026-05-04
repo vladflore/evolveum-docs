@@ -1,0 +1,489 @@
+---
+release-version: '3.2'
+---
+= MidPoint 3.2 "Tycho"
+:page-layout: release-skeleton
+:release-version: 3.2
+:page-wiki-name: Release 3.2
+:page-wiki-id: 17760330
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2014-10-22T16:42:37.361+02:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2016-06-27T16:11:58.098+02:00
+:page-liquid:
+
+Release {release-version} is a thirteenth midPoint release code-named _Tycho_.
+The {release-version} release brings new advanced LDAP connector, internal improvements and governance technology preview.
+
+++++
+{% include release-data.html %}
+++++
+
+++++
+{% capture dedicationContent %}
+<p>
+    <a href="https://en.wikipedia.org/wiki/Tycho_Brahe">Tycho Brahe</a> (1546-1601) was a Danish astronomer.
+    He was known for his exact astronomical observations that refuted the belief in an unchanging celestial realm.
+    Tycho's observations were an essential contribution to the scientific revolution and influenced many scientists that came after Tycho's time.
+</p>
+<p>
+    Similarly to Tycho's empirical data midPoint version 3.2 brings features that make it more anchored into reality.
+    Governance features bring the ability to feed back reality into the policies and continually sustain IDM deployment.
+    And very like Tycho's observations the midPoint 3.2 user experience exposes aspects of reality that might otherwise be missed.
+</p>
+{% endcapture %}
+{% include release-dedication.html content=dedicationContent %}
+++++
+
+== Credits
+
+Majority of the work on the _Tycho_ release was done by the https://evolveum.com/[Evolveum] team.
+However, this release would not be possible without the help of our partners, customers, contributors, friends and families.
+We would like to express a great gratitude to all the people that contributed to the midPoint project.
+
+We would also like to thank:
+
+* http://www.biznet.com.tr[Biznet] for their continued support and contributions.
+
+* ... and many others that we regrettably cannot mention yet.
+
+
+
+== Features
+
+midPoint 3.2 provides following features:
+
+* Basic user data model suitable for easy integration
+
+** Numerous built-in properties based on IDM de-facto standards (LDAP inetOrgPerson, FOAF, ...) and experience
+
+** Extensibility by custom properties
+
+** Off-the-shelf support for user password credentials
+
+** Off-the-shelf support for user activation
+
+*** Enabled/disabled states (extensible in the future)
+
+*** Support for user validity time constraints (valid from, valid to)
+
+** Object template to define policies, default values, etc.
+
+*** Ability to use conditional mappings (e.g. to create RB-RBAC setup)
+
+*** Ability to include other object templates
+
+*** Global and resource-specific template setup
+
+
+* Account provisioning (create, read, update, delete accounts)
+
+** xrefv:/midpoint/reference/before-4.8/synchronization/examples/[Enabling and disabling accounts]
+
+** Support for xrefv:/midpoint/reference/before-4.8/expressions/[mapping and expressions] to determine account attributes
+
+** Support of multi-value attributes
+
+** Processing and computation fully based on xrefv:/midpoint/reference/before-4.8/concepts/relativity/[relative changes]
+
+** xrefv:/midpoint/reference/before-4.8/resources/resource-configuration/schema-handling/[Multi-layer attribute access limitations]
+
+** xrefv:/midpoint/reference/before-4.8/resources/provisioning-dependencies/[Provisioning dependencies]
+
+*** Higher-order dependencies (enables partial support for circular provisioning dependencies)
+
+** xrefv:/midpoint/reference/before-4.8/synchronization/consistency/[Provisioning robustness] - ability to provision to non-accessible (offline) resources
+
+** xrefv:/midpoint/reference/before-4.8/synchronization/consistency/[Provisioning consistency] - ability to handle provisioning errors and compensate for inconsistencies
+
+** Support for xrefv:/midpoint/reference/before-4.8/resources/resource-configuration/schema-handling/#attribute-tolerance[tolerant attributes]
+
+*** Ability to select tolerant and non-tolerant values using a pattern (regexp)
+
+** Matching rules to support case insensitive attributes (extensible)
+
+** Ability to execute scripts before/after provisioning operations
+
+** Advanced support for account activation (enabled/disabled states)
+
+*** Standardized account activation that matches user activation schema for easy integration
+
+*** Ability to simulate activation capability if the connector does not provide it
+
+*** Support for account lock-out
+
+*** Support for account validity time constrains (valid from, valid to)
+
+*** Support easy xrefv:/midpoint/reference/before-4.8/resources/resource-configuration/schema-handling/activation/[activation existence mappings] (e.g. easy configuration of "disables instead of delete" feature)
+
+*** Support for xrefv:/midpoint/reference/before-4.8/expressions/mappings/[mapping time constraints] in activation mappings that allow configuring time-related provisioning features such as xrefv:/midpoint/reference/before-4.8/resources/resource-configuration/schema-handling/activation/[deferred account delete or pre-provisioning].
+
+** Ability to specify set of xrefv:/midpoint/reference/before-4.8/resources/resource-configuration/protected-accounts/[protected accounts] that will not be affected by IDM system
+
+
+* Connectors
+
+** Integration of xref:/connectors/connectors/[Identity Connector Framework (ConnId)]
+
+** Support for Evolveum Polygon connectors
+
+** Support for ConnId connectors
+
+** Support for OpenICF connectors
+
+** xref:/midpoint/architecture/archive/subsystems/provisioning/ucf/[Unified Connector Framework (UCF) layer to allow more provisioning frameworks in the future]
+
+** Automatic generation and caching of xrefv:/midpoint/reference/before-4.8/resources/resource-schema/[resource schema] from the connector
+
+** xref:/midpoint/architecture/archive/data-model/midpoint-common-schema/connectortype/[Local connector discovery]
+
+** Support for connector hosts and remote xref:/midpoint/architecture/archive/data-model/midpoint-common-schema/connectortype/[connectors], xref:/connectors/connectors/[identity connector] and xref:/midpoint/architecture/archive/data-model/midpoint-common-schema/connectorhosttype/[connectors host type]
+
+** Remote connector discovery
+
+** Support for native attribute names
+
+** Support for entitlement shortcut attributes (e.g. `memberOf` LDAP attribute)
+
+** Support for auxiliary object classes
+
+** Support for synchronization of all object classes
+
+
+* Web-based administration xref:/midpoint/architecture/archive/subsystems/gui/[GUI] (AJAX)
+
+** Ability to execute identity management operations on users and accounts
+
+** User-centric views
+
+** Account-centric views (browse and search accounts directly)
+
+** Resource wizards
+
+** Layout automatically adapts to screen size (e.g. for mobile devices)
+
+** Easily customizable look & feel
+
+** Built-in XML editor for identity and configuration objects
+
+
+* xref:/midpoint/architecture/archive/subsystems/repo/identity-repository-interface/[Flexible identity repository implementations] and xrefv:/midpoint/reference/before-4.8/repository/generic/implementation/[SQL repository implementation]
+
+** xrefv:/midpoint/reference/before-4.8/repository/generic/implementation/[Identity repository based on relational databases]
+
+** xref:/midpoint/guides/admin-gui-user-guide/#keeping-metadata-for-all-objects-creation-modification-approvals[Keeping metadata for all objects] (creation, modification, approvals)
+
+** xrefv:/midpoint/reference/before-4.8/deployment/removing-obsolete-information/[Automatic repository cleanup] to keep the data store size sustainable
+
+
+* Synchronization
+
+** xrefv:/midpoint/reference/before-4.8/synchronization/introduction/[Live synchronization]
+
+** xrefv:/midpoint/reference/before-4.8/concepts/relativity/[Reconciliation]
+
+*** Ability to execute scripts before/after reconciliation
+
+** Correlation and confirmation expressions
+
+*** Conditional correlation expressions
+
+** Concept of _channel_ that can be used to adjust synchronization behaviour in some situations
+
+** xrefv:/midpoint/reference/before-4.8/synchronization/generic-synchronization/[Generic Synchronization] allows synchronization of roles to groups to organizational units to ... anything
+
+
+* Advanced RBAC support and flexible account assignments
+
+** xrefv:/midpoint/reference/before-4.8/expressions/expressions/[Expressions in the roles]
+
+** Hierarchical roles
+
+** Conditional roles and assignments/inducements
+
+** Parametric roles (including ability to assign the same role several times with different parameters)
+
+** Temporal constraints (validity dates: valid from, valid to)
+
+** Higher-order inducements
+
+
+* xrefv:/midpoint/reference/before-4.8/resources/entitlements/[Entitlements]
+
+
+* Advanced internal security mechanisms
+
+** Fine-grained authorization model
+
+** Delegated administration
+
+
+* Several xrefv:/midpoint/reference/before-4.8/synchronization/projection-policy/[assignment enforcement modes]
+
+** Ability to specify global or resource-specific enforcement mode
+
+** Ability to "legalize" assignment that violates the enforcement mode
+
+
+* xrefv:/midpoint/reference/before-4.8/expressions/expressions/[Customization expressions]
+
+** xrefv:/midpoint/reference/before-4.8/expressions/expressions/script/groovy/[Groovy]
+
+** xrefv:/midpoint/reference/before-4.8/expressions/expressions/script/javascript/[JavaScript (ECMAScript)]
+
+** xrefv:/midpoint/reference/before-4.8/expressions/expressions/script/xpath/[XPath version 2] and xrefv:/midpoint/reference/before-4.8/legacy/xpath2/[XPath Tutorial]
+
+** Built-in libraries with a convenient set of functions
+
+
+* xrefv:/midpoint/reference/before-4.8/concepts/polystring/[PolyString] support allows automatic conversion of strings in national alphabets
+
+* Mechanism to iteratively determine unique usernames and other identifiers
+
+* Extensibility
+
+** xrefv:/midpoint/reference/before-4.8/schema/custom-schema-extension/[Custom schema extensibility]
+
+** xrefv:/midpoint/reference/before-4.8/concepts/clockwork/scripting-hooks/[Scripting Hooks]
+
+
+* Reporting based on Jasper Reports
+
+* Comprehensive logging designed to aid troubleshooting
+
+* xrefv:/midpoint/reference/before-4.8/tasks/task-manager/[Multi-node task manager component with HA support]
+
+* Rule-based RBAC (RB-RBAC) ability by using conditional mappings in xrefv:/midpoint/reference/before-4.8/expressions/object-template/[user template]
+
+* xrefv:/midpoint/reference/before-4.8/security/audit/[Auditing]
+
+** Auditing to xrefv:/midpoint/reference/before-4.8/security/audit/#logfile-auditing[file (logging)]
+
+** Auditing to xrefv:/midpoint/reference/before-4.8/security/audit/#database-table-auditing[SQL table]
+
+
+* xrefv:/midpoint/reference/before-4.8/security/credentials/password-policy/[Password policies]
+
+* Password recovery (security questions)
+
+* Partial multi-tenancy support
+
+* Access certification (technology preview)
+
+* Lightweight deployment structure
+
+* Support for Apache Tomcat web container
+
+* Import from file and resource
+
+** xrefv:/midpoint/reference/before-4.8/schema/object-references/[Object schema validation during import] (can be switched off)
+
+** xrefv:/midpoint/reference/before-4.8/schema/object-references/[Smart references between objects based on search filters]
+
+
+* Simple xrefv:/midpoint/reference/before-4.8/synchronization/consistency/[handling of provisioning errors]
+
+* xrefv:/midpoint/reference/before-4.8/resources/resource-configuration/protected-accounts/[Protected accounts] (accounts that will not be affected by midPoint)
+
+* xrefv:/midpoint/reference/before-4.8/roles-policies/segregation-of-duties/[Segregation of Duties] (SoD)
+
+** xrefv:/midpoint/reference/before-4.8/roles-policies/segregation-of-duties/[Role exclusions]
+
+
+* Export objects to XML
+
+* Enterprise class scalability (hundreds of thousands of users)
+
+* API accessible using a web service, REST and local JAVA calls
+
+* xrefv:/midpoint/reference/before-4.8/cases/workflow-3/[Workflow support] (based on https://www.activiti.org/[Activiti])
+
+* xrefv:/midpoint/reference/before-4.8/misc/notifications/[Notifications]
+
+* Documentation
+
+** xref:/midpoint/[Administration documentation publicly available in the wiki]
+
+** xref:/midpoint/architecture/[Architectural documentation publicly available in the wiki]
+
+** Schema documentation automatically generated from the definition (schemadoc)
+
+
+
+== Changes With Respect to Version 3.1.1
+
+* Password recovery (security questions)
+
+* Access certification (technology preview)
+
+* `referenceSearch` expression to create a generic reference in expressions and mappings
+
+* Reworked xref:/connectors/connectors/com.evolveum.polygon.connector.ldap.LdapConnector/[LDAP Connector]
+
+* LifeRay Portal connector
+
+* Support for native attribute names
+
+* Support for entitlement shortcut attributes (e.g. `memberOf` LDAP attribute)
+
+* Support for auxiliary object classes
+
+* Matching rule for LDAP distringuished name
+
+* Support for synchronization of all object classes
+
+* Asynchronous bulk delete task
+
+* Improved logging of authorization processing
+
+* Old values in audit deltas
+
+* Improved audit log report
+
+* Support "minimal" fetch strategy to avoid fetching of expensive attributes
+
+* Support for recomputation of other than user objects
+
+* GUI enhancements
+
+* Minor improvements for international environments
+
+
+== Quality
+
+Release 3.2 (_Tycho_) is intended for full production use in enterprise environments.
+All features are stable and well tested except for access certification which is only provided as a preview of future functionality.
+
+
+== Platforms
+
+MidPoint is known to work well in the following deployment environment.
+The following list is list of *tested* platforms, i.e. platforms that midPoint team or reliable partners personally tested this release.
+The version numbers in parentheses are the actual version numbers used for the tests.
+However it is very likely that midPoint will also work in similar environments.
+Also note that this list is not closed.
+MidPoint can be supported in almost any reasonably recent platform (please contact Evolveum for more details).
+
+
+=== Java
+
+* OpenJDK 7 (1.7.0_65, 1.7.0_79)
+
+* Sun/Oracle Java SE Runtime Environment 7 (1.7.0_45, 1.7.0_40, 1.7.0_67, 1.7.0_72)
+
+Please note that Java 6 environment is no longer supported (although it might work in some situations).
+
+Java 7 is supported for development, build and runtime.
+Java 8 is only supported for runtime.
+
+
+=== Web Containers
+
+* Apache Tomcat 6 (6.0.32, 6.0.33, 6.0.36)
+
+* Apache Tomcat 7 (7.0.29, 7.0.30, 7.0.32, 7.0.47, 7.0.50)
+
+* Apache Tomcat 8 (8.0.14)
+
+* Sun/Oracle Glassfish 3 (3.1)
+
+* BEA/Oracle WebLogic (12c)
+
+
+=== Databases
+
+* H2 (embedded, only recommended for demo deployments)
+
+* PostgreSQL (8.4.14, 9.1, 9.2)
+
+* MySQL +
+Supported MySQL version is 5.6.10 and above (with MySQL JDBC ConnectorJ 5.1.23 and above). +
+MySQL in previous versions didn't support dates/timestamps with more accurate than second fraction precision.
+
+* Oracle 11g (11.2.0.2.0)
+
+* Microsoft SQL Server (2008, 2008 R2, 2012)
+
+
+=== Unsupported Platforms
+
+Following list contains platforms that midPoint is known *not* to work due to various issues.
+As these platforms are obsolete and/or marginal we have no plans to support midPoint for these platforms.
+
+* Java 6
+
+* Sun/Oracle GlassFish 2
+
+
+++++
+{% include release-download.html %}
+++++
+
+
+== Upgrade
+
+
+=== Upgrade from midPoint 2.x
+
+Upgrade from version 2.x is possible but it is not publicly supported.
+It requires several manual steps.
+Evolveum provides this upgrade as part of the subscription or professional services.
+
+
+=== Upgrade from midPoint 3.0 and 3.1
+
+Upgrade path from MidPoint 3.0 goes through midPoint 3.1 and 3.1.1. Upgrade to midPoint 3.1 first (refer to the xref:/midpoint/release/3.1/[midPoint 3.1 release notes]). Then upgrade from midPoint 3.1 to 3.1.1 and then to 3.2.
+
+
+=== Upgrade from midPoint 3.1.1
+
+MidPoint 3.2 data model is essentially backwards compatible with midPoint 3.1.1. However as the data model was extended in 3.2 the database schema needs to be upgraded using the xrefv:/midpoint/reference/before-4.8/upgrade/database-schema-upgrade/[usual mechanism].
+
+MidPoint 3.2 is a major release that fixes some issues of previous versions.
+Therefore there are some changes that are not strictly backward compatible.
+There are two important upgrade tasks and a few additional concerns:
+
+* MidPoint 3.2 switched to a completely new xref:/connectors/connectors/com.evolveum.polygon.connector.ldap.LdapConnector/[LDAP Connector]. This connector is expected to resolve many xref:/connectors/connid/1.x/icf-issues/[issues] of the original Sun ICF framework that are still felt today.
+However this is a completely new connector and it is not backward compatible with the old connector.
+There is a separate page describing the migration: xrefv:/midpoint/reference/before-4.8/upgrade/connectors/ldap-connector-migration/[LDAP Connector Migration]
+
+* New ConnId framework brings support for synchronization of all object classes.
+This lead to a change of default behavior of synchronization processes.
+If no objectclass, kind or intent were specified in the synchronization process old midPoint versions used default account definition.
+The new midPoint versions will try to synchronize all object classes in this case.
+However, this will fail for resources that do not support the option to synchronize all object classes (which is currently the majority of all resources).
+Therefore it is strongly recommended to explicitly configure objectclass or kind/intent in existing synchronization tasks.
+
+* User interface (UI) authorization URLs were using wrong URI prefixes in previous midPoint versions (bug:MID-1965[]). MidPoint 3.2 fixed that issue.
+However, this means that UI authorizations configured for previous midPoint versions needs to be updated.
+UI authorization URI prefix changed from `http://midpoint.evolveum.com/xml/ns/public/security/authorization-3` to `http://midpoint.evolveum.com/xml/ns/public/security/authorization-ui-3`.
+
+
+=== Changes in initial objects since 3.1.1
+
+MidPoint has a built-in set of "initial objects" that it will automatically create in the database if they are not present.
+This includes vital objects for the system to be configured (e.g. role `superuser` and user `administrator`). These objects may change in some midPoint releases.
+But to be conservative and to avoid configuration overwrite midPoint does not overwrite existing objects when they are already in the database.
+This may result in upgrade problems if the existing object contains configuration that is no longer supported in a new version.
+Therefore the following list contains a summary of changes to the initial objects in this midPoint release.
+The complete new set of initial objects is in the `config/initial-objects` directory in both the source and binary distributions.
+Although any problems caused by the change in initial objects is unlikely to occur, the implementors are advised to review the following list and assess the impact on case-by-case basis:
+
+* 040-role-enduser: corrected UI authorization URIs (bug:MID-1965[])
+
+* 090-report-audit: significantly improved audit log report
+
+
+== Background and History
+
+MidPoint is roughly based on OpenIDM version 1. Although the architectural outline of OpenIDM v1 is still guiding the development of midPoint almost all the OpenIDM v1 code was rewritten.
+MidPoint has evolved dramatically from these early times.
+It is now based on relative changes and contains advanced identity management mechanisms such as advanced RBAC, provisioning consistency and other advanced IDM features.
+Governance features are currently being developed and are already available in a form of technology preview.
+MidPoint development is independent for more than four years.
+MidPoint is currently several times bigger than other competing systems.
+The development pace is rapid but stable.
+Development team is small, flexible and very efficient.
+Contributions are welcome.
+
+For the full project background see the xref:/midpoint/history/[midPoint History] page.

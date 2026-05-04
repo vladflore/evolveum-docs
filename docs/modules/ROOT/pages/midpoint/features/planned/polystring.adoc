@@ -1,0 +1,41 @@
+---
+midpoint-feature: polystring
+doc-type: plan
+---
+= PolyString Improvements
+:page-wiki-name: PolyString Improvements
+:page-wiki-id: 30245263
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2019-03-26T11:32:50.810+01:00
+:page-wiki-metadata-modify-user: martin.lizner
+:page-wiki-metadata-modify-date: 2020-01-14T12:23:55.853+01:00
+:page-upkeep-status: red
+:page-upkeep-note: This is implemented, convert to documentation!
+:page-toc: top
+
+== Introduction
+
+PolyString is an unusual kind of animal.
+It is a built-in data type for _polymorphic string_. This string maintains extra values in addition to its original value.
+The extra values are derived from the original value automatically using a _normalization_ code.
+
+See xref:/midpoint/reference/concepts/polystring/[PolyString] page for an introduction to PolyStrings.
+
+Some of those features are partially implemented in midPoint 4.0. However, they are considered to be xref:/midpoint/versioning/experimental/[EXPERIMENTAL].
+
+== Future
+
+=== PolyStrings in MidPoint 5.0
+
+It is likely that PolyString will become containers in midPoint 5.0.
+It has to be 5.0 because major schema improvements are needed to support PolyString as container.
+
+See xref:/midpoint/devel/design/midpoint-5-vision/[MidPoint 5.0 Vision] for more information.
+
+== See Also
+
+* xref:/midpoint/devel/prism/concepts/[Using Prism Objects]
+
+* xref:/midpoint/reference/schema/polystring-normalization/[PolyString Normalization Configuration]
+
+* xref:/midpoint/features/planned/localization/[Localization Improvements]

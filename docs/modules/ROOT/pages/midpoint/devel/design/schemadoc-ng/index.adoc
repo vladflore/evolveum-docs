@@ -1,0 +1,371 @@
+= SchemaDoc NG Design Notes
+:page-toc: top
+
+== Diagram Examples
+
+=== "Relation" Diagram
+
+image::datamodel-example-relation-user-shadow.png[]
+
+This also shows some internal structure (selected properties).
+
+=== Type Hierarchy
+
+Shows hierarchy of object types
+
+image::datamodel-example-type-hierarchy.png[]
+
+=== Object Internal Structure
+
+image::datamodel-example-internal-structure.png[]
+
+Also shows some relations.
+
+== Diagram Specifications
+
+=== Schema Annotations
+
+
+[source,xml]
+----
+<xsd:complexType name="UserType">
+        <xsd:annotation>
+            <xsd:documentation>...</xsd:documentation>
+            <xsd:appinfo>
+                <a:diagram>
+                    <a:name>user-shadow-resource</a:name>
+                    <a:form>collapsed</a:form>
+                </a:diagram>
+                <a:diagram>
+                    <a:name>user-details</a:name>
+                    <a:form>expanded</a:form>
+                </a:diagram>
+            </xsd:appinfo>
+        </xsd:annotation>
+</xsd:complexType>
+----
+
+[source,xml]
+----
+<xsd:complexType name="ShadowType">
+        <xsd:annotation>
+            <xsd:documentation>...</xsd:documentation>
+            <xsd:appinfo>
+                <a:diagram>
+                    <a:name>user-shadow-resource</a:name>
+                    <a:form>expanded</a:form>
+                </a:diagram>
+            </xsd:appinfo>
+        </xsd:annotation>
+        ...
+        <xsd:element name="resourceRef" type="c:ObjectReferenceType" minOccurs="0">
+            <xsd:annotation>
+                <xsd:documentation>...</xsd:documentation>
+                <xsd:appinfo>
+                    ...
+                    <a:diagram>
+                        <a:name>user-shadow-resource</a:name>
+                        <!-- default is to include this item, therefore no "inclusion" specification is needed here -->
+                    </a:diagram>
+                </xsd:appinfo>
+            </xsd:annotation>
+            ...
+        </xsd:element>
+        ...
+        <xsd:element name="kind" type="tns:ShadowKindType" minOccurs="0">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <a:diagram>
+                        <a:name>user-shadow-resource</a:name>
+                    </a:diagram>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:element>
+        ...
+</xsd:complexType>
+----
+
+=== "Relation" Diagram Annotations
+
+This is how to specify the user-shadow-resource-connector-connectorhost "relation" diagram above, just by using annotations:
+
+[source,xml]
+----
+<xsd:complexType name="UserType">
+        <xsd:annotation>
+            <xsd:documentation>...</xsd:documentation>
+            <xsd:appinfo>
+                <a:diagram>
+                    <a:name>user-shadow-resource</a:name>
+                    <a:form>collapsed</a:form>
+                    <!-- The subitemInclusion does not really mean anything here. It is just for demonstration.
+                         The form is "collapsed", therefore the subitems will not be displayed anyway. -->
+                    <a:subitemInclusion>exclude</a:subitemInclusion>
+                </a:diagram>
+            </xsd:appinfo>
+        </xsd:annotation>
+</xsd:complexType>
+
+<xsd:complexType name="ShadowType">
+        <xsd:annotation>
+            <xsd:documentation>...</xsd:documentation>
+            <xsd:appinfo>
+                <a:diagram>
+                    <a:name>user-shadow-resource</a:name>
+                    <a:form>expanded</a:form>
+                    <!-- The subitemInclusion is set to auto.
+                         Which means that ony the subitems that have some diagram annotations for "user-shadow-resource" will be included.
+                         That means that only objectClass, kind, intent and resourceRef will be included.
+                         Other subitems will be excluded.
+
+                         The value of "auto" is also a default value, therefore this declaration may not be here, it will still work. -->
+                    <a:subitemInclusion>auto</a:subitemInclusion>
+                </a:diagram>
+            </xsd:appinfo>
+        </xsd:annotation>
+        ...
+        <xsd:element name="objectClass" type="xsd:QName" minOccurs="0">
+            <xsd:annotation>
+                <xsd:documentation>...</xsd:documentation>
+                <xsd:appinfo>
+                    ...
+                    <a:diagram>
+                        <a:name>user-shadow-resource</a:name>
+                        <!-- Default is to include this item if it is mentioned, which it is.
+                             Therefore no "inclusion" specification is needed here. -->
+                    </a:diagram>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="kind" type="..." minOccurs="0">
+            <xsd:annotation>
+                <xsd:documentation>...</xsd:documentation>
+                <xsd:appinfo>
+                    ...
+                    <a:diagram>
+                        <a:name>user-shadow-resource</a:name>
+                    </a:diagram>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="intent" type="..." minOccurs="0">
+            <xsd:annotation>
+                <xsd:documentation>...</xsd:documentation>
+                <xsd:appinfo>
+                    ...
+                    <a:diagram>
+                        <a:name>user-shadow-resource</a:name>
+                        <!-- this is an example of explicit specification of include -->
+                        <a:inclusion>include</a:inclusion>
+                    </a:diagram>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="resourceRef" type="c:ObjectReferenceType" minOccurs="0">
+            <xsd:annotation>
+                <xsd:documentation>...</xsd:documentation>
+                <xsd:appinfo>
+                    ...
+                    <a:diagram>
+                        <a:name>user-shadow-resource</a:name>
+                    </a:diagram>
+                </xsd:appinfo>
+            </xsd:annotation>
+            ...
+        </xsd:element>
+        ...
+</xsd:complexType>
+
+<xsd:complexType name="ResourceType">
+        <xsd:annotation>
+            <xsd:documentation>...</xsd:documentation>
+            <xsd:appinfo>
+                <a:diagram>
+                    <a:name>user-shadow-resource</a:name>
+                    <a:form>expanded</a:form>
+                </a:diagram>
+            </xsd:appinfo>
+        </xsd:annotation>
+        ...
+        <xsd:element name="connectorRef" type="c:ObjectReferenceType" minOccurs="0">
+            <xsd:annotation>
+                <xsd:documentation>...</xsd:documentation>
+                <xsd:appinfo>
+                    ...
+                    <a:diagram>
+                        <a:name>user-shadow-resource</a:name>
+                    </a:diagram>
+                </xsd:appinfo>
+            </xsd:annotation>
+            ...
+        </xsd:element>
+        <xsd:element name="schema" type="..." minOccurs="0">
+            <xsd:annotation>
+                <xsd:documentation>...</xsd:documentation>
+                <xsd:appinfo>
+                    ...
+                    <a:diagram>
+                        <a:name>user-shadow-resource</a:name>
+                        <!-- This is a complex data structure. But we do not want to show all the inned details.
+                              Therefore we will show it as "collapsed". -->
+                        <a:form>collapsed</a:form>
+                    </a:diagram>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="schemaHandling" type="..." minOccurs="0">
+            <xsd:annotation>
+                <xsd:documentation>...</xsd:documentation>
+                <xsd:appinfo>
+                    ...
+                    <a:diagram>
+                        <a:name>user-shadow-resource</a:name>
+                        <a:form>collapsed</a:form>
+                    </a:diagram>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:element>
+        ...
+</xsd:complexType>
+
+<xsd:complexType name="ConnectorType">
+        <xsd:annotation>
+            <xsd:documentation>...</xsd:documentation>
+            <xsd:appinfo>
+                <a:diagram>
+                    <a:name>user-shadow-resource</a:name>
+                    <a:form>collapsed</a:form>
+                </a:diagram>
+            </xsd:appinfo>
+        </xsd:annotation>
+        ...
+        <xsd:element name="connectorHostRef" type="c:ObjectReferenceType" minOccurs="0">
+            <xsd:annotation>
+                <xsd:documentation>...</xsd:documentation>
+                <xsd:appinfo>
+                    ...
+                    <a:diagram>
+                        <a:name>user-shadow-resource</a:name>
+                        <!-- This is a bit strange.
+                             The ConnectorType is collapsed in this diagram, therefore we should not display any internal structure.
+                              But this is a reference. We still want to display it, because it points to ConnectorHostType, which is also a part of the diagram.
+                              Does it makes sense? Or do we need to change the design?
+                              Maybe use something like <a:form>arrow</a:form> to explicitly specify that this should be drawn a arrow? -->
+                    </a:diagram>
+                </xsd:appinfo>
+            </xsd:annotation>
+            ...
+        </xsd:element>
+        ...
+</xsd:complexType>
+
+<xsd:complexType name="ConnectorHostType">
+        <xsd:annotation>
+            <xsd:documentation>...</xsd:documentation>
+            <xsd:appinfo>
+                <a:diagram>
+                    <a:name>user-shadow-resource</a:name>
+                    <a:form>collapsed</a:form>
+                </a:diagram>
+            </xsd:appinfo>
+        </xsd:annotation>
+        ...
+</xsd:complexType>
+
+----
+
+
+
+== Diagram Definitions
+
+Use dedicated `diagrams.json` file (optional).
+
+[source,json]
+----
+[
+  {
+    "name": "user-shadow-resource",
+    "title": "User-Shadow-Resource-Connector relations",
+    "description" : "This diagram relies on the schema annotations to specify which objects to include in the diagram. Only items explicitly specified in schema annotations are included in the diagram.",
+    "defaults" : {
+      "color": "black",
+      "form": "expanded",
+      "includeSupertypeItems": true
+    }
+  },
+  {
+    "name": "object-type-hierarchy-complete",
+    "title": "Complete Object Type Hierarchy",
+    "description": "Shows a complete type hierarchy of midPoint data model. All objects are included. However, only the basic details are shown (objects are collapsed). Reference relations (such as linkRef, resourceRef) are not shown, generalization (subtyping) relations are shown. This diagram does NOT rely on the schema annotations, everything we need is specified here.",
+    "selector" : [
+      {
+        "inclusion": "include",
+        "metatype": "object"
+      },
+      {
+        "inclusion": "exclude",
+        "metatype": "reference"
+      },
+      {
+        "inclusion": "include",
+        "metatype": "generalization"
+      }
+    ],
+    "defaults" : {
+      "form": "collapsed"
+    }
+  },
+  {
+    "name": "object-type-hierarchy-focus",
+    "title": "Type Hierarchy of focal object types",
+    "description": "Shows a type hierarchy of selected objects only. Only some items are shown. Objects are selected by type hierarchy.",
+    "selector" : [
+      {
+        "inclusion": "include",
+        "metatype": "object",
+        "typeHierarchy": {
+          "supertype": "FocusType",
+          "transitive": true,
+          "includeSupertype": true
+        }
+      }
+    ],
+    "defaults" : {
+      "form": "collapsed"
+    }
+  },
+  {
+    "name": "user-details-emphasized",
+    "title": "Important user details",
+    "description" : "Shows only Userype. Only emphasized object items are included in the diagram.",
+    "selector" : [
+      {
+        "inclusion": "include",
+        "metatype": "object",
+        "type": "UserType"
+      },
+      {
+        "inclusion": "include",
+        "metatype": "item",
+        "emphasized": "true"
+      }
+    ],
+    "defaults" : {
+      "form": "expanded",
+      "includeSupertypeItems": true
+    }
+  }
+]
+----
+
+== TODO
+
+* Schema annotations for including/excluding elements in a diagram.
+
+* Schema for definition of a diagram (e.g. label, styles, etc.)
+
+* How to show complex structure of complex types?
+E.g. policy rules, where we have complex types, supertypes, etc.
+
+* Where to put `diagrams.json` file?
+Schemadoc plugin configuration?

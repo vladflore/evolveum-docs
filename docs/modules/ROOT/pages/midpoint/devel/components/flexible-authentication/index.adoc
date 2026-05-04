@@ -1,0 +1,5 @@
+= Flexible Authentication Development Documentation
+
+Sequence diagram on the image shows steps for one loginForm module, during one login with midpoint password.
+
+image:flex-auth.png[]

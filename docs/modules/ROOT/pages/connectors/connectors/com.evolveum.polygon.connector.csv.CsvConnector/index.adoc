@@ -1,0 +1,225 @@
+---
+layout: connector-page
+display-order: 30
+functionality-status: stable
+development-status: active
+support-status: supported
+origin: Evolveum
+support-provided-by: Evolveum
+target-systems: CSV files (local)
+connector-protocol: Local filesystem I/O operations
+source-url-master: https://github.com/Evolveum/connector-csv
+description: Identity connector for for CSV-formatted text files.
+bundling: bundled
+---
+= CSV Connector
+:page-wiki-name: CSV Connector
+:page-wiki-id: 23167152
+:page-wiki-metadata-create-user: lazyman
+:page-wiki-metadata-create-date: 2016-08-19T16:02:43.189+02:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2020-04-03T11:51:47.847+02:00
+
+This connector is useful to connect to systems that regularly export or import user databases in a form of CSV files.
+It is usually used to connect to HR-like systems that export the HR data every night.
+MidPoint deployments are usually using this connector to pull that data.
+This connector pretends that the CSV file is actually the complete resource.
+Therefore, the usual configuration of an authoritative resource can be used to connect such an export-based resource.
+
+This connector can also be used as a remote connector if the file is on a different machine than midPoint.
+
+== Capabilities and Features
+
+// Later: This will be moved to individual connector version page (automatically generated)
+// Maybe we want to keep summary of the latest version here
+
+
+[%autowidth,cols="h,1,1"]
+|===
+| Schema
+| YES
+| Determined from CSV file header.
+
+| Provisioning
+| YES
+|
+
+| Live Synchronization
+| YES
+|
+
+| Password
+| YES
+|
+
+| Activation
+| SIMULATED
+| No activation for generic CSV is possible.
+
+| Paging support
+| NO
+|
+
+| Native attribute names
+| YES
+|
+
+| Last login date
+| YES
+| Via configuration property that defines column to be used as `\_LAST_LOGIN_DATE_`.
+Custom column format (simple date format expression) can be configured as well.
+
+|===
+
+
+== History
+
+This is an CSV connector completely rewritten from scratch during 2016 and 2017.
+
+
+== Versions
+
+[%autowidth]
+|===
+| Version | Origin | Binary | Sources | Build Date | Framework version | Bundled with midPoint | Description
+
+| 2.0
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/public/com/evolveum/polygon/connector-csv/2.0/connector-csv-2.0.jar[download jar]
+| https://github.com/Evolveum/connector-csv/tree/v2.0[GitHub]
+| Jun 3rd 2017
+| 1.4.2.14
+| 3.6
+| Stable version
+
+
+| 2.1
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/public/com/evolveum/polygon/connector-csv/2.1/connector-csv-2.1.jar[download jar]
+| https://github.com/Evolveum/connector-csv/tree/v2.1[GitHub]
+| October 4th 2017
+| 1.4.2.14
+| 3.6.1
+| Improved live synchronization.
+Fixed file locking.
+
+
+| 2.2
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/public/com/evolveum/polygon/connector-csv/2.2/connector-csv-2.2.jar[download jar]
+| https://github.com/Evolveum/connector-csv/tree/v2.2[GitHub]
+| April 12th 2018
+| 1.4.2.14
+| 3.8
+| Script execution (exec)
+
+
+| 2.3
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/public/com/evolveum/polygon/connector-csv/2.3/connector-csv-2.3.jar[download jar]
+| https://github.com/Evolveum/connector-csv/tree/v2.3[GitHub]
+| December 19th 2018
+| 1.4.2.35
+| 4.0
+| Parallel provisioning operation (thread locking) +
+Name no longer required +
+Minor fixes
+
+| 2.4
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/public/com/evolveum/polygon/connector-csv/2.4/connector-csv-2.4.jar[download jar]
+| https://github.com/Evolveum/connector-csv/tree/v2.4[GitHub]
+| April 3rd 2020
+| 1.4.2.35
+| 4.1
+| Fix for getLastSynchronizationToken-always returning new token +
+Java 11 support (Java 8 support is deprecated)
+
+| 2.5
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/public/com/evolveum/polygon/connector-csv/2.5/connector-csv-2.5.jar[download jar]
+| https://github.com/Evolveum/connector-csv/tree/v2.5[GitHub]
+| 10th October 2022
+| 1.5.1.3
+| 4.6
+| Added support for configuration discovery.
+
+| 2.6
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/public/com/evolveum/polygon/connector-csv/2.6/connector-csv-2.6.jar[download jar]
+| https://github.com/Evolveum/connector-csv/tree/v2.6[GitHub]
+| 13th March 2023
+| 1.5.1.3
+| 4.7
+| Internal search filtering - no need for ConnId result handlers any more.
+
+| 2.7
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/public/com/evolveum/polygon/connector-csv/2.7/connector-csv-2.7.jar[download jar]
+| https://github.com/Evolveum/connector-csv/tree/v2.7[GitHub]
+| 9th October 2023
+| 1.5.1.3
+| 4.8
+| Fix of suggestions for configuration discovery.
+
+| 2.8
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/public/com/evolveum/polygon/connector-csv/2.8/connector-csv-2.8.jar[download jar]
+| https://github.com/Evolveum/connector-csv/tree/v2.8[GitHub]
+| 16th August 2024
+| 1.5.2.0
+| 4.8.4, 4.9
+| Fixed NPE with multivalue attributes when delimiter is not defined.
+
+Fix UTF-8 BOM character in csv file during of discovery functions.
+
+| 2.9
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-csv/2.9/connector-csv-2.9.jar[download jar]
+| https://github.com/Evolveum/connector-csv/tree/v2.9[GitHub]
+| 25th November 2025
+|
+|
+| Added support for `\_LAST_LOGIN_DATE_` attribute (capability).
+
+| 2.10
+| Polygon
+| _Not released yet_
+|
+|
+|
+|
+|
+
+|===
+
+== Interoperability
+
+This connector was developed using standard Java I/O libraries.
+It relies on Java platform for all I/O operations, including potentially problematic operations that involve concurrent and remote access to files.
+The capabilities of the Java platform on specific operating systems and filesystems may be limited.
+
+The connector is only tested using local files on standard local filesystems in Linux and Windows environments.
+Network filesystems are not tested - although we have reports that this connector works with some network filesystems.
+
+
+== Support
+
+This connector is bundled with midPoint distribution, therefore it is a subject to xref:/support/bundled-support/[bundled support] program.
+Such bundled support includes only support for local files on standard local filesystems in Linux and Windows environment (ext4 and NTFS file systems).
+Other operating systems are not supported.
+Network file systems and unusual (experimental) filesystems are not supported.
+
+Support for other operating systems, remote or unusual filesystems has to be explicitly negotiated in a support contract.
+
+
+== Resource Examples
+
+* https://github.com/Evolveum/midpoint-samples/tree/master/samples/resources/csv[https://github.com/Evolveum/midpoint-samples/tree/master/samples/resources/csv]
+
+
+== See Also
+
+* xref:/connectors/connectors/com.evolveum.polygon.csvfile.CSVFileConnector/[CSVFile Connector (legacy)]
+
+* xref:/midpoint/reference/upgrade/connectors/csvfile-connector-migration/[CSVFile Connector Migration]

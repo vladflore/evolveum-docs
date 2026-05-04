@@ -1,0 +1,187 @@
+= Data Provenance Prototype Challenges
+:page-toc: top
+
+== Provenance Metadata
+
+How to *structure built-in meta-data* schema for midPoint?
+The metadata that we had in midPoint 4.0 (`MetadataType`) evolved quite spontaneously over the years.
+It has to be improved.
+We need better structure.
+But it looks like there is no standard for meta data.
+There is some work in progress (http://www.metadata2020.org/), but nothing that is ready to use.
+
+It looks like there is almost no scholarly literature on identity provenance.
+Designing _provenance_ data structures proved to be a challenge.
+It was more difficult than expected, several iterations were needed to get usable design draft.
+We need just right amount of provenance metadata to store.
+We cannot store everything, otherwise the data storage requirements would be unreasonable.
+It was also difficult to align provenance with other planned data protection features, notably lawful basis management.
+
+== Axiom
+
+Axiom was motivated by a lot of *challenges with XSD*, documented in https://evolveum.com/a-road-to-axiom/[blog post].
+
+=== Theory, Concepts and Terminology
+
+Axiom is a new language.
+It was inspired by several of its predecessors (XSD, JSON Schema, even SCIM Schema).
+But each of the existing languages has its problems, even problems going all the way down to conceptual level.
+Therefore we could not simple take existing concepts, we had to invent a completely new way how to look at data (and metadata) modeling.
+This is related to terminology.
+We would prefer to use existing terminology to make understanding of Axiom easier.
+But the existing terminology is often quite convoluted, no precise and it is using a lot of overloaded terms.
+Therefore we had to adjust the terminology as well and even invent a completely new terms (such as _inframodel_).
+
+See xref:../axiom/concepts/[Axiom Concepts] and xref:../axiom/spec/terminology/[Axiom Terminology] for more details.
+
+=== Namespaces
+
+*Namespaces* are a big nuisance for users, they complicate the modelling.
+But they are still useful when several models are mixed.
+And in the XML world they were used for compatibility indication and versioning.
+How we can deal with namespaces?
+Should we abandon them?
+Should we hide them from user?
+
+*Solution:* We need namespaces, but we need them at the right places.
+E.g. we do not need a namespace for every item (element), as we can compute that any time from the model.
+But we need namespaces (or _context_) for top-level element, to reliably identify the model.
+We also need namespaces for augmentation, as we want to make sure that the models do not conflict.
+
+Namespaces should also be presented in item paths, qualified names and possibly other "microstructures".
+Using full URIs can be prohibitive here, it would be much better to use prefixes.
+But prefixes are problematic.
+Solution: make prefixes fixed, defined by the schema.
+
+More details: xref:../axiom/spec/namespaces/[Axiom Namespaces]
+
+=== Model Identification
+
+How do we *identify the model*?
+Model name, that is difficult to make unique?
+Or do we use (namespace) URI?
+It can be easily made unique, but it is difficult to use.
+
+*Solution:* We want to use namespace URI for model identification.
+It is a simple and straightforward way.
+We can make it less ugly by minimizing the number of times that the URI needs to be specified.
+
+Question: what about model names? Do we need them? How to use them?
+
+Answer: Name are useful for diagnostics. They also make a nice default prefix.
+
+See xref:../axiom/spec/namespaces/[Axiom Namespace] for more details.
+
+=== MidPoint Resource Schema and Shadow Attributes
+
+Each midPoint resource is bringing its own schema.
+How to use it cleanly?
+Should each resource schema use a separate namespace?
+That is perhaps a clean way, but it may be difficult for the users.
+What we should do?
+
+This issue is not strictly related to metadata or provenance, therefore we are leaving the solution for later.
+The rough idea: we need concept of _dynamic_ type that will be determined in runtime.
+
+== Metadata, Deltas and Equality
+
+There are established ways how to update the data.
+There are also mechanisms for data consistency, such as pessimistic and optimistic locking.
+However, metadata complicate those things as well.
+There are cases where metadata from a new value need to be combined with existing metadata.
+There may be cases when metadata change while the data value does not.
+
+MidPoint is not relying on optimistic/pessimistic locking for data consistency.
+It cannot rely on such mechanism, as identity management system is essentially a "distributed" integration system.
+Systems that are data sources usually do not provide transaction or data consistency guarantees.
+Target systems may be even worse in this aspect.
+In addition to that, midPoint often combines values from many source systems that is distributed to many target systems.
+This could create a massively distributed transaction.
+It would be a nightmare to coordinate that.
+Such system will not work in practice.
+
+Therefore midPoint is using an alternative mechanism based on a concept of _relative changes_.
+Modifications are specified in form of additions and deletions that do not affect original value of an item.
+Such modifications are referred to as _deltas_.
+Deltas have a very nice property that they can be merged and applied in any order.
+The result will still be correct.
+This concept is very suitable for data integration and it worked for midPoint for almost a decade.
+
+However, it is difficult to extend that concept to metadata.
+If the data value does not change, we have no way how to express metadata change.
+Yet another challenge is combination of metadata from several sources.
+It looks like the ideal solution would be to apply the relativistic change model to the metadata.
+However, that creates additional dimension inside the _delta_.
+This may be a feasible solution eventually.
+But it is too complex for this (prototype) phase of the project.
+Therefore the decision was to always replace the metadata when a value is changed.
+The problem with metadata-only modifications will be solved by sending a "redundant" modification of existing value to the same value, just to convey metadata modification.
+The "always replace" approach is opening up some possibility od metadata inconsistencies.
+However, chances of that happening are very small and the impact is almost negligible.
+Even if metadata get corrupted, midPoint reconciliation mechanism could be used to correct them.
+
+Yet another complication is related to concept of data _equality_.
+Let's have two values that both contain string `foo`, but they have different metadata.
+Are those values the same or are they different?
+It looks like the answer to this question varies according to situation.
+Such values are the same when we are concerned just with the data.
+For example presenting two values of full name to the user will be very confusing.
+But the values are different when we care about the metadata.
+For example midPoint consolidation process has to distinguish between them in order to correctly process the metadata.
+Overall, seeming simple concept of data _equality_ is in fact very complex and multi-faceted problem.
+
+== Metadata Mapping
+
+Integrating xref:../processing/model/thoughts/metadata-mapping-model/[meta-data mappings] in midPoint proven to be more challenging than we have expected.
+One part of the problem was specification of metadata mappings (i.e. where to set up the mappings), but that was resolved with a relative ease.
+There was another and slightly unexpected aspect of the problem: value consolidation.
+
+MidPoint is designed to work in a very generic way.
+It assumes that there may be many values, originating from many sources, transformed by many mappings stored in multi-value data items.
+The same value may originate from several sources, some values may be conditional (such as "initial" value that are set only wne no other value is set), some values may be overidden by others and so on.
+This creates quite a complicated system which is at the heart of midPoint's flexibility.
+However, all the values must "collapse" to become an ordinary data item at the end.
+This final step is referred to as value _consolidation_.
+
+Value consolidation is a complex process, but metadata adds additional dimension of complexity.
+The same value may come from several sources.
+While the (data) value is the same, metadata may be completely different for each source.
+As values are merged together in a consolidation process, metadata need to be merged too.
+And this is not always easy to do.
+
+We had to adjust the design of provenance metadata to reflect the consolidation process.
+Provenance metadata are built into midPoint core schema.
+However, other metadata structures may be completely custom and there is no generic way how to consolidate them.
+For example, assurance metadata are likely to choose the highest assurance level to get a single-value assurance metadata for consolidated value.
+While other metadata types may merge values from all the sources into a multi-value metadata item, to keep track of all the sources.
+There is no generic way.
+Therefore we had to specify custom _consolidation mappings_ for metadata types.
+
+It was also challenging to fit this concept into existing midPoint code base.
+MidPoint computation engine (known as _Projector_) conducts the computation is several phases.
+Each phase had its specifics and special behavior, mostly due to historical reasons.
+Existing code had to be xref:../processing/model/plain/['explored in depth, documented'] and improved before metadata consolidation code could be added.
+
+== Metadata Multiplicity
+
+One of the hardest and least expected challenges was certainly metadata multiplicity.
+It looks like metadata are inherently multi-valued, as a single data value may come from several places.
+
+See xref:../metadata-multiplicity-problem/[Metadata Multiplicity Problem] for detailed explanation of the issue.
+
+We have not suspected this issues at the beginning of the project.
+There was nothing in the initial research that would suggest this kind of issues.
+We have observed first signs of this issue approximately in the middle of the project, but at that time we have thought that the issues is limited to _provenance_ metadata.
+It was only quite late in the project that we have realized that this multiplicity is an inherent property of all metadata.
+The metadata multiplicity, the xref:../provenance-origin-basis/[concept of _yields_] and its relation to data protection is perhaps the most surprising discoveries in this project.
+
+== User Interface
+
+How do we display the meta-data in a way that is understandable for users?
+When to display meta-data at all?
+Provenance data can be complex and they are maintained for every value.
+We certainly cannot display them all the time, this would make the user interface very complicated.
+
+== See Also
+
+* xref:../future-work/[Future Work]

@@ -1,0 +1,436 @@
+= Active Directory Group Synchronization HOWTO
+:page-wiki-name: Active Directory Group Synchronization HOWTO
+:page-wiki-id: 15859763
+:page-wiki-metadata-create-user: mederly
+:page-wiki-metadata-create-date: 2014-06-25T14:07:55.225+02:00
+:page-wiki-metadata-modify-user: martin.lizner
+:page-wiki-metadata-modify-date: 2016-12-14T20:13:10.657+01:00
+:page-alias: { "parent" : "/midpoint/guides/" }
+:page-upkeep-status: green
+:page-toc: top
+:page-description: This minimalistic guide demonstrates how to synchronize groups between Active Directory (AD) and midPoint.
+:page-keywords: Active Directory, AD, group synchronization
+
+This minimalistic guide demonstrates how to synchronize groups between Active Directory (AD) and midPoint.
+
+[TIP]
+====
+If you are not experienced using Active Directory resources, see xref:/connectors/resources/active-directory/active-directory-ldap/[].
+====
+
+This guide shows you how to:
+
+* <<synchronization,Synchronize AD users and groups with midPoint>> - When a new account is created in AD, it appears in midPoint as a corresponding account shadow and a user.
+When a new group is created, it appears in midPoint as a new entitlement shadow and a role.
+* <<provisioning,Provision midPoint users and groups to AD>>
+
+* <<use-metarole,Use a metarole to simplify the solution>>
+
+
+[[synchronization]]
+== Synchronize AD users and groups with midPoint
+
+. Configure the two most important schema handling section parts of an AD-LDAP resource - an account object class, and a group object class. +
+In our example below, both classes are similar.
+The group object class defines the handling of the following attributes - DN, CN, and Description.
+You can see that the DN is constructed from the role name, suffixed with "ou=Groups,dc=example,dc=com", placing it in the `example.com/Groups` organizational unit.
+The `<association>` element in the user schema handling defines an association between a user account and a group.
+See xref:/midpoint/reference/resources/entitlements/#associations[Associations] for details.
++
+[source,xml]
+----
+<c:resource oid="11111111-2222-3333-4444-000000000000">
+
+    <name>Active Directory Group Sync</name>
+
+    ...
+
+    <schemaHandling>
+
+        <!-- handling of user accounts -->
+
+        <objectType>
+            <kind>account</kind>
+            <objectClass>ri:AccountObjectClass</objectClass>
+            <default>true</default>
+
+            ...
+
+            <!-- This defines an association between user and groups he is a member of -->
+            <association>
+                <ref>ri:group</ref>
+                <displayName>AD Group Membership</displayName>
+                <kind>entitlement</kind>
+                <intent>group</intent>
+                <direction>objectToSubject</direction>
+                <associationAttribute>ri:member</associationAttribute>
+                <valueAttribute>icfs:name</valueAttribute>
+                <explicitReferentialIntegrity>false</explicitReferentialIntegrity>
+            </association>
+        </objectType>
+
+        <!-- handling of groups -->
+
+        <objectType>
+            <kind>entitlement</kind>
+            <intent>group</intent>
+            <objectClass>ri:CustomGroupObjectClass</objectClass>
+            <default>true</default>
+            <attribute>
+                <ref>icfs:name</ref>
+                <matchingRule>mr:stringIgnoreCase</matchingRule>
+                <outbound>
+                    <source>
+                        <path>$focus/name</path>
+                    </source>
+                    <expression>
+                        <script>
+                            <code>
+                                'cn='+name+',ou=Groups,dc=example,dc=com'
+                            </code>
+                        </script>
+                    </expression>
+                </outbound>
+            </attribute>
+            <attribute>
+                <ref>ri:cn</ref>
+                <matchingRule>mr:stringIgnoreCase</matchingRule>
+                <inbound>
+                    <target>
+                        <path>$focus/name</path>
+                    </target>
+                </inbound>
+            </attribute>
+            <attribute>
+                <ref>ri:description</ref>
+                <outbound>
+                    <strength>strong</strength>
+                    <source>
+                        <path>description</path>
+                    </source>
+                </outbound>
+                <inbound>
+                    <strength>weak</strength>
+                    <target>
+                        <path>$focus/description</path>
+                    </target>
+                </inbound>
+            </attribute>
+        </objectType>
+
+    </schemaHandling>
+
+    ...
+
+</c:resource>
+----
+
+. Configure a correlation and a synchronization so that you can synchronize users and roles/groups between midPoint and the AD resource.
+Notice how we define that groups (i.e., `ri:CustomGroupObjectClass` / `kind=entitlement` / `intent=group`) have to be synchronized with roles, and how we configure reactions to individual situations:
++
+[source,xml]
+----
+<c:resource ...>
+
+    ...
+
+    <!--
+        Synchronization section describes the synchronization policy, timing,
+        reactions and similar synchronization settings based on correlator rules defined correlation section.
+    -->
+            <correlation>
+                <correlators>
+                    <items>
+                        <name>personalNumber-correlation</name>
+                        <description>Correlation using personalNumber. Please note: inbound mapping for personalNumber is used only during correlation.</description>
+                        <enabled>false</enabled>
+                        <item>
+                            <ref>personalNumber</ref>
+                        </item>
+                        <composition>
+                            <tier>21</tier>
+                        </composition>
+                    </items>
+                    <items>
+                        <name>samAccountName-correlation</name>
+                        <enabled>true</enabled>
+                        <item>
+                            <ref>c:name</ref>
+                            <search>
+                                <matchingRule>polyStringOrig</matchingRule>
+                            </search>
+                        </item>
+                        <composition>
+                            <tier>2</tier>
+                        </composition>
+                    </items>
+                </correlators>
+            </correlation>
+            <synchronization>
+                <reaction>
+                    <name>set-linked</name>
+                    <lifecycleState>active</lifecycleState>
+                    <situation>linked</situation>
+                    <actions>
+                        <synchronize/>
+                    </actions>
+                </reaction>
+                <reaction>
+                    <name>set-unlinked</name>
+                    <lifecycleState>active</lifecycleState>
+                    <situation>unlinked</situation>
+                    <actions>
+                        <link/>
+                    </actions>
+                </reaction>
+                <reaction>
+                    <name>set-unmatched</name>
+                    <lifecycleState>active</lifecycleState>
+                    <situation>unmatched</situation>
+                    <actions>
+                        <addFocus/>
+                    </actions>
+                </reaction>
+                <reaction>
+                    <name>set-deleted</name>
+                    <lifecycleState>active</lifecycleState>
+                    <situation>deleted</situation>
+                    <actions>
+                        <synchronize/>
+                    </actions>
+                </reaction>
+                <reaction>
+                    <name>set-disputed</name>
+                    <lifecycleState>active</lifecycleState>
+                    <situation>disputed</situation>
+                    <actions>
+                        <createCorrelationCase/>
+                    </actions>
+                </reaction>
+            </synchronization>
+        </objectType>
+        ...
+</c:resource>
+----
+
+. Define a task that synchronizes users:
++
+[source,xml]
+----
+<task oid="11111111-2222-3333-4444-100000000000">
+    <name>Synchronization: Active Directory (users)</name>
+    <taskIdentifier>11111111-2222-3333-4444-100000000000</taskIdentifier>
+    <ownerRef oid="00000000-0000-0000-0000-000000000002"/>
+    <executionStatus>runnable</executionStatus>
+    <handlerUri>http://midpoint.evolveum.com/xml/ns/public/model/synchronization/task/live-sync/handler-3</handlerUri>
+    <objectRef oid="11111111-2222-3333-4444-000000000000" type="c:ResourceType"/>
+    <recurrence>recurring</recurrence>
+    <binding>tight</binding>
+    <schedule>
+        <interval>5</interval>
+    </schedule>
+</task>
+----
+
+. Define a task that synchronizes groups, as indicated by the "kind = entitlement" property in an extension. +
+Note that as groups are defined as the default intent of the entitlement kind, it is not necessary to specify intent here.
++
+[source,xml]
+----
+<task oid="11111111-2222-3333-4444-100000000001">
+    <name>Synchronization: Active Directory (groups)</name>
+    <extension>
+        <mext:kind xmlns:mext="http://midpoint.evolveum.com/xml/ns/public/model/extension-3">entitlement</mext:kind>
+    </extension>
+    <taskIdentifier>11111111-2222-3333-4444-100000000001</taskIdentifier>
+    <ownerRef oid="00000000-0000-0000-0000-000000000002"/>
+    <executionStatus>runnable</executionStatus>
+    <handlerUri>http://midpoint.evolveum.com/xml/ns/public/model/synchronization/task/live-sync/handler-3</handlerUri>
+    <objectRef oid="11111111-2222-3333-4444-000000000000" type="c:ResourceType"/>
+    <recurrence>recurring</recurrence>
+    <binding>tight</binding>
+    <schedule>
+        <interval>5</interval>
+    </schedule>
+</task>
+----
+
+[[provisioning]]
+== Provision midPoint users and groups to AD
+
+. Add an assignment to roles that instructs midPoint to provision roles to AD.
++
+[source,xml]
+----
+    <assignment>
+       <construction>
+          <resourceRef oid="11111111-2222-3333-4444-000000000000" type="ResourceType"/>
+          <kind>entitlement</kind>
+          <intent>group</intent>
+       </construction>
+    </assignment>
+----
+
+. Make sure that users with the role defined in the previous step have an AD account with a corresponding group assigned. +
+A role can have an "account" (in this case, a group) assigned on a resource, just like a user can.
+For this, an inducement is used.
+By using inducements, you can prescribe not only that an account on a particular resource should exist, but you can also set its attributes and assignments.
+This enables you to assign an entitlement (a group) that corresponds to this role.
+You can use `associationTargetSearch`, or a less flexible, but perhaps a more straightforward way that uses a simple object reference:
++
+[source,xml]
+----
+    <inducement>
+       <construction>
+          <resourceRef oid="11111111-2222-3333-4444-000000000000" type="ResourceType"/>
+          <kind>account</kind>
+          <association>
+             <ref>ri:group</ref>
+             <outbound>
+                <expression>
+                   <value>
+                      <shadowRef oid="88c95eb4-f2a3-4b63-b269-18696e52c03f"/>
+                   </value>
+                </expression>
+             </outbound>
+          </association>
+       </construction>
+    </inducement>
+----
++
+Note that `oid="88c95eb4-f2a3-4b63-b269-18696e52c03f"` points to the shadow of this role, i.e., the group we mentioned.
+Now, when you assign this role to a user, an account will be created for them on a resource, and it will be a member of the given group.
+MidPoint enables you to avoid all these nuances by using its sophisticated mechanisms, namely:
+
+* Object templates - Used to automatically assign a metarole to any created role.
+* Roles with higher-order inducements (metaroles) - Used to create all necessary assignments/inducements to that role.
+
+
+[[use-metarole]]
+== Using a role to simplify the solution
+
+Using metaroles, you can simplify the synchronization and provisioning between your AD and midPoint.
+Metaroles enable you to:
+
+* Create an assignment to an AD group on a resource.
+* Create an inducement prescribing a creation of user accounts with an AD group on the resource.
+
+You can see https://github.com/Evolveum/midpoint-samples/tree/master/samples/resources/ad-ldap/AD%20simple[simple AD] and https://github.com/Evolveum/midpoint-samples/tree/master/samples/resources/ad-ldap/AD%20advanced[advanced AD] samples.
+However, do NOT import them at the moment, we will proceed step by step.
+
+Proceed as follows:
+
+. Create a metarole with an inducement that creates assignments for any role possessing this metarole, and a second-order inducement that creates first-order inducements for any role possessing this metarole.
++
+[source,xml]
+----
+<role oid="11111111-2222-3333-4444-200000000001"
+       xmlns="http://midpoint.evolveum.com/xml/ns/public/common/common-3"
+       xmlns:c="http://midpoint.evolveum.com/xml/ns/public/common/common-3"
+       xmlns:t="http://prism.evolveum.com/xml/ns/public/types-3"
+       xmlns:ri="http://midpoint.evolveum.com/xml/ns/public/resource/instance-3">
+
+    <name>Metarole for groups</name>
+
+    <!-- This inducement causes creation of AD group for any role that possesses this metarole -->
+    <inducement>
+        <construction>
+            <resourceRef oid="11111111-2222-3333-4444-000000000000" type="c:ResourceType"/>
+            <kind>entitlement</kind>
+            <intent>group</intent>
+        </construction>
+    </inducement>
+
+
+    <!-- This inducement causes creation of AD account that is in AD group for any USER that possesses any role that possesses this metarole -->
+    <!-- That's why this is called second-order inducement -->
+    <inducement>
+        <construction>
+            <resourceRef oid="11111111-2222-3333-4444-000000000000" type="c:ResourceType"/>
+            <kind>account</kind>
+            <intent>default</intent>
+            <association>
+                <ref>ri:group</ref>
+                <outbound>
+                    <expression>
+                         <associationFromLink>
+                             <projectionDiscriminator>
+                                 <kind>entitlement</kind>
+                                 <intent>group</intent>
+                             </projectionDiscriminator>
+                         </associationFromLink>
+                    </expression>
+                </outbound>
+            </association>
+        </construction>
+        <order>2</order>
+    </inducement>
+</role>
+----
++
+You can test the metarole by importing it and creating a role, e.g., "r1", that has the metarole assigned.
+You will see that an r1 group has been created in your AD.
+Also, a midPoint shadow has been created and linked to the r1 group.
+Moreover, if you now create a new midPoint user, and assign them the r1 role, their account on the AD will be created and it will be a member of the r1 AD group.
+
+. Create an object template that automatically assigns the metarole to newly created roles. +
+With this object template, you will not have to assign the metarole to new roles that you create in midPoint manually.
+Similarly, if a group is created in AD, the corresponding role in midPoint will be assigned the metarole automatically.
++
+[source,xml]
+----
+<objectTemplate oid="11111111-2222-3333-4444-300000000001"
+                xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+                xmlns='http://midpoint.evolveum.com/xml/ns/public/common/common-3'
+                xmlns:c='http://midpoint.evolveum.com/xml/ns/public/common/common-3'
+                xmlns:q="http://prism.evolveum.com/xml/ns/public/query-3">
+    <name>Role Template</name>
+
+    <mapping>
+        <name>Metarole assignment</name>
+        <authoritative>true</authoritative>
+        <expression>
+            <assignmentTargetSearch>
+                <targetType>c:RoleType</targetType>
+                <oid>11111111-2222-3333-4444-200000000001</oid>             <!-- our meta role -->
+            </assignmentTargetSearch>
+        </expression>
+        <target>
+            <path>assignment</path>
+        </target>
+    </mapping>
+
+</objectTemplate>
+----
+
+. In the system configuration, instruct midPoint to use the metarole for roles.
++
+[source,xml]
+----
+<objectTemplate>
+    <type>c:RoleType</type>
+    <objectTemplateRef oid="11111111-2222-3333-4444-300000000001"/>
+</objectTemplate>
+----
+
+. Test the metarole by creating a new "r2" role.
+The role will get the metarole assigned automatically.
+This will cause a creation of an AD group, and an automatic assignment of this group to any user that has the "r2" role.
+Similarly, if you created an "r3" group in the AD, an r3 role would be created in midPoint and it would be assigned this metarole.
+
+[TIP]
+====
+The presented example is a simplified one.
+In real deployments, you might not want to provision all roles (including e.g. Superuser) to the Active Directory resource.
+You would probably mark roles that have to be provisioned by a flag (e.g., role type == "replicated") and then use this condition in the object template and in your synchronization settings.
+For a more realistic setting, see the xref:/midpoint/reference/samples/story-tests/orgsync/[OrgSync Story Test].
+====
+
+== See Also
+
+* xref:/connectors/resources/active-directory/active-directory-ldap/[]
+* xref:/midpoint/reference/resources/entitlements/[Entitlements]
+* xref:/midpoint/reference/resources/entitlements/#associations[Associations]
+* xref:/midpoint/reference/samples/story-tests/orgsync#new-hr-employee-record-responsibility[OrgSync Story Test] - A broader version of the simplified example presented in this page.
+
+Thanks to Tim Tompkins for providing a sample AD resource definition from which parts of this HOWTO were taken.

@@ -1,0 +1,84 @@
+= Development Applications
+:page-wiki-name: Development Applications
+:page-wiki-id: 4882442
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2012-07-11T11:02:29.473+02:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2019-03-05T13:59:18.154+01:00
+:page-upkeep-status: orange
+
+== Evolveum Applications
+
+[%autowidth]
+|===
+| Application | Type | Link (Generic) | Link (midPoint) | Description
+
+| OpenProject
+| Bug-tracking system
+| https://support.evolveum.com[https://support.evolveum.com]
+| https://support.evolveum.com/projects/midpoint[https://support.evolveum.com/projects/midpoint]
+| Tracking bugs, development tasks, requirements, usecases, ...
+
+
+| Docs
+| Documentation site
+| https://docs.evolveum.com/
+| https://docs.evolveum.com/midpoint/
+| Product information, documentation, configuration guides, architectural description, ...
+
+
+| Jenkins
+| xref:/midpoint/devel/continuous-integration/[Continuous Integration]
+| https://jenkins.evolveum.com/[https://jenkins.evolveum.com/]
+|
+| Continuous integration system, builds the products automatically and reports errors
+
+
+| xref:/midpoint/devel/maven-repository/[Evolveum Maven Repository]
+| Maven repository
+| https://nexus.evolveum.com/[https://nexus.evolveum.com/]
+|
+| Stores and proxies maven artifacts.
+For internal use by Evolveum.
+No guarantees.
+Use at your own risk.
+
+
+| Mailing lists
+| Mailing list
+| https://lists.evolveum.com/mailman/listinfo/[https://lists.evolveum.com/mailman/listinfo/]
+|
+| Evolveum mailing lists
+
+
+|===
+
+== External Systems
+
+[%autowidth]
+|===
+| Application | Link (Generic) | Link (midPoint) | Description
+
+| Github
+| https://github.com/Evolveum[https://github.com/Evolveum]
+| https://github.com/Evolveum/midpoint[https://github.com/Evolveum/midpoint]
+| Source code repository
+
+
+| Open Hub
+| https://www.openhub.net/[https://www.openhub.net/]
+| https://www.openhub.net/p/midPoint[https://www.openhub.net/p/midPoint]
+| Directory of Free and Open Source Software
+
+
+| xref:/community/development/development-chat/[Development Chat (gitter)]
+|
+| https://gitter.im/Evolveum/midpoint[https://gitter.im/Evolveum/midpoint]
+|
+
+
+|===
+
+== See Also
+
+* xref:/community/sites[Community Sites] - mostly similar list of sites

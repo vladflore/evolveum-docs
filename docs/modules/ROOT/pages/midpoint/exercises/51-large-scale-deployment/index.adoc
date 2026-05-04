@@ -1,0 +1,186 @@
+---
+layout: exercise
+number: 51
+permalink: /midpoint/exercises/51-large-scale-deployment/
+synopsis: "Clustering, multi-node tasks, thresholds, dashboards, ..."
+difficulty: Hard
+visibility: hidden
+bookref:
+  - "Unwritten chapters"
+trainingref:
+  - MID-102
+  - Some topics are not covered by any training
+files:
+  - create-table-hr.sql
+  - org.csv
+  - create-table-ext.sql
+---
+
+= Large-Scale Deployment
+
+NOTE: WORK IN PROGRESS
+
+== Environment
+
+* *HR System*: Employee data are stored in the HR system.
+We have direct access to HR system database view (read-only).
+
+* *External Identity Source Database*: Data about external identities are stored in this database.
+The database contains various types of identities: external workers, support staff, partners, suppliers.
+
+* *Organizational Directory*: Very simple (and ancient) application that stores organizational structure.
+We have managed to get a nightly CSV export from this application (`org.csv`).
+
+* *Open source LDAP server* (OpenLDAP, 389ds or similar): Company-wide LDAP server that is used as central user directory and authentication server for several applications.
+Accounts should be provisioned into the LDAP server using the standard `inetOrgPerson` object class.
+This LDAP server has flat structure, e.g. all accounts are in `ou=People,dc=example,dc=com`.
+
+* *MidPoint*: Start the exercise with an empty midPoint server.
+Alternatively you may start with a configuration from previous exercises.
+
+== Description
+
+We have a mid-size company that is processing a large number od identity records.
+Total user population is in a range of several millions.
+
+
+=== Basic Principles
+
+Archetypes should be applied wherever it makes sense.
+There should be archetypes for employees, external workers, business role, project, functional organizational units and so on.
+
+_Do not repeat yourself_.
+Keep copy&paste to the very minimum.
+Try to reuse the code and configuration as much as possible.
+Use the opportunity to specify policies in archetypes and meta-roles.
+Use function libraries to avoid code duplication.
+
+Make this deployment _efficient_.
+Waste as little computational and storage resources as possible.
+
+Make the solution _scalable_.
+Make it work with large number of identities without significant loss in performance.
+For example, full-scale reconciliation over a million of identities is not a scalable way.
+It can be used for checks in weekly/monthly intervals.
+But a different method must be used for ordinary day-to-day operation.
+
+Scope of this solution is beyond the capabilities of a single server.
+And we also want redundancy and fault tolerance.
+Therefore you have to use clustered deployment with at least 4 midPoint nodes.
+HTTP/HTTPS load balancer is assumed on the deployment front end to provide load balancing and high availability for midPoint user interface.
+Make sure that there is appropriate configuration to support this setup.
+
+
+=== Synchronization and Provisioning
+
+We have a simple database-based HR system that maintains employee data.
+We have direct access to HR system database view (read-only).
+All the current and former employees are recorded in the HR system.
+There is no timestamp or any similar datum that would enable live sync.
+We have to rely on regular reconciliation.
+
+There is also an ancient application that stores organizational structure.
+We have managed to get a nightly CSV export from this application (`org.csv`).
+Quite surprisingly, each organizational unit has an (immutable) identifier.
+It also has an identifier of a parent organizational unit.
+
+Most of the identities originate from _External Identity Source Database_.
+All the identities should be synchronized into midPoint.
+The identities should be sorted to special organizational units according to their types.
+
+There is also an LDAP server that works as central directory server.
+Many applications are configured to authenticate at this server using LDAP protocol.
+LDAP server has a flat structure, storing all accounts in `ou=People,dc=example,dc=com` suffix.
+All active identities that are processed in the system should be provisioned to the LDAP server.
+Inactive identities (e.g. former employees) should not have account in the LDAP server.
+
+Set up a synchronization tasks to pull the data from HR database automatically.
+Also set up a synchronization for organizational structure.
+Both organizational structure and employees should be synchronized to midPoint.
+Employees should be properly assigned to organizational units in midPoint.
+Users and orgs in midPoint should be fully populated.
+
+Former employees has to be kept in midPoint, but they should not be exposed to ordinary users.
+Design an appropriate way how to deal with identities of former employees, e.g. separate org, activation, lifecycle state, etc.
+Ordinary (non-administrator) users should not be able to access data about former employees.
+
+All synchronization and provisioning processes should be completely automatic.
+No administrator intervention should be required.
+
+Configure reconciliation tasks for every source resource, even for resources that synchronize by using live sync.
+We want reconciliation to be a failsafe mechanism in case that livesync would miss some data.
+However, reconciliation of millions of identities cannot be executed on a single node.
+It would take ages to finish.
+Therefore setup a multi-node tasks and let reconciliation to execute on several nodes of the cluster.
+
+We are afraid that faulty input data may ruin everything.
+For example, the records from the external identity database may be deleted by mistake.
+Therefore set up thresholds in the live synchronization tasks.
+We want to stop the synchronization task if too many changes are done at the same time.
+
+
+=== LDAP Group Management
+
+We want to have LDAP groups for all organizational units, similarly to previous exercises.
+We also want LDAP groups for external workers, support staff, partners and suppliers.
+There will be many of such identities, therefore these groups are likely to be large.
+Make sure that your configuration can efficiently handle management of large groups.
+You should use `memberOf`/`isMemberOf` attribute that is provided by most modern LDAP servers.
+Also make sure that midPoint will not read all the values of `member`/`uniqueMember` attribute.
+These attribute will have many values, reading them all may be inefficient and are likely to slow system down.
+Hint: Permissive modify LDAP control may be useful in this situation.
+
+
+=== Delegated Administration
+
+There are many identities in our system.
+Too many to rely on one administrator.
+Therefore we want to set up delegated administration mechanism.
+We want to allow employees that work in customer support department to modify some properties of customer identities.
+
+
+=== Audit Trails
+
+We want to record all the operations of the system using audit records in the database table.
+We have special requirements for audit log filtering and processing (see below).
+Therefore we want to store the user type into a custom audit table column.
+
+There are many identities in the system, therefore it is expected that there will be a lot of audit records as well.
+We cannot store that many records in our database for a long time.
+Therefore we have to set up some way how to pump the data to an appropriate system.
+Let us assume that there is a SIEM system, data warehouse or perhaps some other system that is processing and analysing the data.
+Make some effort to set up a way how to export the data from the audit table in regular intervals.
+E.g. set up simple data pump or data export task.
+
+We need to clean up the audit data after they were pumped/exported.
+But some data are more important than other.
+We want to keep audit records about external identities in the system for one month.
+We want to keep all other audit records for six months.
+
+
+=== Dashboards
+
+There are so many identities in the system that administrators can easily get lost.
+We want to set up dashboards that can provide information about the state of the system at a glance.
+We want to set up following dashboards:
+
+* System size dashboard.
+We want to see how many active identities are in our system.
+Do not count disabled identities.
+
+* System health dashboard. We want to show how many resources are down (inaccessible).
+We want this dashboard to turn red if at least one resource is down.
+
+* Recent errors dashboard. We want dashboard that shows failed operations during last 24 hours.
+This dashboard should use audit records.
+We want this dashboard to turn red if more than 5% of operations failed.
+
+* Recent customer errors dashboard. We want dashboard that shows failed operations during last 24 hours, but this dashboard should only show operations that dealt with customer identities.
+We want this dashboard to turn red if more than 5% of operations failed.
+
+
+== Notes
+
+TODO: In exercise use 100k identities. But setup as if you had millions.
+
+TODO: Dedicated GUI and "task" nodes

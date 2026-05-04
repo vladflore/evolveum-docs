@@ -1,0 +1,250 @@
+= Provenance/Axiom Implementation Notes
+:page-toc: top
+
+== Axiom Namespace Resolution
+
+NOTE: Needs review
+
+Models are identified by using namespace.
+That's what import statement specifies.
+We need to get from the namespece (URI) to file that contains model definition.
+There are two options:
+
+* *Offline: catalog*: Use catalog file that maps namespace URIs to filenames.
+
+* *Online: web resolution*: Use HTTP get on namespace to get model spec.
+This needs to be a bit more complex as we need to specify model verion (or version range).
+
+=== Item Namespace resolution
+
+In `Axiom`, `JSON`, `YAML` and `XML`, item names are serialized using prefixed
+name syntax.
+
+Prefixed name consists of optional prefix and localName.
+
+1. If prefix is specified, namespace is namespace associated with specified prefix.
+
+If prefix is not specified:
+
+1. Search for non-augmentation item with same localName in current value type.
+  a) If item exists, use qualified name of the item.
+2. Search for item in current value type with namespace of enclosing value type.
+   a) If item exists, use qualified name of the item.
+   b) If item does not exists, repeat step 2, till root value is reached.
+3. Search for item in current value type with document default namespace
+   if specified.
+4. If no item was found, fail namespace resolution.
+
+// FIXME: Or do we want to guess in augmentation items? Possible to have inconsistent
+// behaviour if two augmentations targeting same type uses same item local name.
+
+== Metadata Authorizations
+
+If no `scope` and no `item` is present, then scope of data=all,metadata=unspecified is assumed.
+This is a short-cut to common case "allow access to all data".
+It is also compatible with old midPoint versions.
+
+If no `scope` is present, but there are ``item``s, then scope of data=enumerated,metadata=unspecified is assumed.
+It is compatible with old midPoint versions.
+
+If empty `scope` is present, then scope of data=unspecified,metadata=unspecified is assumed.
+
+'''
+
+Allow read access to all data items and all metadata items:
+
+[source,xml]
+----
+  <authorization>
+    <action>http://midpoint.evolveum.com/xml/ns/public/security/authorization-model-3#read</action>
+    <scope>
+        <data>
+            <selection>all</selection>
+        </data>
+        <metadata>
+            <selection>all</selection>
+        </metadata>
+    </scope>
+  </authorization>
+----
+
+---
+
+Allow read access to all data items, but no metadata items:
+
+[source,xml]
+----
+  <authorization>
+    <action>http://midpoint.evolveum.com/xml/ns/public/security/authorization-model-3#read</action>
+    <scope>
+        <data>
+            <selection>all</selection>
+        </data>
+        <metadata>
+            <selection>unspecified</selection>
+        </metadata>
+    </scope>
+  </authorization>
+----
+
+Shorter way to express the same thing:
+
+[source,xml]
+----
+  <authorization>
+    <action>http://midpoint.evolveum.com/xml/ns/public/security/authorization-model-3#read</action>
+    <scope>
+        <data>
+            <selection>all</selection>
+        </data>
+    </scope>
+  </authorization>
+----
+
+Old way:
+
+[source,xml]
+----
+  <authorization>
+    <action>http://midpoint.evolveum.com/xml/ns/public/security/authorization-model-3#read</action>
+  </authorization>
+----
+
+---
+
+Allow read access to provenance metadata in all items that the user can already read:
+
+[source,xml]
+----
+  <authorization>
+    <action>http://midpoint.evolveum.com/xml/ns/public/security/authorization-model-3#read</action>
+    <scope>
+        <data>
+            <selection>unspecified</selection>
+        </data>
+        <metadata>
+            <selection>enumerated</selection> <!-- optional -->
+            <item>provenance</item>
+        </metadata>
+    </scope>
+  </authorization>
+----
+
+Or shorter:
+
+[source,xml]
+----
+  <authorization>
+    <action>http://midpoint.evolveum.com/xml/ns/public/security/authorization-model-3#read</action>
+    <scope>
+        <metadata>
+            <item>provenance</item>
+        </metadata>
+    </scope>
+  </authorization>
+----
+
+
+---
+
+Allow read access to metadata items, but give no access to any metadata
+
+[source,xml]
+----
+  <authorization>
+    <action>http://midpoint.evolveum.com/xml/ns/public/security/authorization-model-3#read</action>
+    <scope>
+        <data>
+            <item>name</item>
+            <item>fullName</item>
+        </data>
+        <metadata>
+            <selection>unspecified</selection>
+        </metadata>
+    </scope>
+  </authorization>
+----
+
+Or the same thing shortened:
+
+[source,xml]
+----
+  <authorization>
+    <action>http://midpoint.evolveum.com/xml/ns/public/security/authorization-model-3#read</action>
+    <scope>
+        <data>
+            <item>name</item>
+            <item>fullName</item>
+        </data>
+    </scope>
+  </authorization>
+----
+
+Old way to specify it:
+
+[source,xml]
+----
+  <authorization>
+    <action>http://midpoint.evolveum.com/xml/ns/public/security/authorization-model-3#read</action>
+    <item>name</item>
+    <item>fullName</item>
+  </authorization>
+----
+
+---
+
+Full specification, allow certain data items and certain metadata for them
+(not supported in midPoint 4.2)
+
+[source,xml]
+----
+  <authorization>
+    <action>http://midpoint.evolveum.com/xml/ns/public/security/authorization-model-3#read</action>
+    <scope>
+        <data>
+            <selection>enumerated</selection> <!-- optional -->
+            <item>name</item>
+            <item>fullName</item>
+        </data>
+        <metadata>
+            <selection>enumerated</selection> <!-- optional -->
+            <item>provenance</item>
+            <item>storage</item>
+        </metadata>
+    </scope>
+  </authorization>
+----
+
+== Metadata, Mappings and Value Overrides
+
+Usecase: We have inbound mapping for `fullName` from the HR system to midPoint user.
+We want to map the HR value automatically (inbound mapping).
+However, we want to suppress the mapping in case that user manually overrides the `fullName` value by changing it in the user interface.
+If the user clears the value, we want the mapping to take over again and set the value from HR.
+
+Solution: We can use provenance metadata for this.
+Provenance metadata record that the value was derived from a particular resource.
+Therefore the mapping knows which values were derived by inbound mapping and which came from other sources.
+The mapping can skip setting the value if a value from a different source already exists in target item.
+The mapping does not know whether it was this particular mapping that set the value or whether it was a different inbound mapping.
+But that does not make much difference.
+And in fact it may be even to our benefit, as several conditional mappings may derive the same value.
+
+The situation is slightly more complex in object template.
+For example, if we want to have a mapping that derives `fullName` from `givenName` and `familyName`, but only if used haven't specified `fullName` explicitly.
+We can apply a universal principle for _overridable_ mappings:
+
+____
+Overridable mapping will set value only in case that the target value has the same provenance metadata that the mapping would produce (or if there are no values at all).
+____
+
+All values that have matching provenance metadata can be automatically part of mapping range.
+Therefore the mapping will replace all such values by default.
+
+Idea: we should consider to make this behavior of range easily reusable.
+E.g. it may be very useful when we want to combine inbound mapping from several resource into the same user property.
+Maybe we can create new `matchingProvenance` option for `predefined` set in mapping range.
+
+It would be nice to have similar mechanisms on the outbound side.
+But target attributes have no metadata (yet).
+Therefore we have to rely on the usual mapping range on the outbound side.

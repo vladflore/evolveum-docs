@@ -3,8 +3,14 @@
 :page-display-order: 30
 :page-toc: top
 :toclevels: 4
-:page-keywords: [ 'install', 'kubernetes' ]
-:page-moved-from: /midpoint/install/kubernetes/about/, /midpoint/install/kubernetes/advanced-examples/, /midpoint/install/kubernetes/cluster/, /midpoint/install/kubernetes/, /midpoint/install/kubernetes/single-node/
+:page-keywords:  [ 'install', 'kubernetes' ]
+:page-moved-from: /midpoint/install/kubernetes/about/
+:page-moved-from: /midpoint/install/kubernetes/advanced-examples/
+:page-moved-from: /midpoint/install/kubernetes/cluster/
+:page-moved-from: /midpoint/install/kubernetes/
+:page-moved-from: /midpoint/install/kubernetes/single-node/
+
+{% for v in site.data.midpoint-versions %}{% if v.status == null or v.status == "released" %}{% assign lastReleased = v %}{% endif %}{% endfor %}
 
 This page describes how midPoint uses vanilla Kubernetes for a containerized installation.
 
@@ -24,7 +30,7 @@ The following deployments are supported:
 === Basic Deployment
 
 .Basic deployment in Kubernetes
-image::midpoint/install/containers/kubernetes-diagram.png[]
+image::kubernetes-diagram.png[]
 
 To start the environment, you need several objects.
 You can group them by type/purpose:
@@ -53,7 +59,7 @@ The other objects create a correctly configured Pod and make it reachable.
 === Simple Deployment with PVC and Secret
 
 .Simple deployment with PVC and a secret in Kubernetes
-image::midpoint/install/containers/kubernetes-diagram-pvc_secret.png[]
+image::kubernetes-diagram-pvc_secret.png[]
 
 This diagram extends the <<#basicDepl,basic deployment>> with two objects.
 
@@ -71,7 +77,7 @@ For example, to access the DB you need to "share" the credentials between the DB
 === Advanced Deployment
 
 .Advanced deployment
-image::midpoint/install/containers/kubernetes-diagram-advanced.png[]
+image::kubernetes-diagram-advanced.png[]
 
 This diagram extends the <<#simpleDepl,simple deployment>> with the following objects:
 
@@ -473,7 +479,7 @@ The task manager has to know that there can also be other active nodes.
 * intra-cluster URL +
 The node ID value source has to be set.
 
-For details, refer to xref:midpoint::reference/deployment/clustering-ha/index.adoc[].
+For details, refer to - xref:/midpoint/reference/deployment/clustering-ha/[].
 
 *Cluster setup in production deployments requires an active subscription.*
 ====
@@ -612,19 +618,19 @@ data:
 
 See also:
 
-* xref:midpoint::reference/security/crypto/migrating-encryption-keys/index.adoc[]
-* xref:midpoint::reference/security/crypto/index.adoc[]
+* xref:/midpoint/reference/security/crypto/migrating-encryption-keys/[]
+* xref:/midpoint/reference/security/crypto/[]
 
 === Resource Connection Certificate
 
 To establish secure connections to other systems, you need to store a trusted certificate in the trust store.
 The keystore is also used as a trust store by default.
 
-For details, refer to xref:midpoint::reference/security/crypto/ssl-connections-client-side-/index.adoc[].
+For details, refer to xref:/midpoint/reference/security/crypto/ssl-connections-client-side-/[].
 
 
 == See Also
 
 * xref:index.adoc[]
-* xref:docker/index.adoc[]
-* xref:midpoint/install/post-install-orientation/index.adoc[]
+* xref:./docker/[]
+* xref:/midpoint/install/post-install-orientation[]

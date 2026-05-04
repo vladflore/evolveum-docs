@@ -1,0 +1,233 @@
+= ConnId Connector Framework
+:page-nav-title: ConnId
+:page-display-order: 200
+:page-toc: top
+:page-upkeep-status: orange
+:page-upkeep-note: more details about connectors
+
+MidPoint is using ConnId framework to develop, manage and run identity connectors.
+This framework provides a layer that separates the identity management system from the target and source systems.
+
+== Project Information
+
+ConnId is an open source project with contributors from several independent companies.
+Evolveum is a major contributor to the development of ConnId framework.
+
+[%autowidth,cols="h,1"]
+|===
+| Project home page
+| http://connid.tirasa.net/
+
+| Framework source code
+| link:https://github.com/Tirasa/ConnId[https://github.com/Tirasa/ConnId]
+
+|===
+
+The ConnId _framework_ is developed jointly by several companies and independent contributors.
+However, the _connectors_ have an independent life cycle.
+The connectors are developed and maintained in separate projects.
+There are mostly non-technical reasons for this separation such as licensing issues, philosophical differences and business strategies.
+However, the _common framework_ makes the connectors _compatible_.
+Therefore connectors from several projects can be used together in one solution.
+
+For example, see the xref:../connectors/[connectors that work with midPoint].
+Almost every connector is maintained in its own separate mini-project.
+Many of these connectors are developed by Evolveum.
+There are connectors developed by Evolveum partners, contributed by the community, and there are connectors taken from ConnId project or even connectors that track their origin to OpenICF or Sun ICF.
+
+The connectors depend on the framework, yet they can have a complete separate life cycle.
+
+== Concepts
+
+ConnId "ecosystem" consists of three fundamental parts.
+The bottom part is, quite obviously, made of the _connectors_.
+The connectors contain code that integrates with variety of systems and databases.
+The middle part is the _framework_.
+The framework manages the connectors.
+It loads connector code, creates connector instances, maintains connector pools, it may even simulate some capabilities that the connectors do not have.
+The top part is the _client_, which is usually an identity management system.
+The client initiates the operations and interprets the results.
+
+Following diagram illustrates the use of ConnId in midPoint.
+
+image:connectors-arch.png[]
+
+=== Framework
+
+ConnId framework is the intermediary layer between connectors and the IDM system (client).
+Framework is responsible for managing the connectors.
+The framework loads connector code.
+It initializes the connector and maintains pool of connector instances in ready-to-use state.
+The framework routes the operations to appropriate connector.
+
+Framework does not know specific details about the system that the connectors connect to.
+The framework has no idea about LDAP, it does not know how to use your REST API, it does not even really care about the attributes and values of your accounts.
+The framework is just an intermediary, its responsibility is to manage the connectors and pass the information.
+The framework is designed to be generic and universal.
+All the details about the protocols used to connector to your system and the data structures that the system uses are hidden in the connector.
+
+Despite that, the framework sometimes tries to be somehow intelligent.
+For example, it can simulate some operations that the connector cannot perform.
+However, in practice, these features often xref:1.x/result-handlers/[cause more problems] than they solve.
+It is generally recommended to keep the framework agnostic and keep all the system-specific details in the connector.
+
+=== Connectors
+
+The basic concept of ConnId is a _connector_. The connector is a piece of (usually) Java code that is governed by a uniform Java interface on one side (xref:1.x/connector-development-guide/[ConnId SPI]) and that is using a variety of protocols and interfaces to connect to the resource on the other side.
+
+Connector is essentially just a protocol translator.
+The responsibility of a connector is to get a command from the xref:1.x/connector-development-guide/[ConnId SPI] and execute it using any protocol which is appropriate for the connected resource (SQL, LDAP, REST, etc.)
+
+For example, LDAP protocol will react to the invocation of the create(...) operation by sending LDAP add request to the LDAP server.
+This request will contain data about a new account that the connector translates from the ConnId representation (Java collection of `Attribute` objects) to LDAP representation (LDAP entry).
+
+The connector knows all the system specific details.
+It knows how the LDAP protocol works, which operations are needed to create an LDAP entry, how the entry is structured, what LDAP attributes are mandatory and which are optional, what LDAP error codes means and so on.
+However, the connector usually has very little "business" logic.
+Even the little logic that the connector has will only deal with handling of the communication protocol and protocol data formats.
+Except for a few special-purpose attributes, the connector usually does not understand the meaning of the data that are passed through it.
+Vast majority of the IDM logic is implemented in identity management systems, such as midPoint.
+E.g. midPoint xref:/midpoint/reference/expressions/mappings/[mappings] copies and transforms attribute values, midPoint handles resource capabilities, xref:/midpoint/reference/synchronization/[synchronization], etc.
+The connector does not need to deal with that.
+The connector just translates protocols and data formats.
+
+// TODO: schema
+
+Connectors are distributed in _bundles_ which is an ConnId packaging mechanism.
+A bundle can contain several connectors.
+However, most connector bundles contain only a single connector.
+Connector bundles are versioned, and the ConnId framework allows to run a connector in several versions at the same time.
+
+== Connector Pooling
+
+The framework creates and destroys connector instances.
+As each connector instance opens and closes connection to the server (resource), creating and destroying connector for every operation would be vastly inefficient.
+Therefore, ConnId framework implements a _pooling_ mechanisms, keeping initialized connector instances in the pool.
+Connector instances can be re-used, which also re-uses the connection to the resource, making operations much more efficient.
+
+== Connector Servers
+
+Connectors can be deployed in two ways:
+
+* *Local connectors* are deployed to a midPoint instance.
+This is the usual way how connectors are used.
+The connector is executed inside a midPoint instance, has the same lifecycle (start/stop), etc.
+MidPoint can detect local connectors automatically and overall the connector management is easier.
+
+* *Remote connectors* are executed in a different process or on a different node than midPoint instance.
+Remote connectors are deployed to a xref:1.x/connector-server/[connector server].
+There may be need to use a remote connector e.g. to access a file on a remote system (e.g. in case of CSV connector) or because of platform incompatibilities (e.g. .NET connectors)
+
+Connector is *not* developed as local or remote.
+The placement of the connector is a deployment-time decision.
+There is just one connector package that can be deployed locally or remotely.
+
+
+== ConnId Framework Versions
+
+There are, in theory, two major ConnId versions:
+
+* xref:1.x/[ConnId 1.x] is real, working and practical connector framework.
+xref:../connectors/[Existing connectors] are written to work with ConnId 1.x.
+ConnId 1.x has xref:1.x/icf-issues/[some issues], mostly inherited from the past.
+However, it is a solid and practical choice for identity connectors.
+It is actively maintained, and it is part of several identity management products.
+
+* xref:2.x/[ConnId 2.x] is just a plan now.
+The goal of ConnId 2.x is to correct the mistakes of original framework design.
+Tirasa and Evolveum, as two major contributors to ConnId framework have done numerous evolutionary improvements to ConnId 1.x.
+However, we are at the point where we need to make larger improvements.
+Improvements that will affect compatibility of existing connectors.
+Hence ConnId 2.x plan.
+The plan was agreed by ConnId community.
+However, due to various reasons this remains just a plan for now.
+
+== History
+
+ConnId framework is a descendant of Sun Identity Connector Framework (Sun ICF), which was probably the only usable open-source part of Sun Identity Manager (Waveset).
+The code originated in 2000s, and it has a long and somehow complicated history.
+
+Although there was a significant number of improvements over the original Sun version the basic approach and architecture remains mostly the same.
+
+=== The Story of Identity Connectors as Seen by Evolveum
+
+In the old days there were no identity connectors.
+Each IDM product used its own proprietary framework.
+Such early frameworks were usually ugly, dirty and cumbersome.
+A product called "Lighthouse" developed by a company called Waveset was no exception.
+The company was acquired by Sun Microsystems, and the product was renamed to Sun Identity Manager (Sun IDM).
+The engineers at Sun obviously realized how bad this "adapter" framework was, and after few long years of hesitation they finally created a new framework.
+It was still quite far from being perfect, but there was one huge difference: it was not proprietary.
+Sun developed the framework as an open source project.
+This project was known simply as "Identity Connector Framework" (ICF).
+Identity connectors were born.
+Before the ICF framework got any chance of major success, Sun was acquired by Oracle.
+We can only speculate what happened inside Oracle, but the result was that the ICF project effectively stopped all development activity.
+Last commit to the ICF project was in May 2010.
+
+However, the acquisition of Sun was like a supernova.
+Engineers that worked with Sun technologies suddenly scattered around to other projects and companies.
+This also affected the team that now forms the core of midPoint project.
+
+Back then, Oracle announced the end of Sun IDM development.
+Therefore we were looking for a replacement product.
+We have quickly realized that Oracle IDM or any similar commercial product just cannot satisfy our needs.
+We have decided to start a new open source project to fill this sudden technological gap.
+It was early 2010 when we connected with ForgeRock and started work on OpenIDM version 1.
+The Sun ICF framework was an obvious choice for a connector layer.
+Although we were not aware of it, another project was started approximately at the same time: Syncope.
+This project has also chosen ICF as a connector framework.
+In early 2011, ForgeRock decided to drop OpenIDM version 1 code-base.
+This was an impulse that contributed to our decision to start independent development of midPoint.
+The ICF was kept as a connector layer in a new midPoint project.
+So now there were three open source projects that were using the framework.
+This finally seems like a success for the framework.
+But there was a glitch.
+
+In mid-2011 it was quite clear that the original Sun ICF project is not going anywhere.
+ForgeRock decided to take over the development and formed the OpenICF project.
+We have been forming an independent stream of development at that very time.
+Even though we were competing with ForgeRock, we had seen the benefit of cooperation.
+Therefore we have decided to cooperate on OpenICF.
+Approximately at the same time the ConnId project was created by the Syncope team.
+This was also a fork of the original Sun ICF code.
+There were also rumours that Oracle continues development of ICF in a closed-source fashion.
+Therefore in late 2011 there were actually several versions of ICF:
+
+* Original Sun Identity Connector Framework - in a clinical death state
+
+* OpenICF maintained by ForgeRock with Evolveum as a major contributor
+
+* ConnId maintained by the Syncope team
+
+* Oracle closed-source version (rumoured)
+
+The "forks" began independent development, and it is perhaps no big surprise that the forks quickly became incompatible.
+This was quite an awkward situation.
+We could do nothing about the original Sun ICF, and it is unlikely that we could do anything about Oracle.
+However, having two incompatible open source frameworks was clearly insane.
+That was the time when our _Project Polygon_ was born as an attempt to survive in this confusing situation.
+It took several years to make OpenICF and ConnId teams to talk to each other.
+But it finally happened in late 2013.
+The code of OpenICF was merged into ConnId.
+This worked quite well for some time.
+Yet later on, ForgeRock stopped contributing to ConnId.
+Without any official statement or notice to ConnId team, ForgeRock developed OpenICF framework independently.
+Other ConnId contributors were puzzled, but the development of ConnId went on.
+Then in 2016 ForgeRock stopped to publish their day-to-day development, effectively making OpenICF a closed-source project.
+However, Evolveum and Tirasa continued cooperation to maintain and extend ConnId framework, which continues to this day.
+
+Currently there is one common framework code maintained in ConnId Project.
+The idea is to use this framework in all open source IDM projects (midPoint, Syncope and possibly others).
+Teams from Evolveum and Tirasa contribute the code to ConnId framework.
+ConnId connectors are compatible and interchangeable.
+All the teams also take part of the design and future development of the framework.
+We are more than aware that the ICF framework is not perfect.
+Therefore we have plans to improve it, in ConnId 2.0 framework.
+We take care to proceed in fully open and transparent fashion to make sure it does not become a proprietary technology.
+
+== See Also
+
+* xref:../connectors/[List of connectors that work with midPoint]
+
+* xref:1.x/connector-development-guide/[]

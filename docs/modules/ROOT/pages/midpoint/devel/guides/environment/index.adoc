@@ -1,0 +1,73 @@
+= Development Environment Setup
+:page-wiki-name: Development Environment Setup
+:page-wiki-id: 2654445
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2011-08-08T17:35:32.083+02:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2014-01-09T13:10:50.422+01:00
+:page-upkeep-status: red
+:page-upkeep-note: Java 7 ? rly?
+
+== Requirements
+
+You will need:
+
+* Java Development Kit (JDK) 17
+
+* Maven 3
+
+* PostgreSQL 15 or newer
+
+* IDE
+
+== Installation (Linux)
+
+=== Java
+
+. Install JDK with command[source]
++
+----
+apt-get install temurin-17-jdk
+----
+
+. Check environment variable JAVA_HOME (should be path to Temuring 17 JDK)
++
+----
+echo $JAVA_HOME
+java -version
+----
+
+=== Maven
+
+. Install Maven 3 from repository[source]
++
+----
+sudo apt-get install maven3
+----
++
+. Check maven installation
++
+----
+mvn -v
+----
+
+== PostgreSQL
+
+See xref:/midpoint/reference/repository/native-postgresql/[].
+
+== IDE (Eclipse, Idea)
+
+* xref:/midpoint/devel/guides/environment/idea/[How to start with IntelliJ IDEA]
+
+* xref:/midpoint/devel/guides/environment/eclipse/[How to start with Eclipse]
+
+* NetBeans should work as well, but we haven't tried to use it for years (since Oracle happened).
+If you have any information about midPoint in NetBeans please let us know.
+
+== See Also
+
+* xref:/midpoint/devel/source/[Source Code]
+
+* xref:/midpoint/devel/guides/environment/idea/[How to start with IntelliJ IDEA]
+
+* xref:/midpoint/devel/guides/environment/eclipse/[How to start with Eclipse]

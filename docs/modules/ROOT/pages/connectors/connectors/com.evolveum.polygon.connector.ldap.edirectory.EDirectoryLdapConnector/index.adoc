@@ -1,0 +1,135 @@
+---
+layout: connector-page
+display-order: 900
+functionality-status: stable
+development-status: abandoned
+support-status: unsupported
+origin: Evolveum
+target-systems: Novell/NetIQ eDirectory
+connector-protocol: LDAP/LDAPS
+description: Legacy LDAP-based connector for eDirectory servers.
+---
+= eDirectory Connector
+:page-wiki-name: eDirectory Connector
+:page-wiki-id: 22282322
+:page-wiki-metadata-create-user: vix
+:page-wiki-metadata-create-date: 2016-01-25T17:34:47.667+01:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2019-09-10T09:43:42.818+02:00
+
+[WARNING]
+.Legacy, unsupported
+====
+This connector was part of LDAP bundle for many years.
+However, there is no demand for this connector among midPoint subscribers.
+Therefore this connector is considered to be a legacy and was removed from LDAP bundle.
+====
+
+This connector is an eDirectory-specific extension of our LDAP connector.
+It contains, among others, support for the following attributes:
+
+* user (inetOrgPerson) attributes: groupMembership and securityEquals for maintaining referential integrity
+
+* group (nestedGroupAux) attributes: equivalentToMe and member
+
+Based on Apache Directory API.
+Apache-licensed.
+
+== Capabilities and Features
+
+[%autowidth,cols="h,1,1"]
+|===
+| Schema | YES |
+
+| Provisioning
+| YES
+|
+
+| Live Synchronization
+| YES
+| Only using modifyTimestamp, but untested.
+
+| Password
+| YES
+|
+
+| Activation
+| YES
+| loginDisabled attribute is used
+
+| Filtering changes
+|
+| currently limited
+
+| Paging support
+| YES
+| Simple Paged Results and VLV
+
+| Native attribute names
+| YES
+| Use ri:dn instead of icfs:nameUse ri:entryUUID instead of icfs:uid
+
+|===
+
+
+=== History
+
+This is an extension of the LDAP connector completely rewritten from scratch.
+
+
+== Versions
+
+[%autowidth]
+|===
+| Version | Origin | Binary | Sources | Build Date | Description
+
+| 1.4.2.0
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.2.0/connector-ldap-1.4.2.0.jar[download jar]
+| https://github.com/Evolveum/connector-ldap/tree/v1.4.2.0[GitHub]
+| August 2015
+| Official release
+
+
+| 1.4.2.18
+| Polygon
+| https://nexus.evolveum.com/nexus/repository/releases/com/evolveum/polygon/connector-ldap/1.4.2.18/connector-ldap-1.4.2.18.jar[download jar]
+| https://github.com/Evolveum/connector-ldap/tree/v1.4.2.18[GitHub]
+| August 2015
+| Official release.
+Minor changes.
+
+
+|===
+
+
+== Documentation
+
+Be advised there are multiple interesting limitations within the eDirectory (not midPoint):
+
+* CN attribute has a maximum size of 64 characters
+
+* subsequent white spaces (e.g. spaces) and underscores in the attribute values are considered to be the same as single space, so the following objects are considered to be the same and cannot be created simultaneously:
+
+** "cn=this is a space,ou=people,o=example"
+
+** "cn=this   is      a     space,ou=people,o=example"
+
+** "cn=this is a space ,ou=people,o=example"
+
+** "cn=this_is_a_space,ou=people,o=example"
+
+** "cn=pass:[___this___is___a___space],ou=people,o=example"
+
+
+* searching for values with whitespace e.g. pass:["cn=a__b________c"] may actually return object "cn=a b c,ou=people,o=example".
+
+
+== Resource Samples
+
+* https://github.com/Evolveum/midpoint-samples/blob/master/samples/resources/edirectory/resource-edirectory-nosync.xml[eDirectory sample from master branch]
+
+
+== See Also
+
+* xref:/midpoint/reference/upgrade/connectors/ldap-connector-migration/[LDAP Connector Migration]

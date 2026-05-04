@@ -1,4 +1,10 @@
 = Security Advisory: MidPoint user interface clickjacking
+:page-wiki-name: Security Advisory: MidPoint user interface clickjacking
+:page-wiki-id: 30245231
+:page-wiki-metadata-create-user: semancik
+:page-wiki-metadata-create-date: 2019-03-21T07:57:45.989+01:00
+:page-wiki-metadata-modify-user: semancik
+:page-wiki-metadata-modify-date: 2019-05-23T07:46:49.911+02:00
 :page-nav-title: MidPoint user interface clickjacking
 :page-display-order: 1
 :page-moved-from: /midpoint/reference/security/advisories/001-midpoint-user-interface-clickjacking
@@ -33,7 +39,7 @@ Also, interaction of a privileged user is required.
 
 == Mitigation
 
-MidPoint users are advised to upgrade their deployments to the latest builds from the xref:midpoint/install/bare-installation/using-support-branch/index.adoc[support branches]. MidPoint 3.6.x users are advised to upgrade to a newer midPoint version.
+MidPoint users are advised to upgrade their deployments to the latest builds from the xref:/midpoint/install/bare-installation/using-support-branch/[support branches]. MidPoint 3.6.x users are advised to upgrade to a newer midPoint version.
 
 As this is a medium severity issue, it is not forcing official maintenance releases of midPoint.
 However, the fix is provided in all the support branches, except for midPoint 3.6 support branch.
