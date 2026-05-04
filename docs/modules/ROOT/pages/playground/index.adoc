@@ -1,7 +1,7 @@
 = Playground
 :toc:
-:toclevels: 1
-:page-toclevels: 1
+:toclevels: 3
+:page-toclevels: 0
 
 This is a playground page for experimenting with AsciiDoc features and content layouts.
 
@@ -16,6 +16,10 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 === Subsection
 
 Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+==== Subsection
+
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 == Code Example
 
