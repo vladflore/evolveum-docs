@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- tag::full[] -->
+<configuration>
+
+    <!-- tag::datasource[] -->
+    <datasource>
+        <url>jdbc:postgresql://localhost:5432/midpoint</url>
+        <username>midpoint</username>
+        <password>secret</password>
+    </datasource>
+    <!-- end::datasource[] -->
+
+    <!-- tag::repository[] -->
+    <repository>
+        <repositoryServiceFactoryClass>
+            com.evolveum.midpoint.repo.sql.SqlRepositoryFactory
+        </repositoryServiceFactoryClass>
+        <baseDir>${midpoint.home}</baseDir>
+    </repository>
+    <!-- end::repository[] -->
+
+</configuration>
+<!-- end::full[] -->

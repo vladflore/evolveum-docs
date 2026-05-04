@@ -3,7 +3,7 @@
 :toclevels: 3
 :page-toclevels: 0
 
-This is a playground page for experimenting with AsciiDoc features and content layouts.
+This page showcases various Antora and AsciiDoc features.
 
 == Section One
 
@@ -57,30 +57,229 @@ NOTE: This page is a placeholder and will be replaced with real content.
 
 TIP: You can use this page to test how components render in the site.
 
+== Cross-Reference Examples
+
+Full xref syntax: `xref:version@component:module:page.adoc#fragment[Link text]`
+
+=== Automatic link text
+
+Empty brackets use the target page's title as link text.
+
+* xref:midpoint/quickstart/index.adoc[]
+* xref:midpoint/architecture/index.adoc[]
+* xref:midpoint:ROOT:reference/index.adoc[]
+* xref:support-4.9@midpoint:ROOT:reference/index.adoc[]
+
+=== Anchor within the same page
+
+Fragment only; links to a section on the current page.
+
+* xref:#section-one[Section One]
+* xref:#section-two[Section Two]
+* xref:#code-example[Code Example]
+
+=== Same component, same module — different page
+
+Component and module omitted; path is relative to `pages/`.
+
+* xref:index.adoc[Site home page]
+* xref:playground/a/renamed-index.adoc[Playground — A]
+* xref:playground/b/index.adoc[Playground — B]
+* xref:midpoint/index.adoc[MidPoint overview]
+* xref:midpoint/quickstart/index.adoc[MidPoint quickstart guide]
+* xref:midpoint/architecture/index.adoc[MidPoint architecture]
+* xref:midpoint/architecture/concepts/index.adoc[MidPoint architecture concepts]
+* xref:midpoint/security/advisories/index.adoc[Security advisories]
+
+=== Same component, same module — page with anchor
+
+Page path plus a fragment targets a specific section.
+
+* xref:midpoint/quickstart/index.adoc#introduction[Quickstart — Introduction]
+* xref:midpoint/quickstart/index.adoc#prerequisites[Quickstart — Prerequisites]
+* xref:midpoint/architecture/concepts/index.adoc#midpoint-architectural-concepts[Architecture concepts heading]
+
+=== Same component, different module
+
+Module name required when the component has more than one module.
+
+[source]
+----
+xref:other-module:page.adoc[Link text]
+----
+
+=== Different component — latest version
+
+Component and module specified; version omitted to resolve the latest.
+
+* xref:midpoint:ROOT:reference/index.adoc[MidPoint reference (latest)]
+* xref:midpoint:ROOT:reference/roles-policies/policies/certification/index.adoc[Access Certification (latest)]
+* xref:midpoint:ROOT:reference/admin-gui/resource-wizard/object-type/credentials/index.adoc[Credentials wizard (latest)]
+
+=== Different component — explicit version
+
+`version@` pins the xref to a specific version; the string must match `version` in the target's `antora.yml`.
+
+[cols="1,1,2",options="header"]
+|===
+| Git branch | version | xref
+
+| `Dev`
+| `development`
+| xref:development@midpoint:ROOT:reference/index.adoc[MidPoint reference — Development]
+
+| `v4.10`
+| `support-4.10`
+| xref:support-4.10@midpoint:ROOT:reference/index.adoc[MidPoint reference — 4.10]
+
+| `v4.9`
+| `support-4.9`
+| xref:support-4.9@midpoint:ROOT:reference/index.adoc[MidPoint reference — 4.9]
+
+| `v4.8`
+| `support-4.8`
+| xref:support-4.8@midpoint:ROOT:reference/index.adoc[MidPoint reference — 4.8]
+
+| `v4.7_and_earlier`
+| `before-4.8`
+| xref:before-4.8@midpoint:ROOT:reference/index.adoc[MidPoint reference — 4.7 and earlier]
+
+|===
+
+=== Different component — explicit version with anchor
+
+Pinned version combined with a fragment.
+
+* xref:support-4.10@midpoint:ROOT:reference/roles-policies/policies/certification/index.adoc[Access Certification — 4.10]
+* xref:development@midpoint:ROOT:reference/admin-gui/resource-wizard/object-type/credentials/index.adoc[Credentials wizard — Development]
+
+== Include Directive Examples
+
+Full syntax: `include::family$path/to/file[attrs]`
+
+Source files used below:
+
+* `partials/playground/snippet.adoc` — AsciiDoc partial with tagged regions
+* `examples/playground/config-sample.xml` — XML config with tagged regions
+
+=== Entire partial
+
+Includes the whole file; no attributes needed.
+
+include::partial$playground/snippet.adoc[]
+
+=== First N lines
+
+Includes lines 1 through 5.
+
+include::partial$playground/snippet.adoc[lines=1..5]
+
+=== Line range
+
+Includes lines 6 through 8.
+
+include::partial$playground/snippet.adoc[lines=6..8]
+
+=== Line index to end of file
+
+Includes from line 14 to the last line.
+
+include::partial$playground/snippet.adoc[lines=14..-1]
+
+=== Non-contiguous lines
+
+Includes specific lines picked from different parts of the file.
+
+include::partial$playground/snippet.adoc[lines=2;3;6]
+
+=== Single tag
+
+Includes only the content enclosed by the named tag markers.
+
+include::partial$playground/snippet.adoc[tag=intro]
+
+=== Multiple tags
+
+Includes two named regions, concatenated in declaration order.
+
+include::partial$playground/snippet.adoc[tags=intro;footer]
+
+=== Source file — entire file
+
+Includes the full XML file from the `example$` family.
+
+[source,xml]
+----
+include::example$playground/config-sample.xml[]
+----
+
+=== Source file — line range
+
+Includes lines 6–10, which cover the `<datasource>` element body.
+
+[source,xml]
+----
+include::example$playground/config-sample.xml[lines=6..10]
+----
+
+=== Source file — tag
+
+Includes the `repository` block using XML-style tag comments.
+
+[source,xml]
+----
+include::example$playground/config-sample.xml[tag=repository]
+----
+
+=== leveloffset
+
+Shifts heading levels in the included content by +1.
+
+[source]
+----
+\include::partial$playground/snippet.adoc[tag=intro,leveloffset=+1]
+----
+
 == Static Redirects
 
-* xref:playground/a/index.adoc[Go to A Index]
+Antora generates a redirect page for every path listed in a page's `:page-aliases:` attribute.
+By default the redirect is an HTML page with a `<meta http-equiv="refresh">` tag; Antora extensions can produce other forms such as `.htaccess` rewrite rules.
 
-Original link: link:http://127.0.0.1:8080/docs/playground/a/index.html[Go to A Index]
+`playground/b/index.adoc` was moved from `playground/a/index.adoc` and declares the old path as an alias:
+
+[source,asciidoc]
+----
+= This is the index page of `b`
+:page-aliases: playground/a/index.adoc
+----
+
+Both xrefs below resolve to the same published page — the old path via the redirect, the new path directly:
+
+* xref:playground/a/index.adoc[Link using the old path (alias)] — resolved via redirect
+* xref:playground/b/index.adoc[Link using the new path (direct)]
 
 == Broken Links
 
-* xref:playground/c/index.adoc[Go to C Index which does not exist]
+Antora logs a build error for every xref or image reference that cannot be resolved.
 
-[source,bash]
+=== Missing page
+
+`playground/c/index.adoc` does not exist, so the xref below causes a build error:
+
+* xref:playground/c/index.adoc[Link to a non-existent page]
+
+[source]
 ----
-[01:28:20.433] ERROR (asciidoctor):
-target of xref not found: playground/c/index.adoc
-file: /Users/vladflore/dev/sandbox/work/freelance/evolveum/migration/evolveum-docs/docs/modules/ROOT/pages/playground/index.adoc
-source: /Users/vladflore/dev/sandbox/work/freelance/evolveum/migration/evolveum-docs (branch: links <worktree> | start path: docs)
+ERROR: target of xref not found: playground/c/index.adoc
 ----
 
-image::nonexistent.png[Nonexistent Image]
+=== Missing image
 
-[source,bash]
+`nonexistent.png` does not exist in the `images/` family, so the image below causes a build error:
+
+image::nonexistent.png[Nonexistent image]
+
+[source]
 ----
-[01:47:24.991] ERROR (asciidoctor):
-target of image not found: nonexistent.png
-file: /Users/vladflore/dev/sandbox/work/freelance/evolveum/migration/evolveum-docs/docs/modules/ROOT/pages/playground/index.adoc
-source: /Users/vladflore/dev/sandbox/work/freelance/evolveum/migration/evolveum-docs (branch: links <worktree> | start path: docs)
+ERROR: target of image not found: nonexistent.png
 ----

@@ -1,0 +1,21 @@
+// tag::intro[]
+This partial demonstrates Antora's *include directive*.
+Partials live in the `partials/` family and are not published as standalone pages.
+// end::intro[]
+
+Standalone line 6: content A.
+Standalone line 7: content B.
+Standalone line 8: content C.
+
+// tag::note[]
+NOTE: This admonition block is pulled in from a partial file.
+// end::note[]
+
+Standalone line 14: content D.
+Standalone line 15: content E.
+Standalone line 16: content F.
+Standalone line 17: content G.
+
+// tag::footer[]
+This is the *footer* snippet, also sourced from this partial.
+// end::footer[]
