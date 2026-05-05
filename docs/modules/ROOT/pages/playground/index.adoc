@@ -258,6 +258,42 @@ Both xrefs below resolve to the same published page — the old path via the red
 * xref:playground/a/index.adoc[Link using the old path (alias)] — resolved via redirect
 * xref:playground/b/index.adoc[Link using the new path (direct)]
 
+== Attachment Examples
+
+Downloadable binary resources (PDFs, ZIPs, etc.) stored in the `attachments/` family directory, referenced via `xref` with the `attachment$` coordinate.
+
+=== Same component, same module
+
+The `attachment$` coordinate is required; always provide link text as attachments have no default.
+
+* xref:attachment$playground/midpoint-advanced-customization-sample-slides.pdf[Download the sample report (PDF)]
+* xref:attachment$playground/sample-project.zip[Download the sample project (ZIP)]
+
+=== No link text
+
+Antora renders the raw resource ID as the link label when no link text is provided.
+
+* xref:attachment$playground/midpoint-advanced-customization-sample-slides.pdf[]
+
+=== Different component version
+
+Full resource ID required when the attachment lives in another component version.
+
+[source,asciidoc]
+----
+xref:support-4.9@midpoint:ROOT:attachment$midpoint-advanced-customization-sample-slides.pdf[Release notes — 4.9]
+----
+
+=== Different module, same component version
+
+Module coordinate added when the attachment is in a different module.
+
+[source,asciidoc]
+----
+xref:other-module:attachment$playground/midpoint-advanced-customization-sample-slides.pdf[Sample report from another module]
+----
+
+
 == Broken Links
 
 Antora logs a build error for every xref or image reference that cannot be resolved.
