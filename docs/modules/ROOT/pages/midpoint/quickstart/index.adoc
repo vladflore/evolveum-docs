@@ -1,5 +1,5 @@
 = MidPoint Quick Start Guide
-:page-nav-title: Quick Start Guide
+:navtitle: QSG
 :page-display-order: 10
 :page-liquid:
 :toclevels: 2

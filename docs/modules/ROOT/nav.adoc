@@ -1,6 +1,6 @@
 // * xref:index.adoc[Home]
 * xref:midpoint/index.adoc[MidPoint]
-** xref:midpoint/quickstart/index.adoc[Quick Start Guide]
+** xref:midpoint/quickstart/index.adoc[]
 ** Installation
 *** Containers
 **** xref:midpoint/install/containers/kubernetes.adoc[Vanilla Kubernetes]
