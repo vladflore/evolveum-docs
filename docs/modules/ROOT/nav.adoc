@@ -15,7 +15,7 @@
 ** Security
 *** xref:midpoint/security/advisories/index.adoc[Security Advisories]
 **** xref:midpoint/security/advisories/001-midpoint-user-interface-clickjacking.adoc[MidPoint user interface clickjacking]
-** xref:evolveum-midpoint::index.adoc[MidPoint reference]
+** xref:midpoint::reference/index.adoc[MidPoint reference]
 *** Roles & Policies
 **** Policies
 ***** xref:midpoint::reference/roles-policies/policies/certification/index.adoc[Access Certification]
