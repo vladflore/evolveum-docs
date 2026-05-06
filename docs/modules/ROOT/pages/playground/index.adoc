@@ -30,6 +30,44 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 </configuration>
 ----
 
+== Tabbed Code Example
+
+[tabs]
+====
+Java::
++
+[source,java]
+----
+public class Hello {
+    public static void main(String[] args) {
+        System.out.println("Hello, world!");
+    }
+}
+----
+
+Python::
++
+[source,python]
+----
+def main():
+    print("Hello, world!")
+
+if __name__ == "__main__":
+    main()
+----
+
+JavaScript::
++
+[source,javascript]
+----
+function main() {
+    console.log("Hello, world!");
+}
+
+main();
+----
+====
+
 == Table Example
 
 [cols="1,2,1"]
